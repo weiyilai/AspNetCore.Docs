@@ -9,11 +9,15 @@ uid: fundamentals/localization
 ---
 # Globalization and localization in ASP.NET Core
 
+[!INCLUDE[](~/includes/not-latest-version.md)]
+
 :::moniker range="> aspnetcore-5.0"
 
-By [Rick Anderson](https://twitter.com/RickAndMSFT), [Damien Bowden](https://twitter.com/damien_bod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Hisham Bin Ateya](https://twitter.com/hishambinateya)
+By [Rick Anderson](https://twitter.com/RickAndMSFT), [Damien Bowden](https://github.com/damienbod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Hisham Bin Ateya](https://twitter.com/hishambinateya)
 
 A multilingual website allows a website to reach a wider audience. ASP.NET Core provides services and middleware for localizing into different languages and cultures.
+
+For Blazor localization guidance, which adds to or supersedes the guidance in this article, see <xref:blazor/globalization-localization>.
 
 ## Terms
 
@@ -46,6 +50,8 @@ Move mini TOC from ## Additional resources to here
 -->
 ## Additional resources
 
+* [Url culture provider using middleware as filters in ASP.NET Core](https://andrewlock.net/url-culture-provider-using-middleware-as-mvc-filter-in-asp-net-core-1-1-0/)
+* [Applying the RouteDataRequest CultureProvider globally with middleware as filters](https://andrewlock.net/applying-the-routedatarequest-cultureprovider-globally-with-middleware-as-filters/)
 * [`IStringLocalizer`](xref:fundamentals/localization/make-content-localizable) : Uses the <xref:System.Resources.ResourceManager> and <xref:System.Resources.ResourceReader> to provide culture-specific resources at run time. The interface has an indexer and an `IEnumerable` for returning localized strings.
 * [`IHtmlLocalizer`](xref:fundamentals/localization/make-content-localizable#ihtmllocalizer): For resources that contain HTML.
 * [View and DataAnnotations](xref:fundamentals/localization/make-content-localizable#view-localization)

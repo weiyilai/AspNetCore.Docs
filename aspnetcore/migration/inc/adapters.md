@@ -6,7 +6,6 @@ ms.author: riande
 monikerRange: '>= aspnetcore-6.0'
 ms.date: 11/9/2022
 ms.topic: article
-ms.prod: aspnet-core
 uid: migration/inc/adapters
 ---
 
@@ -63,3 +62,7 @@ public class SomeController : Controller
 ```
 
 Notice that since there's a <xref:Microsoft.AspNetCore.Mvc.ControllerBase.HttpContext> property, they can pass that through, but it generally looks the same. Using implicit conversions, the <xref:Microsoft.AspNetCore.Http.HttpContext> can be converted into the adapter that could then be passed around through the levels utilizing the code in the same way.
+
+## See also
+
+* <xref:migration/inc/unit-testing>

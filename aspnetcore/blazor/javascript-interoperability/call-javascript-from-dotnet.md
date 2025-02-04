@@ -5,7 +5,7 @@ description: Learn how to invoke JavaScript functions from .NET methods in Blazo
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 4/10/2024
 uid: blazor/js-interop/call-javascript-from-dotnet
 ---
 # Call JavaScript functions from .NET methods in ASP.NET Core Blazor
@@ -15,6 +15,8 @@ uid: blazor/js-interop/call-javascript-from-dotnet
 This article explains how to invoke JavaScript (JS) functions from .NET.
 
 For information on how to call .NET methods from JS, see <xref:blazor/js-interop/call-dotnet-from-javascript>.
+
+## Invoke JS functions
 
 <xref:Microsoft.JSInterop.IJSRuntime> is registered by the Blazor framework. To call into JS from .NET, inject the <xref:Microsoft.JSInterop.IJSRuntime> abstraction and call one of the following methods:
 
@@ -31,7 +33,7 @@ For the preceding .NET methods that invoke JS functions:
 * The `TValue` return type must also be JSON serializable. `TValue` should match the .NET type that best maps to the JSON type returned.
 * A [JS `Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise) is returned for `InvokeAsync` methods. `InvokeAsync` unwraps the [`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise) and returns the value awaited by the [`Promise`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise).
 
-For Blazor apps with prerendering enabled, calling into JS isn't possible during prerendering. For more information, see the [Prerendering](#prerendering) section.
+For Blazor apps with prerendering enabled, which is the default for server-side apps, calling into JS isn't possible during prerendering. For more information, see the [Prerendering](#prerendering) section.
 
 The following example is based on [`TextDecoder`](https://developer.mozilla.org/docs/Web/API/TextDecoder), a JS-based decoder. The example demonstrates how to invoke a JS function from a C# method that offloads a requirement from developer code to an existing JS API. The JS function accepts a byte array from a C# method, decodes the array, and returns the text to the component for display.
 
@@ -41,51 +43,72 @@ The following example is based on [`TextDecoder`](https://developer.mozilla.org/
     var win1251decoder = new TextDecoder('windows-1251');
     var bytes = new Uint8Array(win1251Array);
     var decodedArray = win1251decoder.decode(bytes);
-    console.log(decodedArray);
     return decodedArray;
   };
 </script>
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
-The following `CallJsExample1` component:
+The following component:
 
 * Invokes the `convertArray` JS function with <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeAsync%2A> when selecting a button (**`Convert Array`**).
 * After the JS function is called, the passed array is converted into a string. The string is returned to the component for display (`text`).
 
-`Pages/CallJsExample1.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs1.razor`:
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor" highlight="2,34":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs1.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample1.razor`:
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor" highlight="2,34":::
+`CallJsExample1.razor`:
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor" highlight="2,34":::
+`CallJsExample1.razor`:
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor" highlight="2,34-35":::
+`CallJsExample1.razor`:
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample1.razor":::
 
 :::moniker-end
 
 ## JavaScript API restricted to user gestures
 
-*This section only applies to Blazor Server apps.*
+*This section applies to server-side components.*
 
-Some browser JavaScript (JS) APIs can only be executed in the context of a user gesture, such as using the [`Fullscreen API` (MDN documentation)](https://developer.mozilla.org/docs/Web/API/Fullscreen_API). These APIs can't be called through the JS interop mechanism in Blazor Server apps because UI event handling is performed asynchronously and generally no longer in the context of the user gesture. The app must handle the UI event completely in JavaScript, so use `onclick` instead of Blazor's `@onclick` directive attribute.
+Some browser JavaScript (JS) APIs can only be executed in the context of a user gesture, such as using the [`Fullscreen API` (MDN documentation)](https://developer.mozilla.org/docs/Web/API/Fullscreen_API). These APIs can't be called through the JS interop mechanism in server-side components because UI event handling is performed asynchronously and generally no longer in the context of the user gesture. The app must handle the UI event completely in JavaScript, so use `onclick` instead of Blazor's `@onclick` directive attribute.
 
 ## Invoke JavaScript functions without reading a returned value (`InvokeVoidAsync`)
 
@@ -105,35 +128,57 @@ Provide a `displayTickerAlert1` JS function. The function is called with <xref:M
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
 ### Component (`.razor`) example (`InvokeVoidAsync`)
 
-`TickerChanged` calls the `handleTickerChanged1` method in the following `CallJsExample2` component.
+`TickerChanged` calls the `handleTickerChanged1` method in the following component.
 
-`Pages/CallJsExample2.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs2.razor`:
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor" highlight="2,25":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs2.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample2.razor`:
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor" highlight="2,25":::
+`CallJsExample2.razor`:
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor" highlight="2,25":::
+`CallJsExample2.razor`:
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor" highlight="2,25":::
+`CallJsExample2.razor`:
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample2.razor":::
 
 :::moniker-end
 
@@ -141,7 +186,19 @@ Provide a `displayTickerAlert1` JS function. The function is called with <xref:M
 
 `JsInteropClasses1.cs`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/JsInteropClasses1.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/JsInteropClasses1.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/JsInteropClasses1.cs":::
 
@@ -165,11 +222,27 @@ Provide a `displayTickerAlert1` JS function. The function is called with <xref:M
 
 :::moniker-end
 
-`TickerChanged` calls the `handleTickerChanged1` method in the following `CallJsExample3` component.
+`TickerChanged` calls the `handleTickerChanged1` method in the following component.
 
-`Pages/CallJsExample3.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs3.razor`:
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs3.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs3.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs3.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample3.razor`:
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample3.razor":::
 
@@ -177,17 +250,23 @@ Provide a `displayTickerAlert1` JS function. The function is called with <xref:M
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
+`CallJsExample3.razor`:
+
 :::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample3.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
+`CallJsExample3.razor`:
+
 :::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample3.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
+
+`CallJsExample3.razor`:
 
 :::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample3.razor":::
 
@@ -213,35 +292,57 @@ Provide a `displayTickerAlert2` JS function. The following example returns a str
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
 ### Component (`.razor`) example (`InvokeAsync`)
 
-`TickerChanged` calls the `handleTickerChanged2` method and displays the returned string in the following `CallJsExample4` component.
+`TickerChanged` calls the `handleTickerChanged2` method and displays the returned string in the following component.
 
-`Pages/CallJsExample4.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs4.razor`:
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor" highlight="2,31-34":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs4.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs4.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs4.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample4.razor`:
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor" highlight="2,31-34":::
+`CallJsExample4.razor`:
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor" highlight="2,31-34":::
+`CallJsExample4.razor`:
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor" highlight="2,31-34":::
+`CallJsExample4.razor`:
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample4.razor":::
 
 :::moniker-end
 
@@ -249,7 +350,19 @@ Provide a `displayTickerAlert2` JS function. The following example returns a str
 
 `JsInteropClasses2.cs`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/JsInteropClasses2.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/JsInteropClasses2.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/JsInteropClasses2.cs":::
 
@@ -273,31 +386,53 @@ Provide a `displayTickerAlert2` JS function. The following example returns a str
 
 :::moniker-end
 
-`TickerChanged` calls the `handleTickerChanged2` method and displays the returned string in the following `CallJsExample5` component.
+`TickerChanged` calls the `handleTickerChanged2` method and displays the returned string in the following component.
 
-`Pages/CallJsExample5.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs5.razor`:
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor" highlight="2-3,25,30,40-42,46":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs5.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs5.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs5.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample5.razor`:
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor" highlight="2-3,25,30,40-42,46":::
+`CallJsExample5.razor`:
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor" highlight="2-3,25,30,38-40,43":::
+`CallJsExample5.razor`:
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor" highlight="2-3,25,30,38-40,43":::
+`CallJsExample5.razor`:
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample5.razor":::
 
 :::moniker-end
 
@@ -314,30 +449,30 @@ IJSRuntime JS { get; set; }
 
 [!INCLUDE[](~/blazor/includes/prerendering.md)]
 
-## Synchronous JS interop in Blazor WebAssembly apps
+## Synchronous JS interop in client-side components
 
 [!INCLUDE[](~/blazor/includes/js-interop/synchronous-js-interop-call-js.md)]
 
 ## JavaScript location
 
-Load JavaScript (JS) code using any of approaches described by the [JavaScript (JS) interoperability (interop) overview article](xref:blazor/js-interop/index#javascript-location):
+Load JavaScript (JS) code using any of approaches described by the [article on JavaScript location](xref:blazor/js-interop/javascript-location):
 
 :::moniker range=">= aspnetcore-6.0"
 
-* [Load a script in `<head>` markup](xref:blazor/js-interop/index#load-a-script-in-head-markup) (*Not generally recommended*)
-* [Load a script in `<body>` markup](xref:blazor/js-interop/index#load-a-script-in-body-markup)
-* [Load a script from an external JavaScript file (`.js`) collocated with a component](xref:blazor/js-interop/index#load-a-script-from-an-external-javascript-file-js-collocated-with-a-component)
-* [Load a script from an external JavaScript file (`.js`)](xref:blazor/js-interop/index#load-a-script-from-an-external-javascript-file-js)
-* [Inject a script before or after Blazor starts](xref:blazor/js-interop/index#inject-a-script-before-or-after-blazor-starts)
+* [Load a script in `<head>` markup](xref:blazor/js-interop/javascript-location#load-a-script-in-head-markup) (*Not generally recommended*)
+* [Load a script in `<body>` markup](xref:blazor/js-interop/javascript-location#load-a-script-in-body-markup)
+* [Load a script from an external JavaScript file (`.js`) collocated with a component](xref:blazor/js-interop/javascript-location#load-a-script-from-an-external-javascript-file-js-collocated-with-a-component)
+* [Load a script from an external JavaScript file (`.js`)](xref:blazor/js-interop/javascript-location#load-a-script-from-an-external-javascript-file-js)
+* [Inject a script before or after Blazor starts](xref:blazor/js-interop/javascript-location#inject-a-script-before-or-after-blazor-starts)
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-6.0"
 
-* [Load a script in `<head>` markup](xref:blazor/js-interop/index#load-a-script-in-head-markup) (*Not generally recommended*)
-* [Load a script in `<body>` markup](xref:blazor/js-interop/index#load-a-script-in-body-markup)
-* [Load a script from an external JavaScript file (`.js`)](xref:blazor/js-interop/index#load-a-script-from-an-external-javascript-file-js)
-* [Inject a script after Blazor starts](xref:blazor/js-interop/index#inject-a-script-after-blazor-starts)
+* [Load a script in `<head>` markup](xref:blazor/js-interop/javascript-location#load-a-script-in-head-markup) (*Not generally recommended*)
+* [Load a script in `<body>` markup](xref:blazor/js-interop/javascript-location#load-a-script-in-body-markup)
+* [Load a script from an external JavaScript file (`.js`)](xref:blazor/js-interop/javascript-location#load-a-script-from-an-external-javascript-file-js)
+* [Inject a script after Blazor starts](xref:blazor/js-interop/javascript-location#inject-a-script-after-blazor-starts)
 
 :::moniker-end
 
@@ -347,8 +482,19 @@ For information on isolating scripts in [JS modules](https://developer.mozilla.o
 
 :::moniker-end
 
+:::moniker range=">= aspnetcore-8.0"
+
+> [!WARNING]
+> Only place a `<script>` tag in a component file (`.razor`) if the component is guaranteed to adopt [static server-side rendering (static SSR)](xref:blazor/fundamentals/index#client-and-server-rendering-concepts) because the `<script>` tag can't be updated dynamically.
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
 > [!WARNING]
 > Don't place a `<script>` tag in a component file (`.razor`) because the `<script>` tag can't be updated dynamically.
+
+:::moniker-end
 
 :::moniker range=">= aspnetcore-5.0"
 
@@ -371,7 +517,48 @@ In the preceding example, the `{CONDITION}` placeholder represents a conditional
 
 For browser compatibility, see [Can I use: JavaScript modules: dynamic import](https://caniuse.com/es6-module-dynamic-import).
 
-For example, the following JS module exports a JS function for showing a [browser window prompt](https://developer.mozilla.org/docs/Web/API/Window/prompt). Place the following JS code in an external JS file.
+In server-side scenarios, JS interop calls can't be issued after Blazor's SignalR circuit is disconnected. Without a circuit during component disposal or at any other time that a circuit doesn't exist, the following method calls fail and log a message that the circuit is disconnected as a <xref:Microsoft.JSInterop.JSDisconnectedException>:
+
+* JS interop method calls
+  * <xref:Microsoft.JSInterop.IJSRuntime.InvokeAsync%2A?displayProperty=nameWithType>
+  * <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeAsync%2A?displayProperty=nameWithType>
+  * <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeVoidAsync%2A?displayProperty=nameWithType>)
+* `Dispose`/`DisposeAsync` calls on any <xref:Microsoft.JSInterop.IJSObjectReference>.
+
+In order to avoid logging <xref:Microsoft.JSInterop.JSDisconnectedException> or to log custom information in server-side Blazor, catch the exception in a [`try-catch`](/dotnet/csharp/language-reference/keywords/try-catch) statement.
+
+For the following component disposal example:
+
+* The server-side component implements <xref:System.IAsyncDisposable>.
+* `module` is an <xref:Microsoft.JSInterop.IJSObjectReference> for a JS module.
+* <xref:Microsoft.JSInterop.JSDisconnectedException> is caught and not logged.
+* Optionally, you can log custom information in the `catch` statement at whatever log level you prefer. The following example doesn't log custom information. The code assumes that the developer doesn't care about when or where circuits are disconnected during component disposal.
+
+```csharp
+async ValueTask IAsyncDisposable.DisposeAsync()
+{
+    try
+    {
+        if (module is not null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+    catch (JSDisconnectedException)
+    {
+    }
+}
+```
+
+If you must clean up your own JS objects or execute other JS code on the client after a circuit is lost in a server-side Blazor app, use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JS on the client. The `MutationObserver` pattern allows you to execute JS code when an element is removed from the DOM.
+
+For more information, see the following articles:
+
+* <xref:blazor/js-interop/index#dom-cleanup-tasks-during-component-disposal>: Includes a code example of the `MutationObserver` pattern.
+* <xref:blazor/fundamentals/handle-errors#javascript-interop>: The *JavaScript interop* section discusses error handling in JS interop scenarios.
+* <xref:blazor/components/lifecycle#component-disposal-with-idisposable-and-iasyncdisposable>: The *Component disposal with `IDisposable` and `IAsyncDisposable`* section describes how to implement disposal patterns in Razor components.
+
+The following JS module exports a JS function for showing a [browser window prompt](https://developer.mozilla.org/docs/Web/API/Window/prompt). Place the following JS code in an external JS file.
 
 `wwwroot/scripts.js`:
 
@@ -385,11 +572,27 @@ Add the preceding JS module to an app or class library as a static web asset in 
 
 <xref:Microsoft.JSInterop.IJSRuntime> imports the module as an <xref:Microsoft.JSInterop.IJSObjectReference>, which represents a reference to a JS object from .NET code. Use the <xref:Microsoft.JSInterop.IJSObjectReference> to invoke exported JS functions from the module.
 
-`Pages/CallJsExample6.razor`:
+:::moniker-end
+
+:::moniker range=">= aspnetcore-9.0"
+
+`CallJs6.razor`:
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs6.razor":::
 
 :::moniker-end
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs6.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs6.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample6.razor`:
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample6.razor":::
 
@@ -397,11 +600,15 @@ Add the preceding JS module to an app or class library as a static web asset in 
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
+`CallJsExample6.razor`:
+
 :::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample6.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
+
+`CallJsExample6.razor`:
 
 :::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample6.razor":::
 
@@ -416,10 +623,11 @@ In the preceding example:
   * The path segment for the current directory (`./`) is required in order to create the correct static asset path to the JS file.
   * The `{SCRIPT PATH AND FILE NAME (.js)}` placeholder is the path and file name under `wwwroot`.
 * Disposes the <xref:Microsoft.JSInterop.IJSObjectReference> for [garbage collection](xref:blazor/components/lifecycle#asynchronous-iasyncdisposable) in <xref:System.IAsyncDisposable.DisposeAsync%2A?displayProperty=nameWithType>.
+* Don't place a `<script>` tag for the script after the [Blazor script](xref:blazor/project-structure#location-of-the-blazor-script) because the module is loaded and cached automatically when the [dynamic `import()`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Operators/import) is invoked.
 
 Dynamically importing a module requires a network request, so it can only be achieved asynchronously by calling <xref:Microsoft.JSInterop.IJSRuntime.InvokeAsync%2A>.
 
-`IJSInProcessObjectReference` represents a reference to a JS object whose functions can be invoked synchronously in Blazor WebAssembly apps. For more information, see the [Synchronous JS interop in Blazor WebAssembly apps](#synchronous-js-interop-in-blazor-webassembly-apps) section.
+`IJSInProcessObjectReference` represents a reference to a JS object whose functions can be invoked synchronously in client-side components. For more information, see the [Synchronous JS interop in client-side components](#synchronous-js-interop-in-client-side-components) section.
 
 > [!NOTE]
 > When the external JS file is supplied by a [Razor class library](xref:blazor/components/class-libraries), specify the module's JS file using its stable static web asset path: `./_content/{PACKAGE ID}/{SCRIPT PATH AND FILE NAME (.js)}`:
@@ -427,9 +635,10 @@ Dynamically importing a module requires a network request, so it can only be ach
 > * The path segment for the current directory (`./`) is required in order to create the correct static asset path to the JS file.
 > * The `{PACKAGE ID}` placeholder is the library's [package ID](/nuget/create-packages/creating-a-package-msbuild#set-properties). The package ID defaults to the project's assembly name if `<PackageId>` isn't specified in the project file. In the following example, the library's assembly name is `ComponentLibrary` and the library's project file doesn't specify `<PackageId>`.
 > * The `{SCRIPT PATH AND FILE NAME (.js)}` placeholder is the path and file name under `wwwroot`. In the following example, the external JS file (`script.js`) is placed in the class library's `wwwroot` folder.
+> * `module` is a private nullable <xref:Microsoft.JSInterop.IJSObjectReference> of the component class (`private IJSObjectReference? module;`).
 >
 > ```csharp
-> var module = await js.InvokeAsync<IJSObjectReference>(
+> module = await js.InvokeAsync<IJSObjectReference>(
 >     "import", "./_content/ComponentLibrary/scripts.js");
 > ```
 >
@@ -459,7 +668,7 @@ The following example shows capturing a reference to the `username` `<input>` el
 ```
 
 > [!WARNING]
-> Only use an element reference to mutate the contents of an empty element that doesn't interact with Blazor. This scenario is useful when a third-party API supplies content to the element. Because Blazor doesn't interact with the element, there's no possibility of a conflict between Blazor's representation of the element and the Document Object Model (DOM).
+> Only use an element reference to mutate the contents of an empty element that doesn't interact with Blazor. This scenario is useful when a third-party API supplies content to the element. Because Blazor doesn't interact with the element, there's no possibility of a conflict between Blazor's representation of the element and the DOM.
 >
 > In the following example, it's *dangerous* to mutate the contents of the unordered list (`ul`) using `MyList` via JS interop because Blazor interacts with the DOM to populate this element's list items (`<li>`) from the `Todos` object:
 >
@@ -551,18 +760,43 @@ The `clickElement` method is called directly on the object. The following exampl
 When working with generic types and returning a value, use <xref:System.Threading.Tasks.ValueTask%601>:
 
 ```csharp
-public static ValueTask<T> GenericMethod<T>(this ElementReference elementRef, 
-    IJSRuntime js)
-{
-    return js.InvokeAsync<T>("{JAVASCRIPT FUNCTION}", elementRef);
-}
+public static ValueTask<T> GenericMethod<T>(
+        this ElementReference elementRef, IJSRuntime js) => 
+    js.InvokeAsync<T>("{JAVASCRIPT FUNCTION}", elementRef);
 ```
 
 The `{JAVASCRIPT FUNCTION}` placeholder is the JS function identifier.
 
 `GenericMethod` is called directly on the object with a type. The following example assumes that the `GenericMethod` is available from the `JsInteropClasses` namespace:
 
-:::moniker range=">= aspnetcore-6.0"
+:::moniker range=">= aspnetcore-8.0"
+
+```razor
+@inject IJSRuntime JS
+@using JsInteropClasses
+
+<input @ref="username" />
+
+<button @onclick="OnClickMethod">Do something generic</button>
+
+<p>
+    returnValue: @returnValue
+</p>
+
+@code {
+    private ElementReference username;
+    private string? returnValue;
+
+    private async Task OnClickMethod()
+    {
+        returnValue = await username.GenericMethod<string>(JS);
+    }
+}
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
 
 ```razor
 @inject IJSRuntime JS
@@ -644,37 +878,75 @@ For a parent component to make an element reference available to other component
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
-`Pages/CallJsExample7.razor` (parent component):
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs7.razor` (parent component):
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor" highlight="5,9":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs7.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs7.razor` (parent component):
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs7.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample7.razor` (parent component):
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor" highlight="5,9":::
+`CallJsExample7.razor` (parent component):
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor" highlight="5,9":::
+`CallJsExample7.razor` (parent component):
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/CallJsExample7.razor" highlight="5,9":::
+`CallJsExample7.razor` (parent component):
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/CallJsExample7.razor":::
 
 :::moniker-end
 
-`Pages/CallJsExample7.razor.cs`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs7.razor.cs`:
+
+:::code language="csharp" source="~/../blazor-samples/9.0/BlazorSample_WebAssembly/Pages/CallJs7.razor.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs7.razor.cs`:
+
+:::code language="csharp" source="~/../blazor-samples/8.0/BlazorSample_WebAssembly/Pages/CallJs7.razor.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample7.razor.cs`:
 
 :::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor.cs":::
 
@@ -682,11 +954,15 @@ For a parent component to make an element reference available to other component
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
+`CallJsExample7.razor.cs`:
+
 :::code language="csharp" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor.cs":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
+
+`CallJsExample7.razor.cs`:
 
 :::code language="csharp" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/CallJsExample7.razor.cs":::
 
@@ -694,15 +970,29 @@ For a parent component to make an element reference available to other component
 
 :::moniker range="< aspnetcore-5.0"
 
+`CallJsExample7.razor.cs`:
+
 :::code language="csharp" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/CallJsExample7.razor.cs":::
 
 :::moniker-end
 
-In the preceding example, the namespace of the app is `BlazorSample` with components in the `Pages` folder. If testing the code locally, update the namespace.
+In the preceding example, the namespace of the app is `BlazorSample`. If testing the code locally, update the namespace.
 
-`Shared/SurveyPrompt.razor` (child component):
+`SurveyPrompt.razor` (child component):
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/SurveyPrompt.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/SurveyPrompt.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Shared/SurveyPrompt.razor":::
 
@@ -726,9 +1016,21 @@ In the preceding example, the namespace of the app is `BlazorSample` with compon
 
 :::moniker-end
 
-`Shared/SurveyPrompt.razor.cs`:
+`SurveyPrompt.razor.cs`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/SurveyPrompt.razor.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="csharp" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/SurveyPrompt.razor.cs":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Shared/SurveyPrompt.razor.cs":::
 
@@ -756,13 +1058,27 @@ In the preceding example, the namespace of the app is `BlazorSample` with shared
 
 ## Harden JavaScript interop calls
 
-*This section primarily applies to Blazor Server apps, but Blazor WebAssembly apps may also set JS interop timeouts if conditions warrant it.*
+*This section only applies to Interactive Server components, but client-side components may also set JS interop timeouts if conditions warrant it.*
 
-In Blazor Server apps, JavaScript (JS) interop may fail due to networking errors and should be treated as unreliable. By default, Blazor Server apps use a one minute timeout for JS interop calls. If an app can tolerate a more aggressive timeout, set the timeout using one of the following approaches.
+In server-side apps with server interactivity, JavaScript (JS) interop may fail due to networking errors and should be treated as unreliable. Blazor apps use a one minute timeout for JS interop calls. If an app can tolerate a more aggressive timeout, set the timeout using one of the following approaches.
 
 :::moniker range=">= aspnetcore-6.0"
 
 Set a global timeout in the `Program.cs` with <xref:Microsoft.AspNetCore.Components.Server.CircuitOptions.JSInteropDefaultCallTimeout?displayProperty=nameWithType>:
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+```csharp
+builder.Services.AddRazorComponents()
+    .AddInteractiveServerComponents(options => 
+        options.JSInteropDefaultCallTimeout = {TIMEOUT});
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
 
 ```csharp
 builder.Services.AddServerSideBlazor(
@@ -786,18 +1102,30 @@ The `{TIMEOUT}` placeholder is a <xref:System.TimeSpan> (for example, `TimeSpan.
 
 Set a per-invocation timeout in component code. The specified timeout overrides the global timeout set by <xref:Microsoft.AspNetCore.Components.Server.CircuitOptions.JSInteropDefaultCallTimeout>:
 
+:::moniker range=">= aspnetcore-8.0"
+
+```csharp
+var result = await JS.InvokeAsync<string>("{ID}", {TIMEOUT}, [ "Arg1" ]);
+```
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
 ```csharp
 var result = await JS.InvokeAsync<string>("{ID}", {TIMEOUT}, new[] { "Arg1" });
 ```
+
+:::moniker-end
 
 In the preceding example:
 
 * The `{TIMEOUT}` placeholder is a <xref:System.TimeSpan> (for example, `TimeSpan.FromSeconds(80)`).
 * The `{ID}` placeholder is the identifier for the function to invoke. For example, the value `someScope.someFunction` invokes the function `window.someScope.someFunction`.
 
-Although a common cause of JS interop failures are network failures in Blazor Server apps, per-invocation timeouts can be set for JS interop calls in Blazor WebAssembly apps. Although no SignalR circuit exists in a Blazor WebAssembly app, JS interop calls might fail for other reasons that apply in Blazor WebAssembly apps.
+Although a common cause of JS interop failures are network failures with server-side components, per-invocation timeouts can be set for JS interop calls for client-side components. Although no Blazor-SignalR circuit exists for a client-side component, JS interop calls might fail for other reasons that apply.
 
-For more information on resource exhaustion, see <xref:blazor/security/server/threat-mitigation>.
+For more information on resource exhaustion, see <xref:blazor/security/interactive-server-side-rendering>.
 
 ## Avoid circular object references
 
@@ -810,7 +1138,7 @@ Objects that contain circular references can't be serialized on the client for e
 
 ## JavaScript libraries that render UI
 
-Sometimes you may wish to use JavaScript (JS) libraries that produce visible user interface elements within the browser Document Object Model (DOM). At first glance, this might seem difficult because Blazor's diffing system relies on having control over the tree of DOM elements and runs into errors if some external code mutates the DOM tree and invalidates its mechanism for applying diffs. This isn't a Blazor-specific limitation. The same challenge occurs with any diff-based UI framework.
+Sometimes you may wish to use JavaScript (JS) libraries that produce visible user interface elements within the browser DOM. At first glance, this might seem difficult because Blazor's diffing system relies on having control over the tree of DOM elements and runs into errors if some external code mutates the DOM tree and invalidates its mechanism for applying diffs. This isn't a Blazor-specific limitation. The same challenge occurs with any diff-based UI framework.
 
 Fortunately, it's straightforward to embed externally-generated UI within a Razor component UI reliably. The recommended technique is to have the component's code (`.razor` file) produce an empty element. As far as Blazor's diffing system is concerned, the element is always empty, so the renderer does not recurse into the element and instead leaves its contents alone. This makes it safe to populate the element with arbitrary externally-managed content.
 
@@ -864,24 +1192,42 @@ export function setMapCenter(map, latitude, longitude) {
 
 To produce correct styling, add the following stylesheet tag to the host HTML page.
 
-Add the following `<link>` element to the `<head>` element markup ([location of `<head>` content](xref:blazor/project-structure#location-of-head-content)):
+Add the following `<link>` element to the `<head>` element markup ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)):
 
 ```html
 <link href="https://api.mapbox.com/mapbox-gl-js/v1.12.0/mapbox-gl.css" 
     rel="stylesheet" />
 ```
 
-`Pages/CallJsExample8.razor`:
+:::moniker-end
+
+:::moniker range=">= aspnetcore-9.0"
+
+`CallJs8.razor`:
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs8.razor":::
 
 :::moniker-end
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs8.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs8.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample8.razor`:
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample8.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
+
+`CallJsExample8.razor`:
 
 :::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample8.razor":::
 
@@ -899,8 +1245,8 @@ The preceding example produces an interactive map UI. The user:
 In the preceding example:
 
 * The `<div>` with `@ref="mapElement"` is left empty as far as Blazor is concerned. The `mapbox-gl.js` script can safely populate the element and modify its contents. Use this technique with any JS library that renders UI. You can embed components from a third-party JS SPA framework inside Razor components, as long as they don't try to reach out and modify other parts of the page. It is **not** safe for external JS code to modify elements that Blazor does not regard as empty.
-* When using this approach, bear in mind the rules about how Blazor retains or destroys DOM elements. The component safely handles button click events and updates the existing map instance because DOM elements are retained where possible by default. If you were rendering a list of map elements from inside a `@foreach` loop, you want to use `@key` to ensure the preservation of component instances. Otherwise, changes in the list data could cause component instances to retain the state of previous instances in an undesirable manner. For more information, see how to [use the `@key` directive attribute to preserve the relationship among elements, components, and model objects](xref:blazor/components/key).
-* The example encapsulates JS logic and dependencies within an ES6 module and loads the module dynamically using the `import` identifier. For more information, see [JavaScript isolation in JavaScript modules](#javascript-isolation-in-javascript-modules).
+* When using this approach, bear in mind the rules about how Blazor retains or destroys DOM elements. The component safely handles button click events and updates the existing map instance because DOM elements are retained where possible. If you were rendering a list of map elements from inside a `@foreach` loop, you want to use `@key` to ensure the preservation of component instances. Otherwise, changes in the list data could cause component instances to retain the state of previous instances in an undesirable manner. For more information, see how to [use the `@key` directive attribute to preserve the relationship among elements, components, and model objects](xref:blazor/components/key).
+* The example encapsulates JS logic and dependencies within a JavaScript module and loads the module dynamically using the `import` identifier. For more information, see [JavaScript isolation in JavaScript modules](#javascript-isolation-in-javascript-modules).
 
 :::moniker-end
 
@@ -923,9 +1269,54 @@ Provide a `receiveByteArray` JS function. The function is called with <xref:Micr
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
-`Pages/CallJsExample9.razor`:
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+`CallJs9.razor`:
+
+```razor
+@page "/call-js-9"
+@inject IJSRuntime JS
+
+<h1>Call JS Example 9</h1>
+
+<p>
+    <button @onclick="SendByteArray">Send Bytes</button>
+</p>
+
+<p>
+    @result
+</p>
+
+<p>
+    Quote &copy;2005 <a href="https://www.uphe.com">Universal Pictures</a>:
+    <a href="https://www.uphe.com/movies/serenity-2005">Serenity</a><br>
+    <a href="https://www.imdb.com/name/nm0821612/">Jewel Staite on IMDB</a>
+</p>
+
+@code {
+    private string? result;
+
+    private async Task SendByteArray()
+    {
+        var bytes = new byte[] { 0x45, 0x76, 0x65, 0x72, 0x79, 0x74, 0x68, 0x69,
+            0x6e, 0x67, 0x27, 0x73, 0x20, 0x73, 0x68, 0x69, 0x6e, 0x79, 0x2c,
+            0x20, 0x43, 0x61, 0x70, 0x74, 0x69, 0x61, 0x6e, 0x2e, 0x20, 0x4e,
+            0x6f, 0x74, 0x20, 0x74, 0x6f, 0x20, 0x66, 0x72, 0x65, 0x74, 0x2e };
+
+        result = await JS.InvokeAsync<string>("receiveByteArray", bytes);
+    }
+}
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+`CallJsExample9.razor`:
 
 ```razor
 @page "/call-js-example-9"
@@ -970,14 +1361,14 @@ For information on using a byte array when calling .NET from JavaScript, see <xr
 
 ## Stream from .NET to JavaScript
 
-Blazor supports streaming data directly from .NET to JavaScript. Streams are created using a <xref:Microsoft.JSInterop.DotNetStreamReference>.
+Blazor supports streaming data directly from .NET to JavaScript (JS). Streams are created using a <xref:Microsoft.JSInterop.DotNetStreamReference>.
 
 <xref:Microsoft.JSInterop.DotNetStreamReference> represents a .NET stream and uses the following parameters:
 
-* `stream`: The stream sent to JavaScript.
+* `stream`: The stream sent to JS.
 * `leaveOpen`: Determines if the stream is left open after transmission. If a value isn't provided, `leaveOpen` defaults to `false`.
 
-In JavaScript, use an array buffer or a readable stream to receive the data:
+In JS, use an array buffer or a readable stream to receive the data:
 
 * Using an [`ArrayBuffer`](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/ArrayBuffer):
 
@@ -998,14 +1389,23 @@ In JavaScript, use an array buffer or a readable stream to receive the data:
 In C# code:
 
 ```csharp
-using var streamRef = new DotNetStreamReference(stream: {STREAM}, leaveOpen: false);
+var streamRef = new DotNetStreamReference(stream: {STREAM}, leaveOpen: false);
 await JS.InvokeVoidAsync("streamToJavaScript", streamRef);
 ```
 
 In the preceding example:
 
-* The `{STREAM}` placeholder represents the <xref:System.IO.Stream> sent to JavaScript.
+* The `{STREAM}` placeholder represents the <xref:System.IO.Stream> sent to JS.
 * `JS` is an injected <xref:Microsoft.JSInterop.IJSRuntime> instance.
+
+Disposing a <xref:Microsoft.JSInterop.DotNetStreamReference> instance is usually unnecessary. When `leaveOpen` is set to its default value of `false`, the underlying <xref:System.IO.Stream> is automatically disposed after transmission to JS.
+
+If `leaveOpen` is `true`, then disposing a <xref:Microsoft.JSInterop.DotNetStreamReference> doesn't dispose its underlying <xref:System.IO.Stream>. The app's code determines when to dispose the underlying <xref:System.IO.Stream>. When deciding how to dispose the underlying <xref:System.IO.Stream>, consider the following:
+
+* Disposing a <xref:System.IO.Stream> while it's being transmitted to JS is considered an application error and may cause an unhandled exception to occur.
+* <xref:System.IO.Stream> transmission begins as soon as the <xref:Microsoft.JSInterop.DotNetStreamReference> is passed as an argument to a JS interop call, regardless of whether the stream is actually used in JS logic.
+
+Given these characteristics, we recommend disposing the underlying <xref:System.IO.Stream> only after it's fully consumed by JS (the promise returned by `arrayBuffer` or `stream` resolves). It follows that a <xref:Microsoft.JSInterop.DotNetStreamReference> should only be passed to JS if it's unconditionally going to be consumed by JS logic.
 
 <xref:blazor/js-interop/call-dotnet-from-javascript#stream-from-javascript-to-net> covers the reverse operation, streaming from JavaScript to .NET.
 
@@ -1021,29 +1421,51 @@ In the following example, the `nonFunction` JS function doesn't exist. When the 
 
 > `Could not find 'nonFunction' ('nonFunction' was undefined).`
 
-`Pages/CallJsExample11.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`CallJs11.razor`:
 
-:::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor" highlight="28":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs11.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`CallJs11.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/CallJs11.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`CallJsExample11.razor`:
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="csharp" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor" highlight="28":::
+`CallJsExample11.razor`:
+
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="csharp" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor" highlight="28":::
+`CallJsExample11.razor`:
+
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="csharp" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor" highlight="28":::
+`CallJsExample11.razor`:
+
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/call-js-from-dotnet/CallJsExample11.razor":::
 
 :::moniker-end
 
@@ -1084,15 +1506,60 @@ The following JS `Helpers` class contains a simulated long-running function, `lo
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
-The following `CallJsExample12` component:
+The following component:
 
 * Invokes the JS function `longRunningFn` when the **`Start Task`** button is selected. A <xref:System.Threading.CancellationTokenSource> is used to manage the execution of the long-running function. <xref:System.Threading.CancellationToken.Register%2A?displayProperty=nameWithType> sets a JS interop call delegate to execute the JS function `stopFn` when the <xref:System.Threading.CancellationTokenSource.Token?displayProperty=nameWithType> is cancelled.
 * When the **`Cancel Task`** button is selected, the <xref:System.Threading.CancellationTokenSource.Token?displayProperty=nameWithType> is cancelled with a call to <xref:System.Threading.CancellationTokenSource.Cancel%2A>.
 * The <xref:System.Threading.CancellationTokenSource> is disposed in the `Dispose` method.
 
-`Pages/CallJsExample12.razor`:
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+`CallJs12.razor`:
+
+```razor
+@page "/call-js-12"
+@inject IJSRuntime JS
+
+<h1>Cancel long-running JS interop</h1>
+
+<p>
+    <button @onclick="StartTask">Start Task</button>
+    <button @onclick="CancelTask">Cancel Task</button>
+</p>
+
+@code {
+    private CancellationTokenSource? cts;
+
+    private async Task StartTask()
+    {
+        cts = new CancellationTokenSource();
+        cts.Token.Register(() => JS.InvokeVoidAsync("Helpers.stopFn"));
+
+        await JS.InvokeVoidAsync("Helpers.longRunningFn");
+    }
+
+    private void CancelTask()
+    {
+        cts?.Cancel();
+    }
+
+    public void Dispose()
+    {
+        cts?.Cancel();
+        cts?.Dispose();
+    }
+}
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+`CallJsExample12.razor`:
 
 ```razor
 @page "/call-js-example-12"
@@ -1129,6 +1596,10 @@ The following `CallJsExample12` component:
 }
 ```
 
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0"
+
 A browser's [developer tools](https://developer.mozilla.org/docs/Glossary/Developer_Tools) console indicates the execution of the long-running JS function after the **`Start Task`** button is selected and when the function is aborted after the **`Cancel Task`** button is selected:
 
 ```console
@@ -1144,9 +1615,9 @@ longRunningFn aborted!
 
 ## JavaScript `[JSImport]`/`[JSExport]` interop
 
-*This section applies to Blazor WebAssembly apps.*
+*This section applies to client-side components.*
 
-As an alternative to interacting with JavaScript (JS) in Blazor WebAssembly apps using Blazor's JS interop mechanism based on the <xref:Microsoft.JSInterop.IJSRuntime> interface, a JS `[JSImport]`/`[JSExport]` interop API is available to apps targeting .NET 7 or later.
+As an alternative to interacting with JavaScript (JS) in client-side components using Blazor's JS interop mechanism based on the <xref:Microsoft.JSInterop.IJSRuntime> interface, a JS `[JSImport]`/`[JSExport]` interop API is available to apps targeting .NET 7 or later.
 
 For more information, see <xref:blazor/js-interop/import-export-interop>. 
 
@@ -1156,7 +1627,7 @@ For more information, see <xref:blazor/js-interop/import-export-interop>.
 
 ## Unmarshalled JavaScript interop
 
-*This section applies to Blazor WebAssembly apps.*
+*This section applies to client-side components.*
 
 Unmarshalled interop using the <xref:Microsoft.JSInterop.IJSUnmarshalledRuntime> interface is obsolete and should be replaced with JavaScript `[JSImport]`/`[JSExport]` interop.
 
@@ -1207,7 +1678,7 @@ In the following example:
 ```
 
 > [!NOTE]
-> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/index#javascript-location>.
+> For general guidance on JS location and our recommendations for production apps, see <xref:blazor/js-interop/javascript-location>.
 
 > [!WARNING]
 > The `js_string_to_mono_string` function name, behavior, and existence is subject to change in a future release of .NET. For example:
@@ -1215,7 +1686,7 @@ In the following example:
 > * The function is likely to be renamed.
 > * The function itself might be removed in favor of automatic conversion of strings by the framework.
 
-`Pages/CallJsExample10.razor`:
+`CallJsExample10.razor`:
 
 :::moniker-end
 
@@ -1268,9 +1739,9 @@ JS interop object references are implemented as a map keyed by an identifier on 
 
 At a minimum, always dispose objects created on the .NET side to avoid leaking .NET managed memory.
 
-## Document Object Model (DOM) cleanup tasks during component disposal
+## DOM cleanup tasks during component disposal
 
-For more information, see <xref:blazor/js-interop/index#document-object-model-dom-cleanup-tasks-during-component-disposal>.
+For more information, see <xref:blazor/js-interop/index#dom-cleanup-tasks-during-component-disposal>.
 
 ## JavaScript interop calls without a circuit
 
@@ -1279,7 +1750,7 @@ For more information, see <xref:blazor/js-interop/index#javascript-interop-calls
 ## Additional resources
 
 * <xref:blazor/js-interop/call-dotnet-from-javascript>
-* [`InteropComponent.razor` example (dotnet/AspNetCore GitHub repository `main` branch)](https://github.com/dotnet/AspNetCore/blob/main/src/Components/test/testassets/BasicTestApp/InteropComponent.razor): The `main` branch represents the product unit's current development for the next release of ASP.NET Core. To select the branch for a different release (for example, `release/5.0`), use the **Switch branches or tags** dropdown list to select the branch.
-* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples)
-* <xref:blazor/fundamentals/handle-errors> (*JavaScript interop* section) <!-- AUTHOR NOTE: The JavaScript interop section isn't linked because the section title changed across versions of the doc. Prior to 6.0, the section appears twice, once for Blazor Server and once for Blazor WebAssembly, each with the hosting model name in the section name. -->
-* [Blazor Server threat mitigation: JavaScript functions invoked from .NET](xref:blazor/security/server/threat-mitigation#javascript-functions-invoked-from-net)
+* [`InteropComponent.razor` example (`dotnet/AspNetCore` GitHub repository `main` branch)](https://github.com/dotnet/AspNetCore/blob/main/src/Components/test/testassets/BasicTestApp/InteropComponent.razor): The `main` branch represents the product unit's current development for the next release of ASP.NET Core. To select the branch for a different release (for example, `release/{VERSION}`, where the `{VERSION}` placeholder is the release version), use the **Switch branches or tags** dropdown list to select the branch. For a branch that no longer exists, use the **Tags** tab to find the API (for example, `v7.0.0`).
+* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples) ([how to download](xref:blazor/fundamentals/index#sample-apps))
+* <xref:blazor/fundamentals/handle-errors#javascript-interop> (*JavaScript interop* section)
+* [Threat mitigation: JavaScript functions invoked from .NET](xref:blazor/security/interactive-server-side-rendering#javascript-functions-invoked-from-net)

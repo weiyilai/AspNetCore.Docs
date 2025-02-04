@@ -168,7 +168,7 @@ The following code uses <xref:Microsoft.AspNetCore.Http.IFormFile> and <xref:Mic
 
 Authenticated file upload requests are supported using an [Authorization header](https://developer.mozilla.org/docs/Web/HTTP/Headers/Authorization), a [client certificate](/aspnet/core/security/authentication/certauth), or a cookie header.
 
-There is no built-in support for [antiforgery](/aspnet/core/security/anti-request-forgery?view=aspnetcore-7.0&preserve-view=true#anti7). However, it can be implemented using the [`IAntiforgery` service](/aspnet/core/security/anti-request-forgery?view=aspnetcore-7.0&preserve-view=true#antimin7).
+There is no built-in support for [antiforgery](/aspnet/core/security/anti-request-forgery?view=aspnetcore-7.0&preserve-view=true#anti7) in ASP.NET Core 7.0. [Antiforgery is available in ASP.NET Core 8.0](/aspnet/core/fundamentals/minimal-apis?view=aspnetcore-8.0&preserve-view=true#bind8) and later. However, it can be implemented using the [`IAntiforgery` service](/aspnet/core/security/anti-request-forgery?view=aspnetcore-7.0&preserve-view=true#antimin7).
 
 <a name="bindar"></a>
 
@@ -194,7 +194,7 @@ To test the preceding code, add the following endpoint to populate the database 
 
 [!code-csharp[](~/fundamentals/minimal-apis/bindingArrays/7.0-samples/todo/Program.cs?name=snippet_batch)]
 
-Use a tool like Postman to pass the following data to the previous endpoint:
+Use an API testing tool like [`HttpRepl`](xref:web-api/http-repl) to pass the following data to the previous endpoint:
 
 [!code-csharp[](~/fundamentals/minimal-apis/bindingArrays/7.0-samples/todo/Program.cs?name=batch_post_payload)]
 
@@ -259,8 +259,8 @@ There are two ways to customize parameter binding:
 `TryParse` has two APIs:
 
 ```csharp
-public static bool TryParse(string value, T out result);
-public static bool TryParse(string value, IFormatProvider provider, T out result);
+public static bool TryParse(string value, out T result);
+public static bool TryParse(string value, IFormatProvider provider, out T result);
 ```
 
 The following code displays `Point: 12.3, 10.1` with the URI `/map?Point=12.3,10.1`:
@@ -317,7 +317,7 @@ The rules for determining a binding source from a parameter:
     1. [`PipeReader`](xref:System.IO.Pipelines.PipeReader) ([`HttpContext.Request.BodyReader`](xref:Microsoft.AspNetCore.Http.HttpRequest.BodyReader))
 1. Parameter type has a valid static [`BindAsync`](xref:Microsoft.AspNetCore.Http.IBindableFromHttpContext%601.BindAsync%2A) method.
 1. Parameter type is a string or has a valid static [`TryParse`](xref:System.IParsable%601.TryParse%2A) method.
-   1. If the parameter name exists in the route template e.g. `app.Map("/todo/{id}", (int id) => {});`, then it's bound from the route.
+   1. If the parameter name exists in the route template. In `app.Map("/todo/{id}", (int id) => {});`, `id` is bound from the route.
    1. Bound from the query string.
 1. If the parameter type is a service provided by dependency injection, it uses that service as the source.
 1. The parameter is from the body.

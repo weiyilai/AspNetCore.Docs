@@ -5,10 +5,12 @@ description: Advanced configuration with the ASP.NET Core Module and Internet In
 monikerRange: '>= aspnetcore-5.0'
 ms.author: riande
 ms.custom: mvc
-ms.date: 02/13/2023
+ms.date: 10/09/2023
 uid: host-and-deploy/iis/advanced
 ---
 # Advanced configuration of the ASP.NET Core Module and IIS
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 This article covers advanced configuration options and scenarios for the ASP.NET Core Module and IIS.
 
@@ -48,13 +50,36 @@ The `disallowRotationOnConfigChange` setting is intended for blue/green scenario
 
 This setting corresponds to the API <xref:Microsoft.Web.Administration.ApplicationPoolRecycling.DisallowRotationOnConfigChange?displayProperty=nameWithType>
 
+## Reduce 503 likelihood during app recycle
+
+By default, there is a one second delay between when IIS is notified of a recycle or shutdown and when ANCM tells the managed server to initiate shutdown. The delay is configurable via the `ANCM_shutdownDelay` environment variable or by setting the `shutdownDelay` handler setting. Both values are in milliseconds. The delay is primarily to reduce the likelihood of a race where:
+
+* IIS hasn't started queuing requests to go to the new app.
+* ANCM starts rejecting new requests that come into the old app.
+
+This setting doesn't mean incoming requests will be delayed by this amount. The setting indicates that the old app instance will start shutting down after the timeout occurs. Slower machines or machines with heavier CPU usage might need to adjust this value to reduce 503 likelihood.
+
+The following example sets the delay to 5 seconds:
+
+```xml
+<aspNetCore processPath="dotnet"
+    arguments=".\MyApp.dll"
+    stdoutLogEnabled="false"
+    stdoutLogFile="\\?\%home%\LogFiles\stdout"
+    hostingModel="inprocess">
+  <handlerSettings>
+    <handlerSetting name="shutdownDelay" value="5000" />
+  </handlerSettings>
+</aspNetCore>
+```
+
 ## Proxy configuration uses HTTP protocol and a pairing token
 
 *Only applies to out-of-process hosting.*
 
 The proxy created between the ASP.NET Core Module and Kestrel uses the HTTP protocol. There's no risk of eavesdropping the traffic between the module and Kestrel from a location off of the server.
 
-A pairing token is used to guarantee that the requests received by Kestrel were proxied by IIS and didn't come from some other source. The pairing token is created and set into an environment variable (`ASPNETCORE_TOKEN`) by the module. The pairing token is also set into a header (`MS-ASPNETCORE-TOKEN`) on every proxied request. IIS Middleware checks each request it receives to confirm that the pairing token header value matches the environment variable value. If the token values are mismatched, the request is logged and rejected. The pairing token environment variable and the traffic between the module and Kestrel aren't accessible from a location off of the server. Without knowing the pairing token value, an attacker can't submit requests that bypass the check in the IIS Middleware.
+A pairing token is used to guarantee that the requests received by Kestrel were proxied by IIS and didn't come from some other source. The pairing token is created and set into an environment variable (`ASPNETCORE_TOKEN`) by the module. The pairing token is also set into a header (`MS-ASPNETCORE-TOKEN`) on every proxied request. IIS Middleware checks each request it receives to confirm that the pairing token header value matches the environment variable value. If the token values are mismatched, the request is logged and rejected. The pairing token environment variable and the traffic between the module and Kestrel aren't accessible from a location off of the server. Without knowing the pairing token value, a cyberattacker can't submit requests that bypass the check in the IIS Middleware.
 
 ## ASP.NET Core Module with an IIS Shared Configuration
 
@@ -171,7 +196,10 @@ Enable the **IIS Management Console** and **World Wide Web Services**.
 
 An ASP.NET Core app can be hosted as an [IIS sub-application (sub-app)](/iis/get-started/planning-your-iis-architecture/understanding-sites-applications-and-virtual-directories-on-iis#applications). The sub-app's path becomes part of the root app's URL.
 
-Static asset links within the sub-app should use tilde-slash (`~/`) notation. Tilde-slash notation triggers a [Tag Helper](xref:mvc/views/tag-helpers/intro) to prepend the sub-app's pathbase to the rendered relative link. For a sub-app at `/subapp_path`, an image linked with `src="~/image.png"` is rendered as `src="/subapp_path/image.png"`. The root app's Static File Middleware doesn't process the static file request. The request is processed by the sub-app's Static File Middleware.
+Static asset links within the sub-app should use tilde-slash (`~/`) notation in MVC and Razor Pages. Tilde-slash notation triggers a [Tag Helper](xref:mvc/views/tag-helpers/intro) to prepend the sub-app's pathbase to the rendered relative link. For a sub-app at `/subapp_path`, an image linked with `src="~/image.png"` is rendered as `src="/subapp_path/image.png"`. The root app's Static File Middleware doesn't process the static file request. The request is processed by the sub-app's Static File Middleware.
+
+> [!NOTE]
+> Razor components (`.razor`) shouldn't use tilde-slash notation. For more information, see the [Blazor app base path documentation](xref:blazor/host-and-deploy/index#app-base-path).
 
 If a static asset's `src` attribute is set to an absolute path (for example, `src="/image.png"`), the link is rendered without the sub-app's pathbase. The root app's Static File Middleware attempts to serve the asset from the root app's [web root](xref:fundamentals/index#web-root), which results in a *404 - Not Found* response unless the static asset is available from the root app.
 
@@ -385,7 +413,7 @@ The files can be found by searching for `aspnetcore` in the `applicationHost.con
 
 ## Install Web Deploy when publishing with Visual Studio
 
-When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, use the [Web Platform Installer (WebPI)](https://www.microsoft.com/web/downloads/platform.aspx) or obtain an installer directly from the [Microsoft Download Center](https://www.microsoft.com/download/details.aspx?id=43717). The preferred method is to use WebPI. WebPI offers a standalone setup and a configuration for hosting providers.
+When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, see [IIS Downloads: Web Deploy](https://www.iis.net/downloads/microsoft/web-deploy).
 
 ## Create the IIS site
 
@@ -421,7 +449,7 @@ When deploying apps to servers with [Web Deploy](/iis/install/installing-publish
 **Windows Authentication configuration (Optional)**  
 For more information, see [Configure Windows authentication](xref:security/authentication/windowsauth).
 
- :::moniker range="= aspnetcore-7.0"
+ :::moniker range=">= aspnetcore-7.0"
 
 ## Shadow copy
 

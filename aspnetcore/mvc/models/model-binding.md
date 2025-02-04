@@ -1,9 +1,9 @@
 ---
 title: Model Binding in ASP.NET Core
-author: rick-anderson
+author: tdykstra
 description: Learn how model binding in ASP.NET Core works and how to customize its behavior.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.date: 6/20/2023
 uid: mvc/models/model-binding
 ---
@@ -344,7 +344,7 @@ public IActionResult OnPost(
     [Bind("LastName,FirstMidName,HireDate")] Instructor instructor)
 ```
 
-The `[Bind]` attribute can be used to protect against overposting in *create* scenarios. It doesn't work well in edit scenarios because excluded properties are set to null or a default value instead of being left unchanged. For defense against overposting, view models are recommended rather than the `[Bind]` attribute. For more information, see [Security note about overposting](xref:data/ef-mvc/crud#security-note-about-overposting).
+The `[Bind]` attribute can be used to protect against overposting in *create* scenarios. It doesn't work well in edit scenarios because excluded properties are set to null or a default value instead of being left unchanged. For protection against overposting, view models are recommended rather than the `[Bind]` attribute. For more information, see [Security note about overposting](xref:data/ef-mvc/crud#security-note-about-overposting).
 
 ### [ModelBinder] attribute
 
@@ -498,9 +498,9 @@ public class PersonController
 ```cshtml
 @model Person
 
-Name: <input asp-for="Name" />
+<label>Name: <input asp-for="Name" /></label>
 <br />
-Age: <input asp-for="Age" />
+<label>Age: <input asp-for="Age" /></label>
 ```
 
 When validating record types, the runtime searches for binding and validation metadata specifically on parameters rather than on properties.

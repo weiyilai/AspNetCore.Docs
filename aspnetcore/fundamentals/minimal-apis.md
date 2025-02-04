@@ -2,27 +2,33 @@
 title: Minimal APIs quick reference
 author: rick-anderson
 description: Provides an overview of minimal APIs in ASP.NET Core
-ms.author: riande
+ms.author: wpickett
+content_well_notification: AI-contribution
 monikerRange: '>= aspnetcore-6.0'
-ms.date: 6/23/2023
+ms.date: 10/23/2023
 uid: fundamentals/minimal-apis
+ai-usage: ai-assisted
 ---
+
+<!-- When working on this file, open all the LATEST VERSION MD files in ~/fundamentals/minimal-apis/includes/ and search for the target text -->
 
 # Minimal APIs quick reference
 
-:::moniker range=">= aspnetcore-7.0"
+[!INCLUDE[](~/includes/not-latest-version.md)]
+
+:::moniker range=">= aspnetcore-8.0"
 
 This document:
 
 * Provides a quick reference for minimal APIs.
-* Is intended for experienced developers. For an introduction, see <xref:tutorials/min-web-api>
+* Is intended for experienced developers. For an introduction, see <xref:tutorials/min-web-api>.
 
 The minimal APIs consist of:
 
 * [WebApplication and WebApplicationBuilder](xref:fundamentals/minimal-apis/webapplication)
 * [Route Handlers](xref:fundamentals/minimal-apis/route-handlers)
 
-[!INCLUDE [WebApplication](~/fundamentals/minimal-apis/includes/webapplication.md)]
+[!INCLUDE[](~/fundamentals/minimal-apis/includes/webapplication8.md)]
 
 ## ASP.NET Core Middleware
 
@@ -63,7 +69,6 @@ The <xref:System.Delegate> arguments passed to these methods are called "route h
 ## Parameter binding
 
 [!INCLUDE [](~/fundamentals/minimal-apis/includes/parameter-binding8.md)]
-[!INCLUDE [](~/fundamentals/minimal-apis/includes/parameter-binding7.md)]
 
 ## Responses
 
@@ -140,7 +145,7 @@ app.MapGet("/text", () => Results.Text("This is some text"));
 var proxyClient = new HttpClient();
 app.MapGet("/pokemon", async () => 
 {
-    var stream = await proxyClient.GetStreamAsync("http://consoto/pokedex.json");
+    var stream = await proxyClient.GetStreamAsync("http://contoso/pokedex.json");
     // Proxy the response as JSON
     return Results.Stream(stream, "application/json");
 });
@@ -190,7 +195,7 @@ See <xref:fundamentals/minimal-apis/responses> for more examples.
 
 ## Filters
 
-See <xref:fundamentals/minimal-apis/min-api-filters>
+For more information, see <xref:fundamentals/minimal-apis/min-api-filters>.
 
 ## Authorization
 
@@ -224,23 +229,45 @@ Routes can be [CORS](xref:security/cors?view=aspnetcore-6.0) enabled using [CORS
 
 For more information, see <xref:security/cors?view=aspnetcore-6.0>
 
-<a name="openapi7"></a>
+## ValidateScopes and ValidateOnBuild
 
-<!-- 
-# Differences between minimal APIs and APIs with controllers
+<xref:Microsoft.Extensions.DependencyInjection.ServiceProviderOptions.ValidateScopes> and <xref:Microsoft.Extensions.DependencyInjection.ServiceProviderOptions.ValidateOnBuild> are enabled by default in the [Development](xref:fundamentals/environments) environment but disabled in other environments.
 
-Moved to uid: tutorials/min-web-api
--->
+When `ValidateOnBuild` is `true`, the DI container validates the service configuration at build time. If the service configuration is invalid, the build fails at app startup, rather than at runtime when the service is requested.
+
+When `ValidateScopes` is `true`, the DI container validates that a scoped service isn't resolved from the root scope. Resolving a scoped service from the root scope can result in a memory leak because the service is retained in memory longer than the scope of the request.
+
+`ValidateScopes` and `ValidateOnBuild` are false by default in non-Development modes for performance reasons.
+
+The following code shows `ValidateScopes` is enabled by default in development mode but disabled in release mode:
+
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/fundamentals/minimal-apis/samples/ValidateOnBuildWeb/Program.cs" id="snippet_1" highlight="3,16-25":::
+
+The following code shows `ValidateOnBuild` is enabled by default in development mode but disabled in release mode:
+
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/fundamentals/minimal-apis/samples/ValidateOnBuildWeb/Program.cs" id="snippet_vob" highlight="10":::
+
+The following code disables `ValidateScopes` and `ValidateOnBuild` in `Development`:
+
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/fundamentals/minimal-apis/samples/ValidateOnBuildWeb/Program.cs" id="snippet_2":::
 
 ## See also
 
-* <xref:fundamentals/minimal-apis/openapi>
+* <xref:fundamentals/minimal-apis>
+* <xref:fundamentals/openapi/aspnetcore-openapi>
 * <xref:fundamentals/minimal-apis/responses>
 * <xref:fundamentals/minimal-apis/min-api-filters>
 * <xref:fundamentals/minimal-apis/handle-errors>
 * <xref:fundamentals/minimal-apis/security>
 * <xref:fundamentals/minimal-apis/test-min-api>
+* [Short-circuit routing](https://andrewlock.net/exploring-the-dotnet-8-preview-short-circuit-routing/)
+* [Identity API endpoints](https://andrewlock.net/exploring-the-dotnet-8-preview-introducing-the-identity-api-endpoints/)
+* [Keyed service dependency injection container support](https://andrewlock.net/exploring-the-dotnet-8-preview-keyed-services-dependency-injection-support/)
+* [A look behind the scenes of minimal API endpoints](https://andrewlock.net/behind-the-scenes-of-minimal-apis-1-a-first-look-behind-the-scenes-of-minimal-api-endpoints/)
+* [Organizing ASP.NET Core Minimal APIs](https://www.tessferrandez.com/blog/2023/10/31/organizing-minimal-apis.html)
+* [Fluent validation discussion on GitHub](https://github.com/dotnet/aspnetcore/issues/51834#issuecomment-1837180853)
 
 :::moniker-end
 
+[!INCLUDE[](~/fundamentals/minimal-apis/includes/minimal-apis7.md)]
 [!INCLUDE[](~/fundamentals/minimal-apis/includes/minimal-apis6.md)]

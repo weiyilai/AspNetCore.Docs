@@ -2,17 +2,16 @@
 title: Hosting ASP.NET Core image in container using docker compose with HTTPS
 author: ravipal
 description: Learn how to host ASP.NET Core Images with Docker Compose over HTTPS
-monikerRange: '>= aspnetcore-2.1'
-ms.author: riande
+ms.author: wpickett
 ms.custom: mvc
-ms.date: 03/28/2020
+ms.date: 09/07/2024
 uid: security/docker-compose-https
 ---
 # Hosting ASP.NET Core images with Docker Compose over HTTPS
 
-<!-- This topic drops loc for "Let's Encrypt" -->
+:::moniker range=">= aspnetcore-8.0"
 
-ASP.NET Core uses [HTTPS by default](./enforcing-ssl.md). [HTTPS](https://en.wikipedia.org/wiki/HTTPS) relies on [certificates](https://en.wikipedia.org/wiki/Public_key_certificate) for trust, identity, and encryption.
+ASP.NET Core uses [HTTPS by default](~/security/enforcing-ssl.md). [HTTPS](https://en.wikipedia.org/wiki/HTTPS) relies on [certificates](https://en.wikipedia.org/wiki/Public_key_certificate) for trust, identity, and encryption.
 
 This document explains how to run pre-built container images with HTTPS.
 
@@ -99,7 +98,7 @@ dotnet dev-certs https -ep ${HOME}/.aspnet/https/aspnetapp.pfx -p $CREDENTIAL_PL
 dotnet dev-certs https --trust
 ```
 
-`dotnet dev-certs https --trust` is only supported on macOS and Windows. You need to trust certificates on Linux in the way that is supported by your distribution. It is likely that you need to trust the certificate in your browser.
+On Linux, `dotnet dev-certs https --trust` requires .NET 9 SDK or later. For Linux on .NET 8.0.401 SDK and earlier, see your Linux distribution's documentation for trusting a certificate.
 
 In the preceding commands, replace `$CREDENTIAL_PLACEHOLDER$` with a password.
 
@@ -110,7 +109,7 @@ version: '3.4'
 
 services:
   webapp:
-    image: mcr.microsoft.com/dotnet/core/samples:aspnetapp
+    image: mcr.microsoft.com/dotnet/samples:aspnetapp
     ports:
       - 80
       - 443
@@ -148,7 +147,7 @@ version: '3.4'
 
 services:
   webapp:
-    image: mcr.microsoft.com/dotnet/core/samples:aspnetapp
+    image: mcr.microsoft.com/dotnet/samples:aspnetapp
     ports:
       - 80
       - 443
@@ -171,3 +170,7 @@ docker-compose -f "docker-compose.debug.yml" up -d
 ## See also
 
 * [`dotnet dev-certs`](/dotnet/core/tools/dotnet-dev-certs)
+
+:::moniker-end
+
+[!INCLUDE[](~/security/includes/docker-compose-https7.md)]

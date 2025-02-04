@@ -329,7 +329,7 @@ The preceding code displays `The link to the hello endpoint is /hello` from the 
 Endpoint names:
 
 * Must be globally unique.
-* Are used as the OpenAPI operation id when OpenAPI support is enabled. For more information, see [OpenAPI](xref:fundamentals/minimal-apis/openapi).
+* Are used as the OpenAPI operation id when OpenAPI support is enabled. For more information, see [OpenAPI](xref:fundamentals/openapi/aspnetcore-openapi).
 
 ### Route Parameters
 
@@ -577,7 +577,7 @@ The rules for determining a binding source from a parameter:
     1. [`CancellationToken`](xref:System.Threading.CancellationToken) ([`HttpContext.RequestAborted`](xref:Microsoft.AspNetCore.Http.HttpContext.RequestAborted))
 1. Parameter type has a valid `BindAsync` method.
 1. Parameter type is a string or has a valid `TryParse` method.
-   1. If the parameter name exists in the route template e.g. `app.Map("/todo/{id}", (int id) => {});`, then it's bound from the route.
+   1. If the parameter name exists in the route template. In `app.Map("/todo/{id}", (int id) => {});`, `id` is bound from the route.
    1. Bound from the query string.
 1. If the parameter type is a service provided by dependency injection, it uses that service as the source.
 1. The parameter is from the body.
@@ -753,6 +753,6 @@ For more information, see <xref:security/cors?view=aspnetcore-6.0>
 
 ## See also
 
-[OpenAPI support in minimal APIs](xref:fundamentals/minimal-apis/openapi)
+[OpenAPI support in minimal APIs](xref:fundamentals/openapi/aspnetcore-openapi)
 
 :::moniker-end

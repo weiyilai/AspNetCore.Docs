@@ -5,14 +5,12 @@ description: Learn how to interact with JavaScript in Blazor apps.
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 11/12/2024
 uid: blazor/js-interop/index
 ---
 # ASP.NET Core Blazor JavaScript interoperability (JS interop)
 
 [!INCLUDE[](~/includes/not-latest-version.md)]
-
-This article explains general concepts on how to interact with JavaScript in Blazor apps.
 
 A Blazor app can invoke JavaScript (JS) functions from .NET methods and .NET methods from JS functions. These scenarios are called *JavaScript interoperability* (*JS interop*).
 
@@ -24,15 +22,27 @@ Further JS interop guidance is provided in the following articles:
 :::moniker range=">= aspnetcore-7.0"
 
 > [!NOTE]
-> JavaScript `[JSImport]`/`[JSExport]` interop API is available for Blazor WebAssembly apps in ASP.NET Core 7.0 or later.
+> JavaScript `[JSImport]`/`[JSExport]` interop API is available for client-side components in ASP.NET Core in .NET 7 or later.
 >
 > For more information, see <xref:blazor/js-interop/import-export-interop>.
 
 :::moniker-end
 
+:::moniker range=">= aspnetcore-9.0"
+
+## Compression for interactive server components with untrusted data
+
+<!-- DOC AUTHOR NOTE: This content is also in an INCLUDE file at
+     blazor/includes/compression-with-untrusted-data.md because the
+     text is used in a warning format in two articles. -->
+
+With compression, which is enabled by default, avoid creating secure (authenticated/authorized) interactive server-side components that render data from untrusted sources. Untrusted sources include route parameters, query strings, data from JS interop, and any other source of data that a third-party user can control (databases, external services). For more information, see <xref:blazor/fundamentals/signalr#websocket-compression-for-interactive-server-components> and <xref:blazor/security/interactive-server-side-rendering?view=aspnetcore-9.0#interactive-server-components-with-websocket-compression-enabled>.
+
+:::moniker-end
+
 ## JavaScript interop abstractions and features package
 
-The [`@microsoft/dotnet-js-interop` package (`npmjs.com`)](https://www.npmjs.com/package/@microsoft/dotnet-js-interop) provides abstractions and features for interop between .NET and JavaScript (JS) code. Reference source is available in the [`dotnet/aspnetcore` GitHub repository (`/src/JSInterop` folder)](https://github.com/dotnet/aspnetcore/tree/main/src/JSInterop). For more information, see the GitHub repository's `README.md` file.
+The [`@microsoft/dotnet-js-interop` package (`npmjs.com`)](https://www.npmjs.com/package/@microsoft/dotnet-js-interop) ([`Microsoft.JSInterop` NuGet package](https://www.nuget.org/packages/Microsoft.JSInterop)) provides abstractions and features for interop between .NET and JavaScript (JS) code. Reference source is available in the [`dotnet/aspnetcore` GitHub repository (`/src/JSInterop` folder)](https://github.com/dotnet/aspnetcore/tree/main/src/JSInterop). For more information, see the GitHub repository's `README.md` file.
 
 [!INCLUDE[](~/includes/aspnetcore-repo-ref-source-links.md)]
 
@@ -42,9 +52,9 @@ Additional resources for writing JS interop scripts in TypeScript:
 * [Tutorial: Create an ASP.NET Core app with TypeScript in Visual Studio](/visualstudio/javascript/tutorial-aspnet-with-typescript)
 * [Manage npm packages in Visual Studio](/visualstudio/javascript/npm-package-management)
 
-## Interaction with the Document Object Model (DOM)
+## Interaction with the DOM
 
-Only mutate the Document Object Model (DOM) with JavaScript (JS) when the object doesn't interact with Blazor. Blazor maintains representations of the DOM and interacts directly with DOM objects. If an element rendered by Blazor is modified externally using JS directly or via JS Interop, the DOM may no longer match Blazor's internal representation, which can result in undefined behavior. Undefined behavior may merely interfere with the presentation of elements or their functions but may also introduce security risks to the app or server.
+Only mutate the DOM with JavaScript (JS) when the object doesn't interact with Blazor. Blazor maintains representations of the DOM and interacts directly with DOM objects. If an element rendered by Blazor is modified externally using JS directly or via JS Interop, the DOM may no longer match Blazor's internal representation, which can result in undefined behavior. Undefined behavior may merely interfere with the presentation of elements or their functions but may also introduce security risks to the app or server.
 
 This guidance not only applies to your own JS interop code but also to any JS libraries that the app uses, including anything provided by a third-party framework, such as [Bootstrap JS](https://getbootstrap.com/) and [jQuery](https://jquery.com/).
 
@@ -52,22 +62,134 @@ In a few documentation examples, JS interop is used to mutate an element *purely
 
 For more information, see <xref:blazor/js-interop/call-javascript-from-dotnet#capture-references-to-elements>.
 
+## JavaScript class with a field of type function
+
+A JavaScript class with a field of type function isn't supported by Blazor JS interop. Use Javascript functions in classes.
+
+<span aria-hidden="true">❌</span><span class="visually-hidden">Unsupported:</span> `GreetingHelpers.sayHello` in the following class as a field of type function isn't discovered by Blazor's JS interop and can't be executed from C# code:
+
+```javascript
+export class GreetingHelpers {
+  sayHello = function() {
+    ...
+  }
+}
+```
+
+<span aria-hidden="true">✔️</span><span class="visually-hidden">Supported:</span> `GreetingHelpers.sayHello` in the following class as a function is supported:
+
+```javascript
+export class GreetingHelpers {
+  sayHello() {
+    ...
+  }
+}
+```
+
+Arrow functions are also supported:
+
+```javascript
+export class GreetingHelpers {
+  sayHello = () => {
+    ...
+  }
+}
+```
+
+## Avoid inline event handlers
+
+A JavaScript function can be invoked directly from an inline event handler. In the following example, `alertUser` is a JavaScript function called when the button is selected by the user:
+
+```html
+<button onclick="alertUser">Click Me!</button>
+```
+
+However, the use of inline event handlers is a *poor design choice* for calling JavaScript functions:
+
+* Mixing HTML markup and JavaScript code often leads to unmaintainable code.
+* Inline event handler execution may be blocked by a [Content Security Policy (CSP) (MDN documentation)](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP).
+
+We recommend avoiding inline event handlers in favor of approaches that assign handlers in JavaScript with [`addEventListener`](https://developer.mozilla.org/docs/Web/API/EventTarget/addEventListener), as the following example demonstrates:
+
+`AlertUser.razor.js`:
+
+```javascript
+export function alertUser() {
+  alert('The button was selected!');
+}
+
+export function addHandlers() {
+  const btn = document.getElementById("btn");
+  btn.addEventListener("click", alertUser);
+}
+```
+
+`AlertUser.razor`:
+
+```razor
+@page "/alert-user"
+@implements IAsyncDisposable
+@inject IJSRuntime JS
+
+<h1>Alert User</h1>
+
+<p>
+    <button id="btn">Click Me!</button>
+</p>
+
+@code {
+    private IJSObjectReference? module;
+
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import",
+                "./Components/Pages/AlertUser.razor.js");
+
+            await module.InvokeVoidAsync("addHandlers");
+        }
+    }
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        if (module is not null)
+        {
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
+}
+```
+
+In the preceding example, <xref:Microsoft.JSInterop.JSDisconnectedException> is trapped during module disposal in case Blazor's SignalR circuit is lost. If the preceding code is used in a Blazor WebAssembly app, there's no SignalR connection to lose, so you can remove the `try`-`catch` block and leave the line that disposes the module (`await module.DisposeAsync();`). For more information, see <xref:blazor/js-interop/index#javascript-interop-calls-without-a-circuit>.
+
+For more information, see the following resources:
+
+* <xref:blazor/js-interop/javascript-location>
+* [Introduction to events (MDN documentation)](https://developer.mozilla.org/docs/Learn/JavaScript/Building_blocks/Events#inline_event_handlers_%E2%80%94_dont_use_these)
+
 ## Asynchronous JavaScript calls
 
-JS interop calls are asynchronous by default, regardless of whether the called code is synchronous or asynchronous. Calls are asynchronous by default to ensure that components are compatible across both Blazor hosting models, Blazor Server and Blazor WebAssembly. On Blazor Server, JS interop calls must be asynchronous because they're sent over a network connection. For apps that exclusively adopt the Blazor WebAssembly hosting model, synchronous JS interop calls are supported.
+JS interop calls are asynchronous, regardless of whether the called code is synchronous or asynchronous. Calls are asynchronous to ensure that components are compatible across server-side and client-side rendering models. When adopting server-side rendering, JS interop calls must be asynchronous because they're sent over a network connection. For apps that exclusively adopt client-side rendering, synchronous JS interop calls are supported.
 
 :::moniker range=">= aspnetcore-5.0"
 
 For more information, see the following articles:
 
-* <xref:blazor/js-interop/call-javascript-from-dotnet#synchronous-js-interop-in-blazor-webassembly-apps>
-* <xref:blazor/js-interop/call-dotnet-from-javascript#synchronous-js-interop-in-blazor-webassembly-apps>
+* <xref:blazor/js-interop/call-javascript-from-dotnet#synchronous-js-interop-in-client-side-components>
+* <xref:blazor/js-interop/call-dotnet-from-javascript#synchronous-js-interop-in-client-side-components>
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-For more information, see <xref:blazor/js-interop/call-javascript-from-dotnet#synchronous-js-interop-in-blazor-webassembly-apps>.
+For more information, see <xref:blazor/js-interop/call-javascript-from-dotnet#synchronous-js-interop-in-client-side-components>.
 
 :::moniker-end
 
@@ -79,6 +201,8 @@ Blazor uses <xref:System.Text.Json?displayProperty=fullName> for serialization w
 * Global default serialization isn't customizable to avoid breaking existing component libraries, impacts on performance and security, and reductions in reliability.
 * Serializing .NET member names results in lowercase JSON key names.
 * JSON is deserialized as <xref:System.Text.Json.JsonElement> C# instances, which permit mixed casing. Internal casting for assignment to C# model properties works as expected in spite of any case differences between JSON key names and C# property names.
+* Complex framework types, such as <xref:System.Collections.Generic.KeyValuePair>, might be [trimmed away by the IL Trimmer on publish](xref:blazor/host-and-deploy/configure-trimmer) and not present for JS interop. We recommend creating custom types for types that the IL Trimmer trims away.
+* Blazor always relies on [reflection for JSON serialization](/dotnet/standard/serialization/system-text-json/reflection-vs-source-generation), including when using C# [source generation](/dotnet/csharp/roslyn-sdk/source-generators-overview). Setting `JsonSerializerIsReflectionEnabledByDefault` to `false` in the app's project file results in an error when serialization is attempted.
 
 <xref:System.Text.Json.Serialization.JsonConverter> API is available for custom serialization. Properties can be annotated with a [`[JsonConverter]` attribute](xref:System.Text.Json.Serialization.JsonConverterAttribute) to override default serialization for an existing data type.
 
@@ -100,21 +224,21 @@ Blazor supports unmarshalled JS interop when a high volume of .NET objects are r
 
 :::moniker-end
 
-## Document Object Model (DOM) cleanup tasks during component disposal
+## DOM cleanup tasks during component disposal
 
-Don't execute JS interop code for [Document Object Model (DOM)](https://developer.mozilla.org/docs/Web/API/Document_Object_Model/Introduction) cleanup tasks during component disposal. Instead, use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JavaScript (JS) on the client for the following reasons:
+Don't execute JS interop code for DOM cleanup tasks during component disposal. Instead, use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JavaScript (JS) on the client for the following reasons:
 
 * The component may have been removed from the DOM by the time your cleanup code executes in `Dispose{Async}`.
-* In a Blazor Server app, the Blazor renderer may have been disposed by the framework by the time your cleanup code executes in `Dispose{Async}`.
+* During server-side rendering, the Blazor renderer may have been disposed by the framework by the time your cleanup code executes in `Dispose{Async}`.
 
 The [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern allows you to run a function when an element is removed from the DOM.
 
 In the following example, the `DOMCleanup` component:
 
 * Contains a `<div>` with an `id` of `cleanupDiv`. The `<div>` element is removed from the DOM along with the rest of the component's DOM markup when the component is removed from the DOM.
-* Loads the `DOMCleanup` JS class from the `Pages/DOMCleanup.razor.js` file and calls its `createObserver` function to set up the `MutationObserver` callback. These tasks are accomplished in the [`OnAfterRenderAsync` lifecycle method](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync).
+* Loads the `DOMCleanup` JS class from the `DOMCleanup.razor.js` file and calls its `createObserver` function to set up the `MutationObserver` callback. These tasks are accomplished in the [`OnAfterRenderAsync` lifecycle method](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync).
 
-`Pages/DOMCleanup.razor`:
+`DOMCleanup.razor`:
 
 ```razor
 @page "/dom-cleanup"
@@ -126,32 +250,40 @@ In the following example, the `DOMCleanup` component:
 <div id="cleanupDiv"></div>
 
 @code {
-    private IJSObjectReference? jsModule;
+    private IJSObjectReference? module;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            jsModule = await JS.InvokeAsync<IJSObjectReference>(
-                "import", "./Pages/DOMCleanup.razor.js");
+            module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./Components/Pages/DOMCleanup.razor.js");
 
-            await jsModule.InvokeVoidAsync("DOMCleanup.createObserver");
+            await module.InvokeVoidAsync("DOMCleanup.createObserver");
         }
     }
 
     async ValueTask IAsyncDisposable.DisposeAsync()
     {
-        if (jsModule is not null)
+        if (module is not null)
         {
-            await jsModule.DisposeAsync();
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
         }
     }
 }
 ```
 
+In the preceding example, <xref:Microsoft.JSInterop.JSDisconnectedException> is trapped during module disposal in case Blazor's SignalR circuit is lost. If the preceding code is used in a Blazor WebAssembly app, there's no SignalR connection to lose, so you can remove the `try`-`catch` block and leave the line that disposes the module (`await module.DisposeAsync();`). For more information, see <xref:blazor/js-interop/index#javascript-interop-calls-without-a-circuit>.
+
 In the following example, the `MutationObserver` callback is executed each time a DOM change occurs. Execute your cleanup code when the `if` statement confirms that the target element (`cleanupDiv`) was removed (`if (targetRemoved) { ... }`). It's important to disconnect and delete the `MutationObserver` to avoid a memory leak after your cleanup code executes.
 
-`Pages/DOMCleanup.razor.js`:
+`DOMCleanup.razor.js` placed side-by-side with the preceding `DOMCleanup` component:
 
 ```javascript
 export class DOMCleanup {
@@ -183,24 +315,31 @@ export class DOMCleanup {
 window.DOMCleanup = DOMCleanup;
 ```
 
+The preceding approaches attach the `MutationObserver` to `target.parentNode`, which works until `parentNode` itself is removed from the DOM. This is a common scenario, for example, when navigating to a new page, which causes the entire page component to be removed from the DOM. In such cases, any child components observing changes within the page aren't cleaned up properly.
+
+Don't assume that observing `document.body`, instead of `target.parentNode`, is a better target. Observing `document.body` has performance implications because callback logic is executed for *all* DOM updates, whether or not they have anything to do with your element. Use either of the following approaches:
+
+* In cases where you can identify a suitable ancestor node to observe, use `MutationObserver` with it. Ideally, this ancestor is scoped to the changes that you want to observe, rather than `document.body`.
+* Instead of using `MutationObserver`, consider using a [custom element and `disconnectedCallback`](https://developer.mozilla.org/docs/Web/API/Web_components/Using_custom_elements). The event always fires when your custom element is disconnected, no matter where it resides in the DOM relative to the DOM change.
+
 ## JavaScript interop calls without a circuit
 
-*This section only applies to Blazor Server apps.*
+*This section only applies to server-side apps.*
 
-JavaScript (JS) interop calls can't be issued after a SignalR circuit is disconnected. Without a circuit during component disposal or at any other time that a circuit doesn't exist, the following method calls fail and log a message that the circuit is disconnected as a <xref:Microsoft.JSInterop.JSDisconnectedException>:
+JavaScript (JS) interop calls can't be issued after Blazor's SignalR circuit is disconnected. Without a circuit during component disposal or at any other time that a circuit doesn't exist, the following method calls fail and log a message that the circuit is disconnected as a <xref:Microsoft.JSInterop.JSDisconnectedException>:
 
 * JS interop method calls
   * <xref:Microsoft.JSInterop.IJSRuntime.InvokeAsync%2A?displayProperty=nameWithType>
   * <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeAsync%2A?displayProperty=nameWithType>
-  * <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeVoidAsync%2A?displayProperty=nameWithType>)
+  * <xref:Microsoft.JSInterop.JSRuntimeExtensions.InvokeVoidAsync%2A?displayProperty=nameWithType>
 * `Dispose`/`DisposeAsync` calls on any <xref:Microsoft.JSInterop.IJSObjectReference>.
 
 In order to avoid logging <xref:Microsoft.JSInterop.JSDisconnectedException> or to log custom information, catch the exception in a [`try-catch`](/dotnet/csharp/language-reference/keywords/try-catch) statement.
 
 For the following component disposal example:
 
-* The component implements <xref:System.IAsyncDisposable>.
-* `objInstance` is an <xref:Microsoft.JSInterop.IJSObjectReference>.
+* The server-side component implements <xref:System.IAsyncDisposable>.
+* `module` is an <xref:Microsoft.JSInterop.IJSObjectReference> for a JS module.
 * <xref:Microsoft.JSInterop.JSDisconnectedException> is caught and not logged.
 * Optionally, you can log custom information in the `catch` statement at whatever log level you prefer. The following example doesn't log custom information because it assumes the developer doesn't care about when or where circuits are disconnected during component disposal.
 
@@ -209,9 +348,9 @@ async ValueTask IAsyncDisposable.DisposeAsync()
 {
     try
     {
-        if (objInstance is not null)
+        if (module is not null)
         {
-            await objInstance.DisposeAsync();
+            await module.DisposeAsync();
         }
     }
     catch (JSDisconnectedException)
@@ -220,190 +359,12 @@ async ValueTask IAsyncDisposable.DisposeAsync()
 }
 ```
 
-If you must clean up your own JS objects or execute other JS code on the client after a circuit is lost, use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JS on the client. The [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern allows you to run a function when an element is removed from the DOM.
+If you must clean up your own JS objects or execute other JS code on the client after a circuit is lost in a server-side Blazor app, use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JS on the client. The [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern allows you to run a function when an element is removed from the DOM.
 
 For more information, see the following articles:
 
-* <xref:blazor/fundamentals/handle-errors>: The *JavaScript interop* section discusses error handling in JS interop scenarios. <!-- AUTHOR NOTE: The JavaScript interop section isn't linked because the section title changed across versions of the doc. Prior to 6.0, the section appears twice, once for Blazor Server and once for Blazor WebAssembly, each with the hosting model name in the section name. -->
+* <xref:blazor/fundamentals/handle-errors#javascript-interop>: The *JavaScript interop* section discusses error handling in JS interop scenarios.
 * <xref:blazor/components/lifecycle#component-disposal-with-idisposable-and-iasyncdisposable>: The *Component disposal with `IDisposable` and `IAsyncDisposable`* section describes how to implement disposal patterns in Razor components.
-
-## JavaScript location
-
-Load JavaScript (JS) code using any of the following approaches:
-
-:::moniker range=">= aspnetcore-6.0"
-
-* [Load a script in `<head>` markup](#load-a-script-in-head-markup) (*Not generally recommended*)
-* [Load a script in `<body>` markup](#load-a-script-in-body-markup)
-* [Load a script from an external JavaScript file (`.js`) collocated with a component](#load-a-script-from-an-external-javascript-file-js-collocated-with-a-component)
-* [Load a script from an external JavaScript file (`.js`)](#load-a-script-from-an-external-javascript-file-js)
-* [Inject a script before or after Blazor starts](#inject-a-script-before-or-after-blazor-starts)
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-* [Load a script in `<head>` markup](#load-a-script-in-head-markup) (*Not generally recommended*)
-* [Load a script in `<body>` markup](#load-a-script-in-body-markup)
-* [Load a script from an external JavaScript file (`.js`)](#load-a-script-from-an-external-javascript-file-js)
-* [Inject a script after Blazor starts](#inject-a-script-after-blazor-starts)
-
-:::moniker-end
-
-> [!WARNING]
-> Don't place a `<script>` tag in a Razor component file (`.razor`) because the `<script>` tag can't be updated dynamically by Blazor.
-
-:::moniker range=">= aspnetcore-5.0"
-
-> [!NOTE]
-> Documentation examples usually place scripts in a `<script>` tag or load global scripts from external files. These approaches pollute the client with global functions. For production apps, we recommend placing JavaScript into separate [JavaScript modules](https://developer.mozilla.org/docs/Web/JavaScript/Guide/Modules) that can be imported when needed. For more information, see the [JavaScript isolation in JavaScript modules](#javascript-isolation-in-javascript-modules) section.
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-> [!NOTE]
-> Documentation examples place scripts into a `<script>` tag or load global scripts from external files. These approaches pollute the client with global functions. Placing JavaScript into separate [JavaScript modules](https://developer.mozilla.org/docs/Web/JavaScript/Guide/Modules) that can be imported when needed is **not** supported in Blazor earlier than ASP.NET Core 5.0. If the app requires the use of JS modules for JS isolation, we recommend using ASP.NET Core 5.0 or later to build the app. For more information, use the **Version** dropdown list to select a 5.0 or later version of this article and see the *JavaScript isolation in JavaScript modules* section.
-
-:::moniker-end
-
-### Load a script in `<head>` markup
-
-*The approach in this section isn't generally recommended.*
-
-Place the JavaScript (JS) tags (`<script>...</script>`) in the `<head>` element markup of `wwwroot/index.html` (Blazor WebAssembly) or `Pages/_Host.cshtml` (Blazor Server):
-
-```html
-<head>
-    ...
-
-    <script>
-      window.jsMethod = (methodParameter) => {
-        ...
-      };
-    </script>
-</head>
-```
-
-Loading JS from the `<head>` isn't the best approach for the following reasons:
-
-* JS interop may fail if the script depends on Blazor. We recommend loading scripts using one of the other approaches, not via the `<head>` markup.
-* The page may become interactive slower due to the time it takes to parse the JS in the script.
-
-### Load a script in `<body>` markup
-
-Place the JavaScript (JS) tags (`<script>...</script>`) inside the closing `</body>` element markup of `wwwroot/index.html` (Blazor WebAssembly) or `Pages/_Host.cshtml` (Blazor Server):
-
-```html
-<body>
-    ...
-
-    <script src="_framework/blazor.{server|webassembly}.js"></script>
-    <script>
-      window.jsMethod = (methodParameter) => {
-        ...
-      };
-    </script>
-</body>
-```
-
-The `{server|webassembly}` placeholder in the preceding markup is either `server` for a Blazor Server app (`blazor.server.js`) or `webassembly` for a Blazor WebAssembly app (`blazor.webassembly.js`).
-
-:::moniker range=">= aspnetcore-6.0"
-
-### Load a script from an external JavaScript file (`.js`) collocated with a component
-
-[!INCLUDE[](~/includes/js-collocation.md)]
-
-For more information on RCLs, see <xref:blazor/components/class-libraries>.
-
-:::moniker-end
-
-### Load a script from an external JavaScript file (`.js`)
-
-Place the JavaScript (JS) tags (`<script>...</script>`) with a script source (`src`) path inside the closing `</body>` tag after the Blazor script reference.
-
-In `wwwroot/index.html` (Blazor WebAssembly) or `Pages/_Host.cshtml` (Blazor Server):
-
-```html
-<body>
-    ...
-
-    <script src="_framework/blazor.{server|webassembly}.js"></script>
-    <script src="{SCRIPT PATH AND FILE NAME (.js)}"></script>
-</body>
-```
-
-The `{server|webassembly}` placeholder in the preceding markup is either `server` for a Blazor Server app (`blazor.server.js`) or `webassembly` for a Blazor WebAssembly app (`blazor.webassembly.js`). The `{SCRIPT PATH AND FILE NAME (.js)}` placeholder is the path and script file name under `wwwroot`.
-
-In the following example of the preceding `<script>` tag, the `scripts.js` file is in the `wwwroot/js` folder of the app:
-
-```html
-<script src="js/scripts.js"></script>
-```
-
-When the external JS file is supplied by a [Razor class library](xref:blazor/components/class-libraries), specify the JS file using its stable static web asset path: `./_content/{PACKAGE ID}/{SCRIPT PATH AND FILE NAME (.js)}`:
-
-* The path segment for the current directory (`./`) is required in order to create the correct static asset path to the JS file.
-* The `{PACKAGE ID}` placeholder is the library's [package ID](/nuget/create-packages/creating-a-package-msbuild#set-properties). The package ID defaults to the project's assembly name if `<PackageId>` isn't specified in the project file.
-* The `{SCRIPT PATH AND FILE NAME (.js)}` placeholder is the path and file name under `wwwroot`.
-
-```html
-<body>
-    ...
-
-    <script src="_framework/blazor.{server|webassembly}.js"></script>
-    <script src="./_content/{PACKAGE ID}/{SCRIPT PATH AND FILE NAME (.js)}"></script>
-</body>
-```
-
-In the following example of the preceding `<script>` tag:
-
-* The Razor class library has an assembly name of `ComponentLibrary`, and a `<PackageId>` isn't specified in the library's project file.
-* The `scripts.js` file is in the class library's `wwwroot` folder.
-
-```html
-<script src="./_content/ComponentLibrary/scripts.js"></script>
-```
-
-For more information, see <xref:blazor/components/class-libraries>.
-
-:::moniker range=">= aspnetcore-6.0"
-
-### Inject a script before or after Blazor starts
-
-To ensure scripts load before or after Blazor starts, use a JavaScript initializer. For more information and examples, see <xref:blazor/fundamentals/startup#javascript-initializers>.
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-### Inject a script after Blazor starts
-
-To inject a script after Blazor starts, chain to the `Promise` that results from a manual start of Blazor. For more information and an example, see <xref:blazor/fundamentals/startup#inject-a-script-after-blazor-starts>.
-
-:::moniker-end
-
-## JavaScript isolation in JavaScript modules
-
-Blazor enables JavaScript (JS) isolation in standard [JavaScript modules](https://developer.mozilla.org/docs/Web/JavaScript/Guide/Modules) ([ECMAScript specification](https://tc39.es/ecma262/#sec-modules)).
-
-JS isolation provides the following benefits:
-
-* Imported JS no longer pollutes the global namespace.
-* Consumers of a library and components aren't required to import the related JS.
-
-For more information, see <xref:blazor/js-interop/call-javascript-from-dotnet#javascript-isolation-in-javascript-modules>.
-
-[Dynamic import with the `import()` operator](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Operators/import) is supported with ASP.NET Core and Blazor:
-
-```javascript
-if ({CONDITION}) import("/additionalModule.js");
-```
-
-In the preceding example, the `{CONDITION}` placeholder represents a conditional check to determine if the module should be loaded.
-
-For browser compatibility, see [Can I use: JavaScript modules: dynamic import](https://caniuse.com/es6-module-dynamic-import).
 
 ## Cached JavaScript files
 
@@ -415,7 +376,6 @@ To disable client-side caching in browsers, developers usually adopt one of the 
 
 * Disable caching when the browser's developer tools console is open. Guidance can be found in the developer tools documentation of each browser maintainer:
   * [Chrome DevTools](https://developer.chrome.com/docs/devtools/)
-  * [Firefox Developer Tools](https://developer.mozilla.org/docs/Tools)
   * [Microsoft Edge Developer Tools overview](/microsoft-edge/devtools-guide-chromium/)
 * Perform a manual browser refresh of any webpage of the Blazor app to reload JS files from the server. ASP.NET Core's HTTP Caching Middleware always honors a valid no-cache [`Cache-Control` header](https://developer.mozilla.org/docs/Web/HTTP/Headers/Cache-Control) sent by a client.
 
@@ -426,6 +386,14 @@ For more information, see:
 
 ## Size limits on JavaScript interop calls
 
-*This section only applies to Blazor Server apps. In Blazor WebAssembly, the framework doesn't impose a limit on the size of JavaScript (JS) interop inputs and outputs.*
+*This section only applies to interactive components in server-side apps. For client-side components, the framework doesn't impose a limit on the size of JavaScript (JS) interop inputs and outputs.*
 
-In Blazor Server, JS interop calls passing data from the client to the server are limited in size by the maximum incoming SignalR message size permitted for hub methods, which is enforced by <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize?displayProperty=nameWithType> (default: 32 KB). JS to .NET SignalR messages larger than <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize> throw an error. The framework doesn't impose a limit on the size of a SignalR message from the hub to a client. For more information on the size limit, error messages, and guidance on dealing with message size limits, see <xref:blazor/fundamentals/signalr#maximum-receive-message-size>.
+For interactive components in server-side apps, JS interop calls passing data from the client to the server are limited in size by the maximum incoming SignalR message size permitted for hub methods, which is enforced by <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize?displayProperty=nameWithType> (default: 32 KB). JS to .NET SignalR messages larger than <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize> throw an error. The framework doesn't impose a limit on the size of a SignalR message from the hub to a client. For more information on the size limit, error messages, and guidance on dealing with message size limits, see <xref:blazor/fundamentals/signalr#maximum-receive-message-size>.
+
+:::moniker range=">= aspnetcore-6.0"
+
+## Determine where the app is running
+
+If it's relevant for the app to know where code is running for JS interop calls, use <xref:System.OperatingSystem.IsBrowser%2A?displayProperty=nameWithType> to determine if the component is executing in the context of browser on WebAssembly.
+
+:::moniker-end

@@ -3,42 +3,26 @@ title: Handle errors in ASP.NET Core
 author: tdykstra
 description: Discover how to handle errors in ASP.NET Core apps.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 07/06/2023
+ms.date: 08/25/2024
 uid: fundamentals/error-handling
 ---
 # Handle errors in ASP.NET Core
 
-:::moniker range="< aspnetcore-7.0"
 [!INCLUDE[](~/includes/not-latest-version.md)]
-:::moniker-end
 
-:::moniker range=">= aspnetcore-8.0"
+:::moniker range=">= aspnetcore-9.0"
 
 By [Tom Dykstra](https://github.com/tdykstra/)
 
 This article covers common approaches to handling errors in ASP.NET Core web apps. See also <xref:web-api/handle-errors> and <xref:fundamentals/minimal-apis/handle-errors>.
 
+For Blazor error handling guidance, which adds to or supersedes the guidance in this article, see <xref:blazor/fundamentals/handle-errors>.
+
 ## Developer exception page
 
-The *Developer Exception Page* displays detailed information about unhandled request exceptions. ASP.NET Core apps enable the developer exception page by default when both:
-
-* Running in the [Development environment](xref:fundamentals/environments).
-* App created with the current templates, that is, using [WebApplication.CreateBuilder](/dotnet/api/microsoft.aspnetcore.builder.webapplication.createbuilder).  Apps created using the [`WebHost.CreateDefaultBuilder`](xref:Microsoft.AspNetCore.WebHost.CreateDefaultBuilder) must enable the developer exception page by calling `app.UseDeveloperExceptionPage` in `Configure`.
-
-The developer exception page runs early in the middleware pipeline, so that it can catch unhandled exceptions thrown in middleware that follows.
-
-Detailed exception information shouldn't be displayed publicly when the app runs in the Production environment. For more information on configuring environments, see <xref:fundamentals/environments>.
-
-The Developer Exception Page can include the following information about the exception and the request:
-
-* Stack trace
-* Query string parameters, if any
-* Cookies, if any
-* Headers
-
-The Developer Exception Page isn't guaranteed to provide any information. Use [Logging](xref:fundamentals/logging/index) for complete error information.
+[!INCLUDE [](../includes/developer-exception-page.md)]
 
 ## Exception handler page
 
@@ -88,14 +72,18 @@ The following code uses a lambda for exception handling:
 
 :::code language="csharp" source="~/fundamentals/error-handling/samples/7.x/ErrorHandlingSample/Snippets/Program.cs" id="snippet_UseExceptionHandlerInline" highlight="5-29":::
 
+Another way to use a lambda is to set the status code based on the exception type, as in the following example:
+
+:::code language="csharp" source="~/fundamentals/error-handling/samples/9.x/ErrorHandlingSample/Program.cs" id="snippet_lambda" highlight="2,6-11":::
+
 > [!WARNING]
 > Do **not** serve sensitive error information to clients. Serving errors is a security risk.
 
 ## IExceptionHandler
 
-[IExceptionHandler](https://source.dot.net/#Microsoft.AspNetCore.Diagnostics/ExceptionHandler/IExceptionHandler.cs,adae2915ad0c6dc5) is an interface that gives the developer a callback for handling known exceptions in a central location.
+[IExceptionHandler](/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) is an interface that gives the developer a callback for handling known exceptions in a central location.
 
-`IExceptionHandler` implementations are registered by calling [`IServiceCollection.AddExceptionHandler<T>`](https://source.dot.net/#Microsoft.AspNetCore.Diagnostics/ExceptionHandler/ExceptionHandlerServiceCollectionExtensions.cs,e74aac24e3e2cbc9). The lifetime of an `IExceptionHandler` instance is singleton. Multiple implementations can be added, and they're called in the order registered.
+`IExceptionHandler` implementations are registered by calling [`IServiceCollection.AddExceptionHandler<T>`](/dotnet/api/microsoft.extensions.dependencyinjection.exceptionhandlerservicecollectionextensions.addexceptionhandler). The lifetime of an `IExceptionHandler` instance is singleton. Multiple implementations can be added, and they're called in the order registered.
 
 If an exception handler handles a request, it can return `true` to stop processing. If an exception isn't handled by any exception handler, then control falls back to the default behavior and options from the middleware. Different metrics and logs are emitted for handled versus unhandled exceptions.
 
@@ -110,12 +98,12 @@ The following example shows how to register an `IExceptionHandler` implementatio
 When the preceding code runs in the Development environment:
 
 * The `CustomExceptionHandler` is called first to handle an exception.
-* After logging the exception, the `TryHandleException` method returns `false`, so the [developer exception page](#developer-exception-page) is shown.
+* After logging the exception, the `TryHandleAsync` method returns `false`, so the [developer exception page](#developer-exception-page) is shown.
 
 In other environments:
 
 * The `CustomExceptionHandler` is called first to handle an exception.
-* After logging the exception, the `TryHandleException` method returns `false`, so the [`/Error` page](#exception-handler-page) is shown.
+* After logging the exception, the `TryHandleAsync` method returns `false`, so the [`/Error` page](#exception-handler-page) is shown.
 
 <!-- links to this in other docs require sestatuscodepages -->
 <a name="sestatuscodepages"></a>
@@ -261,9 +249,9 @@ For information about how to handle model state errors, see [Model binding](xref
 
 [!INCLUDE[](~/includes/problem-details-service.md)]
 
-The following code configures the app to generate a problem details response for all HTTP client and server error responses that ***don't have a body content yet***:
+The following code configures the app to generate a problem details response for all HTTP client and server error responses that ***don't have body content yet***:
 
-:::code language="csharp" source="~/fundamentals/error-handling/samples/7.x/ErrorHandlingSample/Snippets/Program.cs" id="snippet_AddProblemDetails" highlight="3":::
+:::code language="csharp" source="~/fundamentals/error-handling/samples/7.x/ErrorHandlingSample/Snippets/Program.cs" id="snippet_AddProblemDetails" highlight="1":::
 
 The next section shows how to customize the problem details response body.
 
@@ -283,7 +271,7 @@ The generated problem details can be customized using <xref:Microsoft.AspNetCore
 
 The following code uses <xref:Microsoft.AspNetCore.Http.ProblemDetailsOptions> to set <xref:Microsoft.AspNetCore.Http.ProblemDetailsOptions.CustomizeProblemDetails>:
 
-:::code language="csharp" source="~/fundamentals/error-handling/samples/7.x/ErrorHandlingSample/Snippets/Program.cs" id="snippet_CustomizeProblemDetails" highlight="3-5":::
+:::code language="csharp" source="~/fundamentals/error-handling/samples/7.x/ErrorHandlingSample/Snippets/Program.cs" id="snippet_CustomizeProblemDetails" highlight="1-3":::
 
 For example, an [`HTTP Status 400 Bad Request`](https://developer.mozilla.org/docs/Web/HTTP/Status/400) endpoint result produces the following problem details response body:
 
@@ -314,7 +302,7 @@ An alternative approach to using <xref:Microsoft.AspNetCore.Http.ProblemDetailsO
 
 In the preceding code, the minimal API endpoints `/divide` and `/squareroot` return the expected custom problem response on error input.
 
-The API controller endpoints return the default problem response on error input, not the custom problem response. The default problem response is returned because the API controller has written to the response stream, [Problem details for error status codes](/aspnet/core/web-api/#problem-details-for-error-status-codes-1), before [`IProblemDetailsService.WriteAsync`](https://github.com/dotnet/aspnetcore/blob/ce2db7ea0b161fc5eb35710fca6feeafeeac37bc/src/Http/Http.Extensions/src/ProblemDetailsService.cs#L24) is called and the response is **not** written again.
+The API controller endpoints return the default problem response on error input, not the custom problem response. The default problem response is returned because the API controller has written to the response stream, [Problem details for error status codes](/aspnet/core/web-api/#problem-details-for-error-status-codes), before [`IProblemDetailsService.WriteAsync`](https://github.com/dotnet/aspnetcore/blob/ce2db7ea0b161fc5eb35710fca6feeafeeac37bc/src/Http/Http.Extensions/src/ProblemDetailsService.cs#L24) is called and the response is **not** written again.
 
 The following `ValuesController` returns <xref:Microsoft.AspNetCore.Mvc.BadRequestResult>, which writes to the response stream and therefore prevents the custom problem response from being returned.
 
@@ -361,4 +349,5 @@ An alternative approach to generate problem details is to use the third-party Nu
 
 :::moniker-end
 
+[!INCLUDE[](~/fundamentals/error-handling/includes/error-handling8.md)]
 [!INCLUDE[](~/fundamentals/error-handling/includes/error-handling3-7.md)]

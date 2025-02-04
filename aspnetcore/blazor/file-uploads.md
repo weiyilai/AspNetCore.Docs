@@ -5,9 +5,8 @@ description: Learn how to upload files in Blazor with the InputFile component.
 monikerRange: '>= aspnetcore-5.0'
 ms.author: riande
 ms.custom: mvc
-ms.date: 02/04/2023
+ms.date: 11/12/2024
 uid: blazor/file-uploads
-zone_pivot_groups: blazor-hosting-models
 ---
 # ASP.NET Core Blazor file uploads
 
@@ -15,17 +14,19 @@ zone_pivot_groups: blazor-hosting-models
 
 This article explains how to upload files in Blazor with the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component.
 
+## File uploads
+
 > [!WARNING]
 > Always follow security best practices when permitting users to upload files. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
 
-Use the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component to read browser file data into .NET code. The <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component renders an HTML `<input>` element of type `file`. By default, the user selects single files. Add the `multiple` attribute to permit the user to upload multiple files at once.
+Use the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component to read browser file data into .NET code. The <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component renders an HTML `<input>` element of type `file` for single file uploads. Add the `multiple` attribute to permit the user to upload multiple files at once.
 
 File selection isn't cumulative when using an <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component or its underlying [HTML `<input type="file">`](https://developer.mozilla.org/docs/Web/HTML/Element/input/file), so you can't add files to an existing file selection. The component always replaces the user's initial file selection, so file references from prior selections aren't available.
 
 The following <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component executes the `LoadFiles` method when the <xref:Microsoft.AspNetCore.Components.Forms.InputFile.OnChange> ([`change`](https://developer.mozilla.org/docs/Web/API/HTMLElement/change_event)) event occurs. An <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs> provides access to the selected file list and details about each file:
 
 ```razor
-<InputFile OnChange="@LoadFiles" multiple />
+<InputFile OnChange="LoadFiles" multiple />
 
 @code {
     private void LoadFiles(InputFileChangeEventArgs e)
@@ -48,28 +49,12 @@ To read data from a user-selected file, call <xref:Microsoft.AspNetCore.Componen
 
 <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A> enforces a maximum size in bytes of its <xref:System.IO.Stream>. Reading one file or multiple files larger than 500 KB results in an exception. This limit prevents developers from accidentally reading large files into memory. The `maxAllowedSize` parameter of <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A> can be used to specify a larger size if required.
 
-If you need access to a <xref:System.IO.Stream> that represents the file's bytes, use <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A?displayProperty=nameWithType>. Avoid reading the incoming file stream directly into memory all at once. For example, don't copy all of the file's bytes into a <xref:System.IO.MemoryStream> or read the entire stream into a byte array all at once. These approaches can result in performance and security problems, especially for Blazor Server apps. Instead, consider adopting either of the following approaches:
+If you need access to a <xref:System.IO.Stream> that represents the file's bytes, use <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A?displayProperty=nameWithType>. Avoid reading the incoming file stream directly into memory all at once. For example, don't copy all of the file's bytes into a <xref:System.IO.MemoryStream> or read the entire stream into a byte array all at once. These approaches can result in degraded app performance and potential [Denial of Service (DoS)](xref:blazor/security/interactive-server-side-rendering#denial-of-service-dos-attacks) risk, especially for server-side components. Instead, consider adopting either of the following approaches:
 
-* On the server of a hosted Blazor WebAssembly app or a Blazor Server app, copy the stream directly to a file on disk without reading it into memory. Note that Blazor apps aren't able to access the client's file system directly. 
+* Copy the stream directly to a file on disk without reading it into memory. Note that Blazor apps executing code on the server aren't able to access the client's file system directly. 
 * Upload files from the client directly to an external service. For more information, see the [Upload files to an external service](#upload-files-to-an-external-service) section.
 
 In the following examples, `browserFile` represents the uploaded file and implements <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile>. Working implementations for <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile> are shown in the file upload components later in this article.
-
-<span aria-hidden="true">❌</span><span class="visually-hidden">Unsupported:</span> The following approach is **NOT recommended** because the file's <xref:System.IO.Stream> content is read into a <xref:System.String> in memory (`reader`):
-
-```csharp
-var reader = 
-    await new StreamReader(browserFile.OpenReadStream()).ReadToEndAsync();
-```
-
-<span aria-hidden="true">❌</span><span class="visually-hidden">Unsupported:</span> The following approach is **NOT recommended** for [Microsoft Azure Blob Storage](/azure/storage/blobs/storage-blobs-overview) because the file's <xref:System.IO.Stream> content is copied into a <xref:System.IO.MemoryStream> in memory (`memoryStream`) before calling <xref:Azure.Storage.Blobs.BlobContainerClient.UploadBlobAsync%2A>:
-
-```csharp
-var memoryStream = new MemoryStream();
-browserFile.OpenReadStream().CopyToAsync(memoryStream);
-await blobContainerClient.UploadBlobAsync(
-    trustedFileName, memoryStream));
-```
 
 <span aria-hidden="true">✔️</span><span class="visually-hidden">Supported:</span> The following approach is **recommended** because the file's <xref:System.IO.Stream> is provided directly to the consumer, a <xref:System.IO.FileStream> that creates the file at the provided path:
 
@@ -85,73 +70,99 @@ await blobContainerClient.UploadBlobAsync(
     trustedFileName, browserFile.OpenReadStream());
 ```
 
+<span aria-hidden="true">❌</span><span class="visually-hidden">Not recommended:</span> The following approach is **NOT recommended** because the file's <xref:System.IO.Stream> content is read into a <xref:System.String> in memory (`reader`):
+
+```csharp
+var reader = 
+    await new StreamReader(browserFile.OpenReadStream()).ReadToEndAsync();
+```
+
+<span aria-hidden="true">❌</span><span class="visually-hidden">Not recommended:</span> The following approach is **NOT recommended** for [Microsoft Azure Blob Storage](/azure/storage/blobs/storage-blobs-overview) because the file's <xref:System.IO.Stream> content is copied into a <xref:System.IO.MemoryStream> in memory (`memoryStream`) before calling <xref:Azure.Storage.Blobs.BlobContainerClient.UploadBlobAsync%2A>:
+
+```csharp
+var memoryStream = new MemoryStream();
+await browserFile.OpenReadStream().CopyToAsync(memoryStream);
+await blobContainerClient.UploadBlobAsync(
+    trustedFileName, memoryStream));
+```
+
 A component that receives an image file can call the <xref:Microsoft.AspNetCore.Components.Forms.BrowserFileExtensions.RequestImageFileAsync%2A?displayProperty=nameWithType> convenience method on the file to resize the image data within the browser's JavaScript runtime before the image is streamed into the app. Use cases for calling <xref:Microsoft.AspNetCore.Components.Forms.BrowserFileExtensions.RequestImageFileAsync%2A> are most appropriate for Blazor WebAssembly apps.
+
+:::moniker range="< aspnetcore-9.0"
+
+<!-- UPDATE 10.0 Remove this section. Leave the coverage in the 
+                 Troubleshoot section. -->
+
+## Autofac Inversion of Control (IoC) container users
+
+If you're using the [Autofac Inversion of Control (IoC) container](https://autofac.org/) instead of the built-in ASP.NET Core dependency injection container, set <xref:Microsoft.AspNetCore.SignalR.HubOptions.DisableImplicitFromServicesParameters%2A> to `true` in the [server-side circuit handler hub options](xref:blazor/fundamentals/signalr#server-side-circuit-handler-options). For more information, see [FileUpload: Did not receive any data in the allotted time (`dotnet/aspnetcore` #38842)](https://github.com/dotnet/aspnetcore/issues/38842#issuecomment-1342540950).
+
+:::moniker-end
 
 ## File size read and upload limits
 
 :::moniker range=">= aspnetcore-6.0"
 
-:::zone pivot="server"
-
-There's no file size read or upload limit for the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component in Blazor Server apps.
-
-:::zone-end
-
-:::zone pivot="webassembly"
-
-Prior to the release of ASP.NET Core 6.0, the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component had a file size read limit of 2 GB. In ASP.NET Core 6.0 or later, the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component has no file size read limit.
-
-In all versions of ASP.NET Core to date, Blazor WebAssembly reads the file's bytes into a single JavaScript array buffer when marshalling the data from JavaScript to C#, which is limited to 2 GB or to the device's available memory. Large file uploads (> 250 MB) may fail.
-
-<!-- TRACKED BY https://github.com/dotnet/AspNetCore.Docs/issues/28161 
-     for potential update at the .NET 8 release and/or when Safari/FF support Fetch streaming.
-
-To resolve the file size upload limitation in Blazor WebAssembly apps, we recommend implementing file uploads entirely in JavaScript by [streaming requests with the Fetch API](https://developer.chrome.com/articles/fetch-streaming-requests/).
-
--->
-
-:::zone-end
+Server-side or client-side, there's no file read or upload size limit specifically for the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component. However, client-side Blazor reads the file's bytes into a single JavaScript array buffer when marshalling the data from JavaScript to C#, which is limited to 2 GB or to the device's available memory. Large file uploads (> 250 MB) may fail for client-side uploads using the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component. For more information, see the following discussions:
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-6.0"
 
-The maximum supported file size for the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component is 2 GB.
-
-To resolve the file size read limitation, we recommend implementing file uploads entirely in JavaScript by [streaming requests with the Fetch API](https://developer.chrome.com/articles/fetch-streaming-requests/).
+The maximum supported file size for the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component is 2 GB. Additionally, client-side Blazor reads the file's bytes into a single JavaScript array buffer when marshalling the data from JavaScript to C#, which is limited to 2 GB or to the device's available memory. Large file uploads (> 250 MB) may fail for client-side uploads using the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component. For more information, see the following discussions:
 
 :::moniker-end
 
-## Upload files example
+* [The Blazor InputFile Component should handle chunking when the file is uploaded (dotnet/runtime #84685)](https://github.com/dotnet/runtime/issues/84685)
+* [Request Streaming upload via http handler (dotnet/runtime #36634)](https://github.com/dotnet/runtime/issues/36634)
 
-The following example demonstrates multiple file upload in a component. <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs.GetMultipleFiles%2A?displayProperty=nameWithType> allows reading multiple files. Specify the maximum number of files to prevent a malicious user from uploading a larger number of files than the app expects. <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs.File?displayProperty=nameWithType> allows reading the first and only file if the file upload doesn't support multiple files.
+For large client-side file uploads that fail when attempting to use the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component, we recommend chunking large files with a custom component using multiple [HTTP range requests](https://developer.mozilla.org/docs/Web/HTTP/Range_requests) instead of using the <xref:Microsoft.AspNetCore.Components.Forms.InputFile> component.
 
-> [!NOTE]
-> <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs> is in the <xref:Microsoft.AspNetCore.Components.Forms?displayProperty=fullName> namespace, which is typically one of the namespaces in the app's `_Imports.razor` file. When the namespace is present in the `_Imports.razor` file, it provides API member access to the app's components:
->
-> ```razor
-> using Microsoft.AspNetCore.Components.Forms
-> ```
->
-> Namespaces in the `_Imports.razor` file aren't applied to C# files (`.cs`). C# files require an explicit [`using`](/dotnet/csharp/language-reference/language-specification/namespaces#using-directives) directive.
+<!-- UPDATE 9.0 PU PR: https://github.com/dotnet/runtime/pull/91295 -->
 
-> [!NOTE]
-> For testing file upload components, you can create test files of any size with [PowerShell](/powershell/):
->
-> ```powershell
-> $out = new-object byte[] {SIZE}; (new-object Random).NextBytes($out); [IO.File]::WriteAllBytes('{PATH}', $out)
-> ```
->
-> In the preceding command:
->
-> * The `{SIZE}` placeholder is the size of the file in bytes (for example, `2097152` for a 2 MB file).
-> * The `{PATH}` placeholder is the path and file with file extension (for example, `D:/test_files/testfile2MB.txt`).
+Work is currently scheduled for .NET 9 (late 2024) to address the client-side file size upload limitation.
 
-`Pages/FileUpload1.razor`:
+## Examples
 
-:::zone pivot="server"
+The following examples demonstrate multiple file upload in a component. <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs.GetMultipleFiles%2A?displayProperty=nameWithType> allows reading multiple files. Specify the maximum number of files to prevent a malicious user from uploading a larger number of files than the app expects. <xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs.File?displayProperty=nameWithType> allows reading the first and only file if the file upload doesn't support multiple files.
 
-:::moniker range=">= aspnetcore-7.0"
+<xref:Microsoft.AspNetCore.Components.Forms.InputFileChangeEventArgs> is in the <xref:Microsoft.AspNetCore.Components.Forms?displayProperty=fullName> namespace, which is typically one of the namespaces in the app's `_Imports.razor` file. When the namespace is present in the `_Imports.razor` file, it provides API member access to the app's components.
+
+Namespaces in the `_Imports.razor` file aren't applied to C# files (`.cs`). C# files require an explicit [`using`](/dotnet/csharp/language-reference/language-specification/namespaces#using-directives) directive at the top of the class file:
+
+```razor
+using Microsoft.AspNetCore.Components.Forms;
+```
+
+For testing file upload components, you can create test files of any size with [PowerShell](/powershell/):
+
+```powershell
+$out = new-object byte[] {SIZE}; (new-object Random).NextBytes($out); [IO.File]::WriteAllBytes('{PATH}', $out)
+```
+
+In the preceding command:
+
+* The `{SIZE}` placeholder is the size of the file in bytes (for example, `2097152` for a 2 MB file).
+* The `{PATH}` placeholder is the path and file with file extension (for example, `D:/test_files/testfile2MB.txt`).
+
+### Server-side file upload example
+
+**To use the following code, create a `Development/unsafe_uploads` folder at the root of the app running in the `Development` environment.**
+
+Because the example uses the app's [environment](xref:blazor/fundamentals/environments) as part of the path where files are saved, additional folders are required if other environments are used in testing and production. For example, create a `Staging/unsafe_uploads` folder for the `Staging` environment. Create a `Production/unsafe_uploads` folder for the `Production` environment.
+
+> [!WARNING]
+> The example saves files without scanning their contents, and the guidance in this article doesn't take into account additional security best practices for uploaded files. On staging and production systems, disable execute permission on the upload folder and scan files with an anti-virus/anti-malware scanner API immediately after upload. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
+
+`FileUpload1.razor`:
+
+:::moniker range=">= aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/FileUpload1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_Server/Pages/file-uploads/FileUpload1.razor":::
 
@@ -169,17 +180,22 @@ The following example demonstrates multiple file upload in a component. <xref:Mi
 
 :::moniker-end
 
-:::zone-end
+### Client-side file upload example
 
-:::zone pivot="webassembly"
+The following example processes file bytes and doesn't send files to a destination outside of the app. For an example of a Razor component that sends a file to a server or service, see the following sections:
 
-> [!NOTE]
-> The following example merely processes file bytes and doesn't send (upload) files to a destination outside of the app. For an example of a Razor component that sends a file to a server or service, see the following sections:
-> 
-> * [Upload files to a server](#upload-files-to-a-server)
-> * [Upload files to an external service](#upload-files-to-an-external-service)
+* [Upload files to a server with client-side rendering (CSR)](#upload-files-to-a-server-with-client-side-rendering-csr)
+* [Upload files to an external service](#upload-files-to-an-external-service)
 
-:::moniker range=">= aspnetcore-7.0"
+The component assumes that the Interactive WebAssembly render mode (`InteractiveWebAssembly`) is inherited from a parent component or applied globally to the app.
+
+:::moniker range=">= aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_WebAssembly/Pages/FileUpload1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/file-uploads/FileUpload1.razor":::
 
@@ -197,27 +213,22 @@ The following example demonstrates multiple file upload in a component. <xref:Mi
 
 :::moniker-end
 
-:::zone-end
-
 <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile> returns metadata [exposed by the browser](https://developer.mozilla.org/docs/Web/API/File#Instance_properties) as properties. Use this metadata for preliminary validation.
-
-> [!WARNING]
-> Never trust the values of the following properties, especially the <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.Name> property for display in the UI. Treat all user-supplied data as a significant security risk to the app, server, and network. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
 
 * <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.Name>
 * <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.Size>
 * <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.LastModified>
 * <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.ContentType>
 
-## Upload files to a server
+***Never trust the values of the preceding properties, especially the <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.Name> property for display in the UI.*** Treat all user-supplied data as a significant security risk to the app, server, and network. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
 
-:::zone pivot="server"
+## Upload files to a server with server-side rendering
 
-The following example demonstrates uploading files from a Blazor Server app to a backend web API controller in a separate app, possibly on a separate server.
+*This section applies to Interactive Server components in Blazor Web Apps or Blazor Server apps.*
 
-In the Blazor Server app, add <xref:System.Net.Http.IHttpClientFactory> and related services that allow the app to create <xref:System.Net.Http.HttpClient> instances.
+The following example demonstrates uploading files from a server-side app to a backend web API controller in a separate app, possibly on a separate server.
 
-In `Program.cs`:
+In the server-side app's `Program` file, add <xref:System.Net.Http.IHttpClientFactory> and related services that allow the app to create <xref:System.Net.Http.HttpClient> instances:
 
 ```csharp
 builder.Services.AddHttpClient();
@@ -228,31 +239,14 @@ For more information, see <xref:fundamentals/http-requests>.
 For the examples in this section:
 
 * The web API runs at the URL: `https://localhost:5001`
-* The Blazor Server app runs at the URL: `https://localhost:5003`
+* The server-side app runs at the URL: `https://localhost:5003`
 
 For testing, the preceding URLs are configured in the projects' `Properties/launchSettings.json` files.
 
-:::zone-end
-
-:::zone pivot="webassembly"
-
-The following example demonstrates uploading files to a web API controller in the **:::no-loc text="Server":::** app of a hosted Blazor WebAssembly [solution](xref:blazor/tooling#visual-studio-solution-file-sln).
-
-> [!IMPORTANT]
-> When executing a hosted Blazor WebAssembly app, run the app from the solution's **:::no-loc text="Server":::** project.
-
-:::zone-end
-
-### Upload result class
-
-:::zone pivot="server"
-
-The following `UploadResult` class is placed in the client project and in the web API project to maintain the result of an uploaded file. When a file fails to upload on the server, an error code is returned in `ErrorCode` for display to the user. A safe file name is generated on the server for each file and returned to the client in `StoredFileName` for display. Files are keyed between the client and server using the unsafe/untrusted file name in `FileName`.
+The following `UploadResult` class maintains the result of an uploaded file. When a file fails to upload on the server, an error code is returned in `ErrorCode` for display to the user. A safe file name is generated on the server for each file and returned to the client in `StoredFileName` for display. Files are keyed between the client and server using the unsafe/untrusted file name in `FileName`.
 
 `UploadResult.cs`:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 public class UploadResult
 {
@@ -263,75 +257,41 @@ public class UploadResult
 }
 ```
 
+A security best practice for production apps is to avoid sending error messages to clients that might reveal sensitive information about an app, server, or network. Providing detailed error messages can aid a malicious user in devising attacks on an app, server, or network. The example code in this section only sends back an error code number (`int`) for display by the component client-side if a server-side error occurs. If a user requires assistance with a file upload, they provide the error code to support personnel for support ticket resolution without ever knowing the exact cause of the error.
+
+<!-- UPDATE 10.0 HOLD moniker range="< aspnetcore-9.0" Tracking PU bug: https://github.com/dotnet/aspnetcore/issues/47301 -->
+
+The following `LazyBrowserFileStream` class defines a custom stream type that lazily calls <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A> just before the first bytes of the stream are requested. The stream isn't transmitted from the browser to the server until reading the stream begins in .NET.
+
+`LazyBrowserFileStream.cs`:
+
+<!-- UPDATE 10.0 HOLD moniker-end -->
+
+<!-- UPDATE 10.0 HOLD for next line: < aspnetcore-9.0 -->
+
+:::moniker range=">= aspnetcore-8.0"
+
+:::code language="csharp" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/LazyBrowserFileStream.cs":::
+
 :::moniker-end
 
-:::moniker range="< aspnetcore-6.0"
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
-```csharp
-public class UploadResult
-{
-    public bool Uploaded { get; set; }
-    public string FileName { get; set; }
-    public string StoredFileName { get; set; }
-    public int ErrorCode { get; set; }
-}
-```
+:::code language="csharp" source="~/../blazor-samples/7.0/BlazorSample_Server/LazyBrowserFileStream.cs":::
 
 :::moniker-end
 
-:::zone-end
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::zone pivot="webassembly"
-
-The following `UploadResult` class in the **:::no-loc text="Shared":::** project maintains the result of an uploaded file. When a file fails to upload on the server, an error code is returned in `ErrorCode` for display to the user. A safe file name is generated on the server for each file and returned to the client in `StoredFileName` for display. Files are keyed between the client and server using the unsafe/untrusted file name in `FileName`. In the following example, the project's namespace is `BlazorSample.Shared`.
-
-`UploadResult.cs` in the **:::no-loc text="Shared":::** project of the hosted Blazor WebAssembly [solution](xref:blazor/tooling#visual-studio-solution-file-sln):
-
-:::moniker range=">= aspnetcore-6.0"
-
-```csharp
-namespace BlazorSample.Shared;
-
-public class UploadResult
-{
-    public bool Uploaded { get; set; }
-    public string? FileName { get; set; }
-    public string? StoredFileName { get; set; }
-    public int ErrorCode { get; set; }
-}
-```
+:::code language="csharp" source="~/../blazor-samples/6.0/BlazorSample_Server/LazyBrowserFileStream.cs":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-6.0"
 
-```csharp
-namespace BlazorSample.Shared
-{
-    public class UploadResult
-    {
-        public bool Uploaded { get; set; }
-        public string FileName { get; set; }
-        public string StoredFileName { get; set; }
-        public int ErrorCode { get; set; }
-    }
-}
-```
+:::code language="csharp" source="~/../blazor-samples/5.0/BlazorSample_Server/LazyBrowserFileStream.cs":::
 
 :::moniker-end
-
-To make the `UploadResult` class available to the **:::no-loc text="Client":::** project, add an import to the **:::no-loc text="Client":::** project's `_Imports.razor` file for the **:::no-loc text="Shared":::** project:
-
-```razor
-@using BlazorSample.Shared
-```
-
-:::zone-end
-
-> [!NOTE]
-> A security best practice for production apps is to avoid sending error messages to clients that might reveal sensitive information about an app, server, or network. Providing detailed error messages can aid a malicious user in devising attacks on an app, server, or network. The example code in this section only sends back an error code number (`int`) for display by the component client-side if a server-side error occurs. If a user requires assistance with a file upload, they provide the error code to support personnel for support ticket resolution without ever knowing the exact cause of the error.
-
-### Upload component
 
 The following `FileUpload2` component:
 
@@ -346,11 +306,15 @@ The following `FileUpload2` component:
 >
 > For more information on security considerations when uploading files to a server, see <xref:mvc/models/file-uploads#security-considerations>.
 
-:::zone pivot="server"
+`FileUpload2.razor`:
 
-`Pages/FileUpload2.razor` in the Blazor Server app:
+:::moniker range=">= aspnetcore-8.0"
 
-:::moniker range=">= aspnetcore-7.0"
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/FileUpload2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_Server/Pages/file-uploads/FileUpload2.razor":::
 
@@ -368,13 +332,228 @@ The following `FileUpload2` component:
 
 :::moniker-end
 
-:::zone-end
+<!-- UPDATE 10.0 HOLD for the next line: < aspnetcore-9.0 -->
 
-:::zone pivot="webassembly"
+:::moniker range=">= aspnetcore-8.0"
 
-`Pages/FileUpload2.razor` in the **:::no-loc text="Client":::** project:
+If the component limits file uploads to a single file at a time or if the component only adopts interactive client-side rendering (CSR, `InteractiveWebAssembly`), the component can avoid the use of the `LazyBrowserFileStream` and use a <xref:System.IO.Stream>. The following demonstrates the changes for the `FileUpload2` component:
 
-:::moniker range=">= aspnetcore-7.0"
+```diff
+- var stream = new LazyBrowserFileStream(file, maxFileSize);
+- var fileContent = new StreamContent(stream);
++ var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+```
+
+Remove the `LazyBrowserFileStream` class (`LazyBrowserFileStream.cs`), as it isn't used.
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+If the component limits file uploads to a single file at a time, the component can avoid the use of the `LazyBrowserFileStream` and use a <xref:System.IO.Stream>. The following demonstrates the changes for the `FileUpload2` component:
+
+```diff
+- var stream = new LazyBrowserFileStream(file, maxFileSize);
+- var fileContent = new StreamContent(stream);
++ var fileContent = new StreamContent(file.OpenReadStream(maxFileSize));
+```
+
+Remove the `LazyBrowserFileStream` class (`LazyBrowserFileStream.cs`), as it isn't used.
+
+:::moniker-end
+
+The following controller in the web API project saves uploaded files from the client.
+
+> [!IMPORTANT]
+> The controller in this section is intended for use in a separate web API project from the Blazor app. The web API should [mitigate Cross-Site Request Forgery (XSRF/CSRF) attacks](xref:security/anti-request-forgery) if file upload users are authenticated.
+
+:::moniker range="= aspnetcore-6.0"
+
+> [!NOTE]
+> Binding form values with the [`[FromForm]` attribute](xref:Microsoft.AspNetCore.Mvc.FromFormAttribute) isn't natively supported for [Minimal APIs](xref:fundamentals/minimal-apis?view=aspnetcore-6.0#explicit-parameter-binding) in ASP.NET Core in .NET 6. Therefore, the following `Filesave` controller example can't be converted to use Minimal APIs. Support for binding from form values with Minimal APIs is available in ASP.NET Core in .NET 7 or later.
+
+:::moniker-end
+
+**To use the following code, create a `Development/unsafe_uploads` folder at the root of the web API project for the app running in the `Development` environment.**
+
+Because the example uses the app's [environment](xref:blazor/fundamentals/environments) as part of the path where files are saved, additional folders are required if other environments are used in testing and production. For example, create a `Staging/unsafe_uploads` folder for the `Staging` environment. Create a `Production/unsafe_uploads` folder for the `Production` environment.
+
+> [!WARNING]
+> The example saves files without scanning their contents, and the guidance in this article doesn't take into account additional security best practices for uploaded files. On staging and production systems, disable execute permission on the upload folder and scan files with an anti-virus/anti-malware scanner API immediately after upload. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
+
+`Controllers/FilesaveController.cs`:
+
+```csharp
+using System.Net;
+using Microsoft.AspNetCore.Mvc;
+
+[ApiController]
+[Route("[controller]")]
+public class FilesaveController(
+    IHostEnvironment env, ILogger<FilesaveController> logger) 
+    : ControllerBase
+{
+    [HttpPost]
+    public async Task<ActionResult<IList<UploadResult>>> PostFile(
+        [FromForm] IEnumerable<IFormFile> files)
+    {
+        var maxAllowedFiles = 3;
+        long maxFileSize = 1024 * 15;
+        var filesProcessed = 0;
+        var resourcePath = new Uri($"{Request.Scheme}://{Request.Host}/");
+        List<UploadResult> uploadResults = [];
+
+        foreach (var file in files)
+        {
+            var uploadResult = new UploadResult();
+            string trustedFileNameForFileStorage;
+            var untrustedFileName = file.FileName;
+            uploadResult.FileName = untrustedFileName;
+            var trustedFileNameForDisplay =
+                WebUtility.HtmlEncode(untrustedFileName);
+
+            if (filesProcessed < maxAllowedFiles)
+            {
+                if (file.Length == 0)
+                {
+                    logger.LogInformation("{FileName} length is 0 (Err: 1)",
+                        trustedFileNameForDisplay);
+                    uploadResult.ErrorCode = 1;
+                }
+                else if (file.Length > maxFileSize)
+                {
+                    logger.LogInformation("{FileName} of {Length} bytes is " +
+                        "larger than the limit of {Limit} bytes (Err: 2)",
+                        trustedFileNameForDisplay, file.Length, maxFileSize);
+                    uploadResult.ErrorCode = 2;
+                }
+                else
+                {
+                    try
+                    {
+                        trustedFileNameForFileStorage = Path.GetRandomFileName();
+                        var path = Path.Combine(env.ContentRootPath,
+                            env.EnvironmentName, "unsafe_uploads",
+                            trustedFileNameForFileStorage);
+
+                        await using FileStream fs = new(path, FileMode.Create);
+                        await file.CopyToAsync(fs);
+
+                        logger.LogInformation("{FileName} saved at {Path}",
+                            trustedFileNameForDisplay, path);
+                        uploadResult.Uploaded = true;
+                        uploadResult.StoredFileName = trustedFileNameForFileStorage;
+                    }
+                    catch (IOException ex)
+                    {
+                        logger.LogError("{FileName} error on upload (Err: 3): {Message}",
+                            trustedFileNameForDisplay, ex.Message);
+                        uploadResult.ErrorCode = 3;
+                    }
+                }
+
+                filesProcessed++;
+            }
+            else
+            {
+                logger.LogInformation("{FileName} not uploaded because the " +
+                    "request exceeded the allowed {Count} of files (Err: 4)",
+                    trustedFileNameForDisplay, maxAllowedFiles);
+                uploadResult.ErrorCode = 4;
+            }
+
+            uploadResults.Add(uploadResult);
+        }
+
+        return new CreatedResult(resourcePath, uploadResults);
+    }
+}
+```
+
+In the preceding code, <xref:System.IO.Path.GetRandomFileName%2A> is called to generate a secure file name. Never trust the file name provided by the browser, as a cyberattacker may choose an existing file name that overwrites an existing file or send a path that attempts to write outside of the app.
+
+The server app must register controller services and map controller endpoints. For more information, see <xref:mvc/controllers/routing>.
+
+## Upload files to a server with client-side rendering (CSR)
+
+*This section applies to client-side rendered (CSR) components in Blazor Web Apps or Blazor WebAssembly apps.*
+
+The following example demonstrates uploading files to a backend web API controller in a separate app, possibly on a separate server, from a component in a Blazor Web App that adopts CSR or a component in a Blazor WebAssembly app.
+
+The following `UploadResult` class maintains the result of an uploaded file. When a file fails to upload on the server, an error code is returned in `ErrorCode` for display to the user. A safe file name is generated on the server for each file and returned to the client in `StoredFileName` for display. Files are keyed between the client and server using the unsafe/untrusted file name in `FileName`.
+
+`UploadResult.cs`:
+
+```csharp
+public class UploadResult
+{
+    public bool Uploaded { get; set; }
+    public string? FileName { get; set; }
+    public string? StoredFileName { get; set; }
+    public int ErrorCode { get; set; }
+}
+```
+
+> [!NOTE]
+> The preceding `UploadResult` class can be shared between client- and server-based projects. When client and server projects share the class, add an import to each project's `_Imports.razor` file for the shared project. For example:
+>
+> ```razor
+> @using BlazorSample.Shared
+> ```
+
+The following `FileUpload2` component:
+
+* Permits users to upload files from the client.
+* Displays the untrusted/unsafe file name provided by the client in the UI. The untrusted/unsafe file name is automatically HTML-encoded by Razor for safe display in the UI.
+
+A security best practice for production apps is to avoid sending error messages to clients that might reveal sensitive information about an app, server, or network. Providing detailed error messages can aid a malicious user in devising attacks on an app, server, or network. The example code in this section only sends back an error code number (`int`) for display by the component client-side if a server-side error occurs. If a user requires assistance with a file upload, they provide the error code to support personnel for support ticket resolution without ever knowing the exact cause of the error.
+
+> [!WARNING]
+> **Don't trust file names supplied by clients** for:
+>
+> * Saving the file to a file system or service.
+> * Display in UIs that don't encode file names automatically or via developer code.
+>
+> For more information on security considerations when uploading files to a server, see <xref:mvc/models/file-uploads#security-considerations>.
+
+:::moniker range=">= aspnetcore-8.0"
+
+In the Blazor Web App main project, add <xref:System.Net.Http.IHttpClientFactory> and related services in the project's `Program` file:
+
+```csharp
+builder.Services.AddHttpClient();
+```
+
+The `HttpClient` services must be added to the main project because the client-side component is prerendered on the server. If you [disable prerendering for the following component](xref:blazor/components/render-modes#prerendering), you aren't required to provide the `HttpClient` services in the main app and don't need to add the preceding line to the main project.
+
+For more information on adding `HttpClient` services to an ASP.NET Core app, see <xref:fundamentals/http-requests>.
+
+The client project (`.Client`) of a Blazor Web App must also register an <xref:System.Net.Http.HttpClient> for HTTP POST requests to a backend web API controller. Confirm or add the following to the client project's `Program` file:
+
+```csharp
+builder.Services.AddScoped(sp => 
+    new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+```
+
+The preceding example sets the base address with `builder.HostEnvironment.BaseAddress` (<xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress%2A?displayProperty=nameWithType>), which gets the base address for the app and is typically derived from the `<base>` tag's `href` value in the host page. If you're calling an external web API, set the URI to the web API's base address.
+
+Specify the Interactive WebAssembly render mode attribute at the top of the following component in a Blazor Web App:
+
+```razor
+@rendermode InteractiveWebAssembly
+```
+
+:::moniker-end
+
+`FileUpload2.razor`:
+
+:::moniker range=">= aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_WebAssembly/Pages/FileUpload2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/file-uploads/FileUpload2.razor":::
 
@@ -392,154 +571,23 @@ The following `FileUpload2` component:
 
 :::moniker-end
 
-:::zone-end
-
-### Upload controller
-
-:::zone pivot="server"
-
-The following controller in the web API project saves uploaded files from the client.
-
-> [!IMPORTANT]
-> The controller in this section is intended for use in a separate web API project from the Blazor Server app.
-
-:::moniker range="= aspnetcore-6.0"
-
-> [!NOTE]
-> Binding form values with the [`[FromForm]` attribute](xref:Microsoft.AspNetCore.Mvc.FromFormAttribute) isn't natively supported for [Minimal APIs](xref:fundamentals/minimal-apis?view=aspnetcore-6.0#explicit-parameter-binding) in ASP.NET Core 6.0. Therefore, the following `Filesave` controller example can't be converted to use Minimal APIs. Support for binding from form values with Minimal APIs is available in ASP.NET Core 7.0 or later.
-
-:::moniker-end
-
-**To use the following code, create a `Development/unsafe_uploads` folder at the root of the web API project for the app running in the `Development` environment.**
-
-Because the example uses the app's [environment](xref:blazor/fundamentals/environments) as part of the path where files are saved, additional folders are required if other environments are used in testing and production. For example, create a `Staging/unsafe_uploads` folder for the `Staging` environment. Create a `Production/unsafe_uploads` folder for the `Production` environment.
-
-> [!WARNING]
-> The example saves files without scanning their contents, and the guidance in this article doesn't take into account additional security best practices for uploaded files. On staging and production systems, disable execute permission on the upload folder and scan files with an anti-virus/anti-malware scanner API immediately after upload. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
-
-`Controllers/FilesaveController.cs`:
-
-```csharp
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-
-[ApiController]
-[Route("[controller]")]
-public class FilesaveController : ControllerBase
-{
-    private readonly IWebHostEnvironment env;
-    private readonly ILogger<FilesaveController> logger;
-
-    public FilesaveController(IWebHostEnvironment env,
-        ILogger<FilesaveController> logger)
-    {
-        this.env = env;
-        this.logger = logger;
-    }
-
-    [HttpPost]
-    public async Task<ActionResult<IList<UploadResult>>> PostFile(
-        [FromForm] IEnumerable<IFormFile> files)
-    {
-        var maxAllowedFiles = 3;
-        long maxFileSize = 1024 * 15;
-        var filesProcessed = 0;
-        var resourcePath = new Uri($"{Request.Scheme}://{Request.Host}/");
-        List<UploadResult> uploadResults = new();
-
-        foreach (var file in files)
-        {
-            var uploadResult = new UploadResult();
-            string trustedFileNameForFileStorage;
-            var untrustedFileName = file.FileName;
-            uploadResult.FileName = untrustedFileName;
-            var trustedFileNameForDisplay =
-                WebUtility.HtmlEncode(untrustedFileName);
-
-            if (filesProcessed < maxAllowedFiles)
-            {
-                if (file.Length == 0)
-                {
-                    logger.LogInformation("{FileName} length is 0 (Err: 1)",
-                        trustedFileNameForDisplay);
-                    uploadResult.ErrorCode = 1;
-                }
-                else if (file.Length > maxFileSize)
-                {
-                    logger.LogInformation("{FileName} of {Length} bytes is " +
-                        "larger than the limit of {Limit} bytes (Err: 2)",
-                        trustedFileNameForDisplay, file.Length, maxFileSize);
-                    uploadResult.ErrorCode = 2;
-                }
-                else
-                {
-                    try
-                    {
-                        trustedFileNameForFileStorage = Path.GetRandomFileName();
-                        var path = Path.Combine(env.ContentRootPath,
-                            env.EnvironmentName, "unsafe_uploads",
-                            trustedFileNameForFileStorage);
-
-                        await using FileStream fs = new(path, FileMode.Create);
-                        await file.CopyToAsync(fs);
-
-                        logger.LogInformation("{FileName} saved at {Path}",
-                            trustedFileNameForDisplay, path);
-                        uploadResult.Uploaded = true;
-                        uploadResult.StoredFileName = trustedFileNameForFileStorage;
-                    }
-                    catch (IOException ex)
-                    {
-                        logger.LogError("{FileName} error on upload (Err: 3): {Message}",
-                            trustedFileNameForDisplay, ex.Message);
-                        uploadResult.ErrorCode = 3;
-                    }
-                }
-
-                filesProcessed++;
-            }
-            else
-            {
-                logger.LogInformation("{FileName} not uploaded because the " +
-                    "request exceeded the allowed {Count} of files (Err: 4)",
-                    trustedFileNameForDisplay, maxAllowedFiles);
-                uploadResult.ErrorCode = 4;
-            }
-
-            uploadResults.Add(uploadResult);
-        }
-
-        return new CreatedResult(resourcePath, uploadResults);
-    }
-}
-```
-
-:::zone-end
-
-:::zone pivot="webassembly"
-
-The following controller in the **:::no-loc text="Server":::** project saves uploaded files from the client.
+The following controller in the server-side project saves uploaded files from the client.
 
 :::moniker range="< aspnetcore-6.0"
 
 > [!NOTE]
-> Binding form values with the [`[FromForm]` attribute](xref:Microsoft.AspNetCore.Mvc.FromFormAttribute) isn't natively supported for [Minimal APIs](xref:fundamentals/minimal-apis?view=aspnetcore-6.0#explicit-parameter-binding) in ASP.NET Core 6.0. Therefore, the following `Filesave` controller example can't be converted to use Minimal APIs. Support for binding from form values with Minimal APIs is available in ASP.NET Core 7.0 or later.
+> Binding form values with the [`[FromForm]` attribute](xref:Microsoft.AspNetCore.Mvc.FromFormAttribute) isn't natively supported for [Minimal APIs](xref:fundamentals/minimal-apis?view=aspnetcore-6.0#explicit-parameter-binding) in ASP.NET Core in .NET 6. Therefore, the following `Filesave` controller example can't be converted to use Minimal APIs. Support for binding from form values with Minimal APIs is available in ASP.NET Core in .NET 7 or later.
 
 :::moniker-end
 
-**To use the following code, create a `Development/unsafe_uploads` folder at the root of the :::no-loc text="Server"::: project for the app running in the `Development` environment.**
+**To use the following code, create a `Development/unsafe_uploads` folder at the root of the server-side project for the app running in the `Development` environment.**
 
 Because the example uses the app's [environment](xref:blazor/fundamentals/environments) as part of the path where files are saved, additional folders are required if other environments are used in testing and production. For example, create a `Staging/unsafe_uploads` folder for the `Staging` environment. Create a `Production/unsafe_uploads` folder for the `Production` environment.
 
 > [!WARNING]
 > The example saves files without scanning their contents, and the guidance in this article doesn't take into account additional security best practices for uploaded files. On staging and production systems, disable execute permission on the upload folder and scan files with an anti-virus/anti-malware scanner API immediately after upload. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
+
+In the following example, update the shared project's namespace to match the shared project if a shared project is supplying the `UploadResult` class.
 
 `Controllers/FilesaveController.cs`:
 
@@ -549,7 +597,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -557,18 +604,10 @@ using BlazorSample.Shared;
 
 [ApiController]
 [Route("[controller]")]
-public class FilesaveController : ControllerBase
+public class FilesaveController(
+    IHostEnvironment env, ILogger<FilesaveController> logger) 
+    : ControllerBase
 {
-    private readonly IWebHostEnvironment env;
-    private readonly ILogger<FilesaveController> logger;
-
-    public FilesaveController(IWebHostEnvironment env,
-        ILogger<FilesaveController> logger)
-    {
-        this.env = env;
-        this.logger = logger;
-    }
-
     [HttpPost]
     public async Task<ActionResult<IList<UploadResult>>> PostFile(
         [FromForm] IEnumerable<IFormFile> files)
@@ -577,7 +616,7 @@ public class FilesaveController : ControllerBase
         long maxFileSize = 1024 * 15;
         var filesProcessed = 0;
         var resourcePath = new Uri($"{Request.Scheme}://{Request.Host}/");
-        List<UploadResult> uploadResults = new();
+        List<UploadResult> uploadResults = [];
 
         foreach (var file in files)
         {
@@ -646,9 +685,17 @@ public class FilesaveController : ControllerBase
 }
 ```
 
-:::zone-end
+In the preceding code, <xref:System.IO.Path.GetRandomFileName%2A> is called to generate a secure file name. Never trust the file name provided by the browser, as a cyberattacker may choose an existing file name that overwrites an existing file or send a path that attempts to write outside of the app.
 
-In the preceding code, <xref:System.IO.Path.GetRandomFileName%2A> is called to generate a secure file name. Never trust the file name provided by the browser, as an attacker may choose an existing file name that overwrites an existing file or send a path that attempts to write outside of the app.
+The server app must register controller services and map controller endpoints. For more information, see <xref:mvc/controllers/routing>.
+
+<!--
+
+HOLD: Tracking anti-request forgery work for this article in the UE tracking issue.
+
+We recommend adding controller services with <xref:Microsoft.Extensions.DependencyInjection.MvcServiceCollectionExtensions.AddControllersWithViews%2A> in order to automatically [mitigate Cross-Site Request Forgery (XSRF/CSRF) attacks](xref:security/anti-request-forgery). If you merely use <xref:Microsoft.Extensions.DependencyInjection.MvcServiceCollectionExtensions.AddControllers%2A>, antiforgery isn't enabled automatically. For more information, see <xref:mvc/controllers/routing>.
+
+-->
 
 ## Cancel a file upload
 
@@ -661,11 +708,9 @@ If a file upload is in progress:
 * Call <xref:System.Threading.CancellationTokenSource.Cancel%2A> on the previous upload.
 * Create a new <xref:System.Threading.CancellationTokenSource> for the next upload and pass the <xref:System.Threading.CancellationTokenSource.Token?displayProperty=nameWithType> to <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A> or <xref:System.IO.StreamReader.ReadAsync%2A>.
 
-:::zone pivot="server"
+## Upload files server-side with progress
 
-## Upload files with progress
-
-The following example demonstrates how to upload files in a Blazor Server app with upload progress displayed to the user.
+The following example demonstrates how to upload files in a server-side app with upload progress displayed to the user.
 
 To use the following example in a test app:
 
@@ -676,9 +721,15 @@ To use the following example in a test app:
 > [!WARNING]
 > The example saves files without scanning their contents, and the guidance in this article doesn't take into account additional security best practices for uploaded files. On staging and production systems, disable execute permission on the upload folder and scan files with an anti-virus/anti-malware scanner API immediately after upload. For more information, see <xref:mvc/models/file-uploads#security-considerations>.
 
-`Pages/FileUpload3.razor`:
+`FileUpload3.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/FileUpload3.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_Server/Pages/file-uploads/FileUpload3.razor":::
 
@@ -701,27 +752,17 @@ For more information, see the following API resources:
 * <xref:System.IO.FileStream>: Provides a <xref:System.IO.Stream> for a file, supporting both synchronous and asynchronous read and write operations.
 * <xref:System.IO.FileStream.ReadAsync%2A?displayProperty=nameWithType>: The preceding `FileUpload3` component reads the stream asynchronously with <xref:System.IO.FileStream.ReadAsync%2A>. Reading a stream synchronously with <xref:System.IO.FileStream.Read%2A> isn't supported in Razor components.
 
-:::zone-end
-
 ## File streams
 
-:::zone pivot="server"
-
-In Blazor Server, file data is streamed over the SignalR connection into .NET code on the server as the file is read.
+With server interactivity, file data is streamed over the SignalR connection into .NET code on the server as the file is read.
 
 :::moniker range="= aspnetcore-5.0"
 
-<xref:Microsoft.AspNetCore.Components.Forms.RemoteBrowserFileStreamOptions> allows configuring file upload characteristics for Blazor Server.
+<xref:Microsoft.AspNetCore.Components.Forms.RemoteBrowserFileStreamOptions> allows configuring file upload characteristics.
 
 :::moniker-end
 
-:::zone-end
-
-:::zone pivot="webassembly"
-
-In Blazor WebAssembly, file data is streamed directly into the .NET code within the browser.
-
-:::zone-end
+For a WebAssembly-rendered component, file data is streamed directly into the .NET code within the browser.
 
 :::moniker range=">= aspnetcore-6.0"
 
@@ -730,7 +771,7 @@ In Blazor WebAssembly, file data is streamed directly into the .NET code within 
 For an image preview of uploading images, start by adding an `InputFile` component with a component reference and an `OnChange` handler:
 
 ```razor
-<InputFile @ref="inputFile" OnChange="@ShowPreview" />
+<InputFile @ref="inputFile" OnChange="ShowPreview" />
 ```
 
 Add an image element with an [element reference](xref:blazor/js-interop/call-javascript-from-dotnet#capture-references-to-elements), which serves as the placeholder for the image preview:
@@ -782,7 +823,11 @@ The preceding example is for uploading a single image. The approach can be expan
 
 The following `FileUpload4` component shows the complete example.
 
-`Pages/FileUpload4.razor`:
+`FileUpload4.razor`:
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
 
 ```razor
 @page "/file-upload-4"
@@ -790,7 +835,30 @@ The following `FileUpload4` component shows the complete example.
 
 <h1>File Upload Example</h1>
 
-<InputFile @ref="inputFile" OnChange="@ShowPreview" />
+<InputFile @ref="inputFile" OnChange="ShowPreview" />
+
+<img style="max-width:200px;max-height:200px" @ref="previewImageElem" />
+
+@code {
+    private InputFile? inputFile;
+    private ElementReference previewImageElem;
+
+    private async Task ShowPreview() => await JS.InvokeVoidAsync(
+        "previewImage", inputFile!.Element, previewImageElem);
+}
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+```razor
+@page "/file-upload-4"
+@inject IJSRuntime JS
+
+<h1>File Upload Example</h1>
+
+<InputFile @ref="inputFile" OnChange="ShowPreview" />
 
 <img style="max-width:200px;max-height:200px" @ref="previewImageElem" />
 
@@ -825,9 +893,7 @@ Consider an approach that uses [Azure Files](https://azure.microsoft.com/service
 
 For more information on Azure Blob Storage and Azure Files, see the [Azure Storage documentation](/azure/storage/).
 
-:::zone pivot="server"
-
-## SignalR message size limit
+## Server-side SignalR message size limit
 
 File uploads may fail even before they start, when Blazor retrieves data about the files that exceeds the maximum SignalR message size.
 
@@ -839,9 +905,31 @@ The logged error is similar to the following:
 
 When uploading files, reaching the message size limit on the first message is rare. If the limit is reached, the app can configure <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize?displayProperty=nameWithType> with a larger value.
 
-For more information on SignalR configuration and how to set <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize>, see <xref:blazor/fundamentals/signalr#circuit-handler-options-for-blazor-server-apps>.
+For more information on SignalR configuration and how to set <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumReceiveMessageSize>, see <xref:blazor/fundamentals/signalr#server-side-circuit-handler-options>.
 
-:::zone-end
+## Maximum parallel invocations per client hub setting
+
+Blazor relies on <xref:Microsoft.AspNetCore.SignalR.HubOptions.MaximumParallelInvocationsPerClient%2A> set to 1, which is the default value.
+
+Increasing the value leads to a high probability that `CopyTo` operations throw `System.InvalidOperationException: 'Reading is not allowed after reader was completed.'`. For more information, see [MaximumParallelInvocationsPerClient > 1 breaks file upload in Blazor Server mode (`dotnet/aspnetcore` #53951)](https://github.com/dotnet/aspnetcore/issues/53951).
+
+## Troubleshoot
+
+The line that calls <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A?displayProperty=nameWithType> throws a <xref:System.TimeoutException?displayProperty=nameWithType>:
+
+> :::no-loc text="System.TimeoutException: Did not receive any data in the allotted time.":::
+
+Possible causes:
+
+* Using the [Autofac Inversion of Control (IoC) container](https://autofac.org/) instead of the built-in ASP.NET Core dependency injection container. To resolve the issue, set <xref:Microsoft.AspNetCore.SignalR.HubOptions.DisableImplicitFromServicesParameters%2A> to `true` in the [server-side circuit handler hub options](xref:blazor/fundamentals/signalr#server-side-circuit-handler-options). For more information, see [FileUpload: Did not receive any data in the allotted time (`dotnet/aspnetcore` #38842)](https://github.com/dotnet/aspnetcore/issues/38842#issuecomment-1342540950).
+
+* Not reading the stream to completion. This isn't a framework issue. Trap the exception and investigate it further in your local environment/network.
+
+<!-- UPDATE 10.0 HOLD in versions of ASP.NET Core earlier than 9.0 
+                adopt ***either*** of the following approaches: * Upgrade the app to ASP.NET Core 9.0 or later. 
+                with the article version selector set to "ASP.NET Core in .NET 8" or earlier -->
+
+* Using server-side rendering and calling <xref:Microsoft.AspNetCore.Components.Forms.IBrowserFile.OpenReadStream%2A> on multiple files before reading them to completion. To resolve the issue, use the `LazyBrowserFileStream` class and approach described in the [Upload files to a server with server-side rendering](#upload-files-to-a-server-with-server-side-rendering) section of this article.
 
 ## Additional resources
 
@@ -849,15 +937,15 @@ For more information on SignalR configuration and how to set <xref:Microsoft.Asp
 
 * <xref:blazor/file-downloads>
 * <xref:mvc/models/file-uploads#security-considerations>
-* <xref:blazor/forms-and-input-components>
-* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples)
+* <xref:blazor/forms/index>
+* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples) ([how to download](xref:blazor/fundamentals/index#sample-apps))
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-6.0"
 
 * <xref:mvc/models/file-uploads#security-considerations>
-* <xref:blazor/forms-and-input-components>
-* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples)
+* <xref:blazor/forms/index>
+* [Blazor samples GitHub repository (`dotnet/blazor-samples`)](https://github.com/dotnet/blazor-samples) ([how to download](xref:blazor/fundamentals/index#sample-apps))
 
 :::moniker-end

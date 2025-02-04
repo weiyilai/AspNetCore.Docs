@@ -169,6 +169,8 @@ The `appsettings.json` file is updated with the connection string used to connec
 
 ---
 
+[!INCLUDE [managed-identities-test-non-production](~/includes/managed-identities-test-non-production.md)]
+
 ### Files created and updated
 
 The scaffold process creates the following files:
@@ -229,6 +231,8 @@ In this section, the **Package Manager Console** (PMC) window is used to:
   dotnet ef migrations add InitialCreate
   dotnet ef database update
   ```
+
+  [!INCLUDE[](~/includes/dotnet-tool-install-arch-options.md)]
 
 > [!NOTE]
 > For SQLite, column type for the `Price` field is set to `TEXT`. This is resolved in a later step.

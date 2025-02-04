@@ -1,11 +1,11 @@
 ---
 title: Rate limiting middleware in ASP.NET Core
-author: rick-anderson
+author: tdykstra
 monikerRange: '>= aspnetcore-7.0'
 description: Learn how limit requests in ASP.NET Core apps
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 9/30/2022
+ms.date: 10/29/2022
 uid: performance/rate-limit
 ---
 
@@ -16,6 +16,8 @@ By [Arvin Kahbazi](https://github.com/Kahbazi), [Maarten Balliauw](https://githu
 :::moniker range=">= aspnetcore-7.0"
 
 The `Microsoft.AspNetCore.RateLimiting` middleware provides rate limiting middleware. Apps configure rate limiting policies and then attach the policies to endpoints. Apps using rate limiting should be carefully load tested and reviewed before deploying. See [Testing endpoints with rate limiting](#test7) in this article for more information.
+
+For an introduction to rate limiting, see [Rate limiting middleware](https://blog.maartenballiauw.be/post/2022/09/26/aspnet-core-rate-limiting-middleware.html).
 
 ## Rate limiter algorithms
 
@@ -60,10 +62,12 @@ A sliding window algorithm:
 * Is similar to the fixed window limiter but adds segments per window. The window slides one segment each segment interval. The segment interval is (window time)/(segments per window).
 * Limits the requests for a window to `permitLimit` requests.
 * Each time window is divided in `n` segments per window.
-* Requests taken from the expired time segment one window back (`n` segments prior to the current segment), are added to the current segment. We refer to the most expired time segment one window back as the expired segment.  Consider the following table which shows a sliding window limiter with a 30-second window, 3 segments per window and a limit of 100 requests:
+* Requests taken from the expired time segment one window back (`n` segments prior to the current segment) are added to the current segment. We refer to the most expired time segment one window back as the expired segment.
+
+Consider the following table that shows a sliding window limiter with a 30-second window, three segments per window, and a limit of 100 requests:
 
 * The top row and first column shows the time segment.
-* The second row shows the remaining requests available. The remaining requests are available-requests+recycled.
+* The second row shows the remaining requests available. The remaining requests are calculated as the available requests minus the processed requests plus the recycled requests.
 * Requests at each time moves along the diagonal blue line.
 * From time 30 on, the request taken from the expired time segment are added back to the request limit, as shown in the red lines.
 
@@ -80,20 +84,19 @@ A sliding window algorithm:
 |  40   |          |**[+30]**|       |                 | -10   |  | |
 |  50   |          |           | **[+40]**  |            |               | -10  | |
 |  60   |          |           |            |  **[+30]**  |    |  | -35|
-
 -->
 
-The following table shows the data in the previous graph in a different format. The **Remaining** column shows the requests available from the previous segment (The **Carry over** from the previous row). The first row shows 100 available because there's no previous segment:
+The following table shows the data in the previous graph in a different format. The **Available** column shows the requests available from the previous segment (The **Carry over** from the previous row). The first row shows 100 available requests because there's no previous segment.
 
 | Time | Available | Taken | Recycled from expired | Carry over |
-| ---- | ----      | ------| ------                | ---- |
-| 0    | 100       | 20    | 0                     | 80 |
-| 10   | 80        | 30    | 0                     | 50 |
-| 20   | 50        | 40    | 0                     | 10 |
-| 30   | 10        | 30    | 20                    | 0  |
-| 40   | 0         | 10    | 30                    | 20 |
-| 50   | 20        | 10    | 40                    | 50 |
-| 60   | 50        | 35    | 30                    | 45 |
+| :--: | :-------: | :---: | :-------------------: | :--------: |
+| 0    | 100       | 20    | 0                     | 80         |
+| 10   | 80        | 30    | 0                     | 50         |
+| 20   | 50        | 40    | 0                     | 10         |
+| 30   | 10        | 30    | 20                    | 0          |
+| 40   | 0         | 10    | 30                    | 20         |
+| 50   | 20        | 10    | 40                    | 50         |
+| 60   | 50        | 35    | 30                    | 45         |
 
 The following code uses the sliding window rate limiter:
 
@@ -103,17 +106,17 @@ The following code uses the sliding window rate limiter:
 
 ### Token bucket limiter
 
-The token bucket limiter is similar to the sliding window limiter, but rather than adding back the requests taken from the expired segment, a fixed number of tokens are added each replenishment period. The tokens added each segment can't increase the available tokens to a number higher than the token bucket limit. The following table shows a token bucket limiter with a limit of 100 tokens and a 10-second replenishment period:
+The token bucket limiter is similar to the sliding window limiter, but rather than adding back the requests taken from the expired segment, a fixed number of tokens are added each replenishment period. The tokens added each segment can't increase the available tokens to a number higher than the token bucket limit. The following table shows a token bucket limiter with a limit of 100 tokens and a 10-second replenishment period.
 
 | Time | Available | Taken | Added | Carry over |
-| ---- | ----      | ------| ------| ---- |
-| 0    | 100       | 20    | 0     | 80 |
-| 10   | 80        | 10    | 20    | 90 |
-| 20   | 90        |  5    | 15    | 100 |
-| 30   | 100       | 30    | 20    | 90  |
-| 40   | 90        |  6    | 16    | 100 |
-| 50   | 100       | 40    | 20    | 80 |
-| 60   | 80        | 50    | 20    | 50 |
+| :--: | :-------: | :---: | :---: | :--------: |
+| 0    | 100       | 20    | 0     | 80         |
+| 10   | 80        | 10    | 20    | 90         |
+| 20   | 90        | 5     | 15    | 100        |
+| 30   | 100       | 30    | 20    | 90         |
+| 40   | 90        | 6     | 16    | 100        |
+| 50   | 100       | 40    | 20    | 80         |
+| 60   | 80        | 50    | 20    | 50         |
 
 The following code uses the token bucket limiter:
 
@@ -125,7 +128,7 @@ When <xref:System.Threading.RateLimiting.TokenBucketRateLimiterOptions.AutoReple
 
 ### Concurrency limiter
 
-The concurrency limiter limits the number concurrent requests. Each request reduces the concurrency limit by one. When a request completes, the limit is increased by one. Unlike the other requests limiters that limit the total number of requests for a specified period, the concurrency limiter limits only the number of concurrent requests and doesn't cap the number of requests in a time period.
+The concurrency limiter limits the number of concurrent requests. Each request reduces the concurrency limit by one. When a request completes, the limit is increased by one. Unlike the other requests limiters that limit the total number of requests for a specified period, the concurrency limiter limits only the number of concurrent requests and doesn't cap the number of requests in a time period.
 
 The following code uses the concurrency limiter:
 
@@ -157,7 +160,7 @@ In the preceding code, the `[EnableRateLimiting("sliding")]` is ***not*** applie
 
 Consider the following code which doesn't call `RequireRateLimiting` on `MapRazorPages` or `MapDefaultControllerRoute`:
 
-:::code language="csharp" source="~/../AspNetCore.Docs.Samples/fundamentals/middleware/rate-limit/WebRate2/Program.cs" id="snippet_2" highlight="52,51":::
+:::code language="csharp" source="~/../AspNetCore.Docs.Samples/fundamentals/middleware/rate-limit/WebRate2/Program.cs" id="snippet_2" highlight="51-52":::
 
 Consider the following controller:
 
@@ -187,7 +190,7 @@ The following samples aren't meant for production code but are examples on how t
 
 The following sample:
 
-* Creates a [RateLimiterOptions.OnRejected](xref:Microsoft.AspNetCore.RateLimiting.RateLimiterOptions.OnRejected) callback that is called when a request exceeds the specified limit. `retryAfter` can be used with the [`TokenBucketRateLimiter`](https://source.dot.net/#System.Threading.RateLimiting/System/Threading/RateLimiting/TokenBucketRateLimiter.cs), [`FixedWindowLimiter`](https://source.dot.net/#System.Threading.RateLimiting/System/Threading/RateLimiting/FixedWindowRateLimiter.cs), and [`SlidingWindowLimiter`](https://source.dot.net/#System.Threading.RateLimiting/System/Threading/RateLimiting/SlidingWindowRateLimiter.cs) because these algorithms are able to estimate when more permits will be added. The `ConcurrencyLimiter` has no way of calculating when permits will be available.
+* Creates a [RateLimiterOptions.OnRejected](xref:Microsoft.AspNetCore.RateLimiting.RateLimiterOptions.OnRejected) callback that is called when a request exceeds the specified limit. `retryAfter` can be used with the [TokenBucketRateLimiter](/dotnet/api/system.threading.ratelimiting.tokenbucketratelimiter), [FixedWindowLimiter](/dotnet/api/microsoft.aspnetcore.ratelimiting.ratelimiteroptionsextensions.addfixedwindowlimiter), and [SlidingWindowLimiter](/dotnet/api/microsoft.aspnetcore.ratelimiting.ratelimiteroptionsextensions.addslidingwindowlimiter) because these algorithms are able to estimate when more permits will be added. The `ConcurrencyLimiter` has no way of calculating when permits will be available.
 * Adds the following limiters:
 
   * A `SampleRateLimiterPolicy` which implements the `IRateLimiterPolicy<TPartitionKey>` interface. The `SampleRateLimiterPolicy` class is shown later in this article.
@@ -231,13 +234,13 @@ See [the samples repository for the complete `Program.cs`](https://github.com/do
 
 ## Testing endpoints with rate limiting
 
-Before deploying an app using rate limiting to production, stress test the app to validate the rate limiters and options used. For example, create a [JMeter script](https://jmeter.apache.org/usermanual/jmeter_proxy_step_by_step.html) with a tool like [BlazeMeter](https://guide.blazemeter.com/hc/articles/207421695-Writing-your-first-JMeter-script) or [Apache JMeter HTTP(S) Test Script Recorder](https://jmeter.apache.org/usermanual/jmeter_proxy_step_by_step.html) and load the script to [Azure Load Testing](/azure/load-testing/overview-what-is-azure-load-testing).
+Before deploying an app using rate limiting to production, stress test the app to validate the rate limiters and options used. For example, create a [JMeter script](https://jmeter.apache.org/usermanual/jmeter_proxy_step_by_step.html) with a tool like [BlazeMeter](https://www.blazemeter.com/blog/jmeter-tutorial) or [Apache JMeter HTTP(S) Test Script Recorder](https://jmeter.apache.org/usermanual/jmeter_proxy_step_by_step.html) and load the script to [Azure Load Testing](/azure/load-testing/overview-what-is-azure-load-testing).
 
 Creating partitions with user input makes the app vulnerable to [Denial of Service](https://www.cisa.gov/uscert/ncas/tips/ST04-015) (DoS) Attacks. For example, creating partitions on client IP addresses makes the app vulnerable to Denial of Service Attacks that employ IP Source Address Spoofing. For more information, see [BCP 38 RFC 2827 Network Ingress Filtering: Defeating Denial of Service Attacks that employ IP Source Address Spoofing](https://www.rfc-editor.org/info/bcp38).
 
 ## Additional resources
 
-* [Rate limiting middleware](https://blog.maartenballiauw.be/post/2022/09/26/aspnet-core-rate-limiting-middleware.html) by Maarten Balliauw
+* [Rate limiting middleware](https://blog.maartenballiauw.be/post/2022/09/26/aspnet-core-rate-limiting-middleware.html) by Maarten Balliauw provides an excellent introduction and overview to rate limiting.
 * [Rate limit an HTTP handler in .NET](/dotnet/core/extensions/http-ratelimiter)
 
 :::moniker-end

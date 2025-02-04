@@ -5,7 +5,7 @@ description: Learn how to manage request routing and navigation in Blazor Hybrid
 monikerRange: '>= aspnetcore-6.0'
 ms.author: riande
 ms.custom: "mvc"
-ms.date: 01/18/2023
+ms.date: 11/12/2024
 uid: blazor/hybrid/routing
 zone_pivot_groups: blazor-hybrid-frameworks
 ---
@@ -35,7 +35,7 @@ To change the link handling behavior for links that don't set `target="_blank"`,
 The <xref:Microsoft.AspNetCore.Components.WebView.UrlLoadingEventArgs.Url?displayProperty=nameWithType> property is used to get or dynamically set the URL.
 
 > [!WARNING]
-> By default, external links are opened in an app determined by the device. Opening external links within a `BlazorWebView` can introduce security vulnerabilities and should ***not*** be enabled unless you can ensure that the external links are fully trusted.
+> External links are opened in an app determined by the device. Opening external links within a `BlazorWebView` can introduce security vulnerabilities and shouldn't be enabled unless you can ensure that the external links are fully trusted.
 
 API documentation:
 
@@ -126,6 +126,12 @@ In the `MainPage` XAML markup (`MainPage.xaml`), specify the start path. The fol
 <BlazorWebView ... StartPath="/welcome" ...>
     ...
 <BlazorWebView>
+```
+
+Alternatively, the start path can be set in the `MainPage` constructor (`MainPage.xaml.cs`):
+
+```csharp
+blazorWebView.StartPath = "/welcome";
 ```
 
 :::zone-end
@@ -273,9 +279,14 @@ For more information, see the following resources:
 
 :::zone pivot="maui"
 
-## Deep linking
+## App linking (deep linking)
 
-Coverage of deep linking support is forthcoming. In the meantime, see [Support deep linking into .NET MAUI Blazor apps (dotnet/maui #3788)](https://github.com/dotnet/maui/issues/3788#issuecomment-1421550198) for more information.
+It's often desirable to connect a website and a mobile app so that links on a website launch the mobile app and display content in the mobile app. App linking, also known as *deep linking*, is a technique that enables a mobile device to respond to a URI and launch content in a mobile app that's represented by the URI.
+
+For more information, see the following articles in the .NET MAUI documentation:
+
+* [Android app links](/dotnet/maui/android/app-links)
+* [Apple universal links](/dotnet/maui/macios/universal-links)
 
 :::zone-end
 

@@ -5,7 +5,7 @@ description: Learn how to secure an ASP.NET Core Blazor WebAssembly standalone a
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 03/10/2023
+ms.date: 11/12/2024
 uid: blazor/security/webassembly/standalone-with-azure-active-directory-b2c
 ---
 # Secure an ASP.NET Core Blazor WebAssembly standalone app with Azure Active Directory B2C
@@ -39,15 +39,15 @@ Register an AAD B2C app:
 1. Provide a **Name** for the app (for example, **Blazor Standalone AAD B2C**).
 1. For **Supported account types**, select the multi-tenant option: **Accounts in any organizational directory or any identity provider. For authenticating users with Azure AD B2C.**
 1. Set the **Redirect URI** dropdown list to **Single-page application (SPA)** and provide the following redirect URI: `https://localhost/authentication/login-callback`. If you know the production redirect URI for the Azure default host (for example, `azurewebsites.net`) or the custom domain host (for example, `contoso.com`), you can also add the production redirect URI at the same time that you're providing the `localhost` redirect URI. Be sure to include the port number for non-`:443` ports in any production redirect URIs that you add.
-1. If you're using an [unverified publisher domain](/azure/active-directory/develop/howto-configure-publisher-domain), confirm that **Permissions** > **Grant admin consent to openid and offline_access permissions** is selected. If the publisher domain is verified, this checkbox isn't present.
+1. If you're using an [unverified publisher domain](/entra/identity-platform/howto-configure-publisher-domain), confirm that **Permissions** > **Grant admin consent to openid and offline_access permissions** is selected. If the publisher domain is verified, this checkbox isn't present.
 1. Select **Register**.
 
 > [!NOTE]
-> Supplying the port number for a `localhost` AAD B2C redirect URI isn't required. For more information, see [Redirect URI (reply URL) restrictions and limitations: Localhost exceptions (Azure documentation)](/azure/active-directory/develop/reply-url#localhost-exceptions).
+> Supplying the port number for a `localhost` AAD B2C redirect URI isn't required. For more information, see [Redirect URI (reply URL) restrictions and limitations: Localhost exceptions (Entra documentation)](/entra/identity-platform/reply-url#localhost-exceptions).
 
 Record the following information:
 
-* Application (client) ID (for example, `41451fa7-82d9-4673-8fa5-69eff5a761fd`).
+* Application (client) ID (for example, `00001111-aaaa-2222-bbbb-3333cccc4444`).
 * AAD B2C instance (for example, `https://contoso.b2clogin.com/`, which includes the trailing slash): The instance is the scheme and host of an Azure B2C app registration, which can be found by opening the **Endpoints** window from the **App registrations** page in the Azure portal.
 * AAD B2C Primary/Publisher/Tenant domain (for example, `contoso.onmicrosoft.com`): The domain is available as the **Publisher domain** in the **Branding** blade of the Azure portal for the registered app.
 
@@ -78,20 +78,20 @@ dotnet new blazorwasm -au IndividualB2C --aad-b2c-instance "{AAD B2C INSTANCE}" 
 | ----------------------------- | ------------------------------- | ------------------------------------------------------------- |
 | `{AAD B2C INSTANCE}`          | Instance                        | `https://contoso.b2clogin.com/` (includes the trailing slash) |
 | `{PROJECT NAME}`              | &mdash;                         | `BlazorSample`                                                |
-| `{CLIENT ID}`                 | Application (client) ID         | `41451fa7-82d9-4673-8fa5-69eff5a761fd`                        |
+| `{CLIENT ID}`                 | Application (client) ID         | `00001111-aaaa-2222-bbbb-3333cccc4444`                        |
 | `{SIGN UP OR SIGN IN POLICY}` | Sign-up/sign-in user flow       | `B2C_1_signupsignin1`                                         |
 | `{TENANT DOMAIN}`             | Primary/Publisher/Tenant domain | `contoso.onmicrosoft.com`                                     |
 
 The output location specified with the `-o|--output` option creates a project folder if it doesn't exist and becomes part of the project's name.
 
-[!INCLUDE[](~/blazor/security/includes/additional-scopes-standalone-nonAAD.md)]
+[!INCLUDE[](~/blazor/security/includes/additional-scopes-standalone-nonMEID.md)]
 
 After creating the app, you should be able to:
 
-* Log into the app using an AAD user account.
+* Log into the app using an Microsoft Entra ID user account.
 * Request access tokens for Microsoft APIs. For more information, see:
   * [Access token scopes](#access-token-scopes)
-  * [Quickstart: Configure an application to expose web APIs](/azure/active-directory/develop/quickstart-configure-app-expose-web-apis).
+  * [Quickstart: Configure an application to expose web APIs](/entra/identity-platform/quickstart-configure-app-expose-web-apis).
 
 ### Run the app
 
@@ -101,7 +101,7 @@ Use one of the following approaches to run the app:
   * Select the **Run** button.
   * Use **Debug** > **Start Debugging** from the menu.
   * Press <kbd>F5</kbd>.
-* .NET CLI command shell: Execute the `dotnet run` command from the app's folder.
+* .NET CLI command shell: Execute the `dotnet watch` (or `dotnet run`) command from the app's folder.
 
 ## Parts of the app
 
@@ -109,7 +109,7 @@ This section describes the parts of an app generated from the Blazor WebAssembly
 
 ### Authentication package
 
-When an app is created to use an Individual B2C Account (`IndividualB2C`), the app automatically receives a package reference for the [Microsoft Authentication Library](/azure/active-directory/develop/msal-overview) ([`Microsoft.Authentication.WebAssembly.Msal`](https://www.nuget.org/packages/Microsoft.Authentication.WebAssembly.Msal)). The package provides a set of primitives that help the app authenticate users and obtain tokens to call protected APIs.
+When an app is created to use an Individual B2C Account (`IndividualB2C`), the app automatically receives a package reference for the [Microsoft Authentication Library](/entra/identity-platform/msal-overview) ([`Microsoft.Authentication.WebAssembly.Msal`](https://www.nuget.org/packages/Microsoft.Authentication.WebAssembly.Msal)). The package provides a set of primitives that help the app authenticate users and obtain tokens to call protected APIs.
 
 If adding authentication to an app, manually add the [`Microsoft.Authentication.WebAssembly.Msal`](https://www.nuget.org/packages/Microsoft.Authentication.WebAssembly.Msal) package to the app.
 
@@ -121,7 +121,7 @@ The [`Microsoft.Authentication.WebAssembly.Msal`](https://www.nuget.org/packages
 
 Support for authenticating users is registered in the service container with the <xref:Microsoft.Extensions.DependencyInjection.MsalWebAssemblyServiceCollectionExtensions.AddMsalAuthentication%2A> extension method provided by the [`Microsoft.Authentication.WebAssembly.Msal`](https://www.nuget.org/packages/Microsoft.Authentication.WebAssembly.Msal) package. This method sets up all of the services required for the app to interact with the Identity Provider (IP).
 
-`Program.cs`:
+In the `Program` file:
 
 ```csharp
 builder.Services.AddMsalAuthentication(options =>
@@ -130,7 +130,7 @@ builder.Services.AddMsalAuthentication(options =>
 });
 ```
 
-The <xref:Microsoft.Extensions.DependencyInjection.MsalWebAssemblyServiceCollectionExtensions.AddMsalAuthentication%2A> method accepts a callback to configure the parameters required to authenticate an app. The values required for configuring the app can be obtained from the AAD configuration when you register the app.
+The <xref:Microsoft.Extensions.DependencyInjection.MsalWebAssemblyServiceCollectionExtensions.AddMsalAuthentication%2A> method accepts a callback to configure the parameters required to authenticate an app. The values required for configuring the app can be obtained from the configuration when you register the app.
 
 Configuration is supplied by the `wwwroot/appsettings.json` file:
 
@@ -152,7 +152,7 @@ Example:
 {
   "AzureAdB2C": {
     "Authority": "https://contoso.b2clogin.com/contoso.onmicrosoft.com/B2C_1_signupsignin1",
-    "ClientId": "41451fa7-82d9-4673-8fa5-69eff5a761fd",
+    "ClientId": "00001111-aaaa-2222-bbbb-3333cccc4444",
     "ValidateAuthority": false
   }
 }
@@ -175,6 +175,9 @@ Specify additional scopes with `AdditionalScopesToConsent`:
 ```csharp
 options.ProviderOptions.AdditionalScopesToConsent.Add("{ADDITIONAL SCOPE URI}");
 ```
+
+> [!NOTE]
+> <xref:Microsoft.Authentication.WebAssembly.Msal.Models.MsalProviderOptions.AdditionalScopesToConsent%2A> isn't able to provision delegated user permissions for Microsoft Graph via the Microsoft Entra ID consent UI when a user first uses an app registered in Microsoft Azure. For more information, see <xref:blazor/security/webassembly/graph-api?pivots=graph-sdk-5#defaultaccesstokenscopes-versus-additionalscopestoconsent>.
 
 For more information, see the following sections of the *Additional scenarios* article:
 
@@ -215,14 +218,15 @@ For more information, see the following sections of the *Additional scenarios* a
 
 ## Troubleshoot
 
-[!INCLUDE[](~/blazor/security/includes/troubleshoot.md)]
+[!INCLUDE[](~/blazor/security/includes/troubleshoot-wasm.md)]
 
 ## Additional resources
 
+* [Identity and account types for single- and multitenant apps](/security/zero-trust/develop/identity-supported-account-types)
 * <xref:blazor/security/webassembly/additional-scenarios>
 * [Build a custom version of the Authentication.MSAL JavaScript library](xref:blazor/security/webassembly/additional-scenarios#build-a-custom-version-of-the-authenticationmsal-javascript-library)
 * [Unauthenticated or unauthorized web API requests in an app with a secure default client](xref:blazor/security/webassembly/additional-scenarios#unauthenticated-or-unauthorized-web-api-requests-in-an-app-with-a-secure-default-client)
 * <xref:security/authentication/azure-ad-b2c>
 * [Tutorial: Create an Azure Active Directory B2C tenant](/azure/active-directory-b2c/tutorial-create-tenant)
 * [Tutorial: Register an application in Azure Active Directory B2C](/azure/active-directory-b2c/tutorial-register-applications)
-* [Microsoft identity platform documentation](/azure/active-directory/develop/)
+* [Microsoft identity platform documentation](/entra/identity-platform/)

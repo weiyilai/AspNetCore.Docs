@@ -2,7 +2,7 @@
 title: Part 4, Razor Pages with EF Core in ASP.NET Core - Migrations
 author: tdykstra
 description: Part 4 of Razor Pages and Entity Framework tutorial series.
-ms.author: riande
+ms.author: tdykstra
 ms.date: 07/22/2019
 uid: data/ef-rp/migrations
 ---
@@ -42,6 +42,8 @@ Drop-Database
   ```dotnetcli
   dotnet tool install --global dotnet-ef
   ```
+
+[!INCLUDE[](~/includes/dotnet-tool-install-arch-options.md)]
 
 * In the command prompt, navigate to the project folder. The project folder contains the `ContosoUniversity.csproj` file.
 
@@ -312,7 +314,7 @@ Solution: Run `dotnet ef database update`
 ### Additional resources
 
 * [YouTube version of this tutorial](https://www.youtube.com/watch?v=OWSUuMLKTJo)
-* [.NET Core CLI](/ef/core/miscellaneous/cli/dotnet).
+* [.NET CLI](/ef/core/miscellaneous/cli/dotnet).
 * [Package Manager Console (Visual Studio)](/ef/core/miscellaneous/cli/powershell)
 
 

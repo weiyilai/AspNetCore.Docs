@@ -5,7 +5,7 @@ description: Learn how to build a Blazor Progressive Web Application (PWA) that 
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 02/23/2023
+ms.date: 11/12/2024
 uid: blazor/progressive-web-app
 ---
 # ASP.NET Core Blazor Progressive Web Application (PWA)
@@ -33,11 +33,7 @@ The word *progressive* is used to describe these apps because:
 
 When creating a new **Blazor WebAssembly App**, select the **Progressive Web Application** checkbox.
 
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-When creating a new **Blazor WebAssembly App**, select the **Progressive Web Application** checkbox.
-
-# [Visual Studio Code / .NET Core CLI](#tab/visual-studio-code+netcore-cli)
+# [Visual Studio Code / .NET CLI](#tab/visual-studio-code+net-cli)
 
 Use the following command to create a PWA project in a command shell with the `--pwa` switch:
 
@@ -49,7 +45,11 @@ In the preceding command, the `-o|--output` option creates a new folder for the 
 
 ---
 
+:::moniker range="< aspnetcore-8.0"
+
 Optionally, PWA can be configured for an app created from the **ASP.NET Core Hosted** Blazor WebAssembly project template. The PWA scenario is independent of the hosting model.
+
+:::moniker-end
 
 ## Convert an existing Blazor WebAssembly app into a PWA
 
@@ -90,18 +90,50 @@ To obtain static assets, use **one** of the following approaches:
   dotnet new blazorwasm -o MyBlazorPwa --pwa -f net5.0
   ```
 
+:::moniker range=">= aspnetcore-8.0"
+
 * Navigate to the ASP.NET Core GitHub repository at the following URL, which links to `main` branch reference source and assets. Select the release that you're working with from the **Switch branches or tags** dropdown list that applies to your app.
 
-  [Blazor WebAssembly project template `wwwroot` folder (dotnet/aspnetcore GitHub repository `main` branch)](https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content/ComponentsWebAssembly-CSharp/Client/wwwroot)
+  [Blazor WebAssembly project template `wwwroot` folder (`dotnet/aspnetcore` GitHub repository `main` branch)](https://github.com/dotnet/aspnetcore/tree/main/src/ProjectTemplates/Web.ProjectTemplates/content/ComponentsWebAssembly-CSharp/wwwroot)
 
   [!INCLUDE[](~/includes/aspnetcore-repo-ref-source-links.md)]
 
-From the source `wwwroot` folder either in the app that you created or from the reference assets in the `dotnet/aspnetcore` GitHub repository, copy the following files into the app's `wwwroot` folder:
+  From the source `wwwroot` folder either in the app that you created or from the reference assets in the `dotnet/aspnetcore` GitHub repository, copy the following files into the app's `wwwroot` folder:
 
-* `icon-512.png`
-* `manifest.json`
-* `service-worker.js`
-* `service-worker.published.js`
+  * `icon-192.png`
+  * `icon-512.png`
+  * `manifest.webmanifest`
+  * `service-worker.js`
+  * `service-worker.published.js`
+
+In the app's `wwwroot/index.html` file:
+
+* Add `<link>` elements for the manifest and app icon:
+
+  ```html
+  <link href="manifest.webmanifest" rel="manifest" />
+  <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+  ```
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+* Navigate to the ASP.NET Core GitHub repository at the following URL, which links to the `v7.0.0` tag reference source and assets. If you're using a version of ASP.NET Core later than 7.0, change the document version selector at the top of this article to see the updated guidance for this section. Select the release that you're working with from the **Switch branches or tags** dropdown list that applies to your app.
+
+  [Blazor WebAssembly project template `wwwroot` folder (`v7.0.0` tag)](https://github.com/dotnet/aspnetcore/tree/v7.0.0/src/ProjectTemplates/Web.ProjectTemplates/content/ComponentsWebAssembly-CSharp/Client/wwwroot)
+
+  [!INCLUDE[](~/includes/aspnetcore-repo-ref-source-links.md)]
+
+  From the source `wwwroot` folder either in the app that you created or from the reference assets in the `dotnet/aspnetcore` GitHub repository, copy the following files into the app's `wwwroot` folder:
+
+  * `favicon.png`
+  * `icon-192.png`
+  * `icon-512.png`
+  * `manifest.json`
+  * `service-worker.js`
+  * `service-worker.published.js`
 
 In the app's `wwwroot/index.html` file:
 
@@ -110,7 +142,10 @@ In the app's `wwwroot/index.html` file:
   ```html
   <link href="manifest.json" rel="manifest" />
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+  <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
   ```
+
+:::moniker-end
 
 * Add the following `<script>` tag inside the closing `</body>` tag immediately after the `blazor.webassembly.js` script tag:
 
@@ -136,7 +171,7 @@ To customize the window's title, color scheme, icon, or other details, see the `
 
 ## Offline support
 
-By default, apps created using the PWA template option have support for running offline. A user must first visit the app while they're online. The browser automatically downloads and caches all of the resources required to operate offline.
+Apps created using the PWA template option have support for running offline. A user must first visit the app while they're online. The browser automatically downloads and caches all of the resources required to operate offline.
 
 > [!IMPORTANT]
 > Development support would interfere with the usual development cycle of making changes and testing them. Therefore, offline support is only enabled for *published* apps. 
@@ -204,7 +239,7 @@ As a mental model, you can think of an offline-first PWA as behaving like a mobi
 
 The Blazor PWA template produces apps that automatically try to update themselves in the background whenever the user visits and has a working network connection. The way this works is as follows:
 
-* During compilation, the project generates a *service worker assets manifest*. By default, this is called `service-worker-assets.js`. The manifest lists all the static resources that the app requires to function offline, such as .NET assemblies, JavaScript files, and CSS, including their content hashes. The resource list is loaded by the service worker so that it knows which resources to cache.
+* During compilation, the project generates a *service worker assets manifest*, which is named `service-worker-assets.js`. The manifest lists all the static resources that the app requires to function offline, such as .NET assemblies, JavaScript files, and CSS, including their content hashes. The resource list is loaded by the service worker so that it knows which resources to cache.
 * Each time the user visits the app, the browser re-requests `service-worker.js` and `service-worker-assets.js` in the background. The files are compared byte-for-byte with the existing installed service worker. If the server returns changed content for either of these files, the service worker attempts to install a new version of itself.
 * When installing a new version of itself, the service worker creates a new, separate cache for offline resources and starts populating the cache with resources listed in `service-worker-assets.js`. This logic is implemented in the `onInstall` function inside `service-worker.published.js`.
 * The process completes successfully when all of the resources are loaded without error and all content hashes match. If successful, the new service worker enters a *waiting for activation* state. As soon as the user closes the app (no remaining app tabs or windows), the new service worker becomes *active* and is used for subsequent app visits. The old service worker and its cache are deleted.
@@ -250,7 +285,7 @@ const shouldServeIndexHtml = event.request.mode === 'navigate'
   && !event.request.url.includes('/signin-google');
 ```
 
-No action is required for the Development environment, where content is always fetched from the network.
+No action is required for the `Development` environment, where content is always fetched from the network.
 
 ### Control asset caching
 
@@ -262,12 +297,12 @@ If your project defines the `ServiceWorkerAssetsManifest` MSBuild property, Blaz
 
 The file is placed in the `wwwroot` output directory, so the browser can retrieve this file by requesting `/service-worker-assets.js`. To see the contents of this file, open `/bin/Debug/{TARGET FRAMEWORK}/wwwroot/service-worker-assets.js` in a text editor. However, don't edit the file, as it's regenerated on each build.
 
-By default, this manifest lists:
+The manifest lists:
 
 * Any Blazor-managed resources, such as .NET assemblies and the .NET WebAssembly runtime files required to function offline.
 * All resources for publishing to the app's `wwwroot` directory, such as images, stylesheets, and JavaScript files, including static web assets supplied by external projects and NuGet packages.
 
-You can control which of these resources are fetched and cached by the service worker by editing the logic in `onInstall` in `service-worker.published.js`. By default, the service worker fetches and caches files matching typical web file name extensions such as `.html`, `.css`, `.js`, and `.wasm`, plus file types specific to Blazor WebAssembly, such as `.pdb` files (all versions) and `.dll` files (ASP.NET Core 7.0 or earlier).
+You can control which of these resources are fetched and cached by the service worker by editing the logic in `onInstall` in `service-worker.published.js`. The service worker fetches and caches files matching typical web file name extensions such as `.html`, `.css`, `.js`, and `.wasm`, plus file types specific to Blazor WebAssembly, such as `.pdb` files (all versions) and `.dll` files (ASP.NET Core in .NET 7 or earlier).
 
 To include additional resources that aren't present in the app's `wwwroot` directory, define extra MSBuild `ItemGroup` entries, as shown in the following example:
 
@@ -307,7 +342,7 @@ Additionally, offline-capable PWAs must deal with a range of additional complica
 
 During development you typically want to see each change reflected immediately in the browser without going through a background update process. Therefore, Blazor's PWA template enables offline support only when published.
 
-When building an offline-capable app, it's not enough to test the app in the Development environment. You must test the app in its published state to understand how it responds to different network conditions.
+When building an offline-capable app, it's not enough to test the app in the `Development` environment. You must test the app in its published state to understand how it responds to different network conditions.
 
 ### Update completion after user navigation away from app
 
@@ -321,7 +356,7 @@ This commonly troubles developers who are trying to test updates to their servic
 
 For as long as the list of "clients," which are tabs or windows displaying your app, is nonempty, the worker continues waiting. The reason service workers do this is to guarantee consistency. Consistency means that all resources are fetched from the same atomic cache.
 
-When testing changes, you may find it convenient to click the "skipWaiting" link as shown in the preceding screenshot, then reload the page. You can automate this for all users by coding your service worker to [skip the "waiting" phase and immediately activate on update](https://web.dev/service-worker-lifecycle/#skip-waiting). If you skip the waiting phase, you're giving up the guarantee that resources are always fetched consistently from the same cache instance.
+When testing changes, you may find it convenient to select the "skipWaiting" link as shown in the preceding screenshot, then reload the page. You can automate this for all users by coding your service worker to [skip the "waiting" phase and immediately activate on update](https://web.dev/service-worker-lifecycle/#skip-waiting). If you skip the waiting phase, you're giving up the guarantee that resources are always fetched consistently from the same cache instance.
 
 ### Users may run any historical version of the app
 
@@ -337,11 +372,11 @@ If possible, don't deploy breaking changes to your backend APIs. If you must do 
 
 As described in the [Support server-rendered pages](#support-server-rendered-pages) section, if you want to bypass the service worker's behavior of returning `/index.html` contents for all navigation requests, edit the logic in your service worker.
 
-### All service worker asset manifest contents are cached by default
+### All service worker asset manifest contents are cached
 
 As described in the [Control asset caching](#control-asset-caching) section, the file `service-worker-assets.js` is generated during build and lists all assets the service worker should fetch and cache.
 
-Since this list by default includes everything emitted to `wwwroot`, including content supplied by external packages and projects, you must be careful not to put too much content there. If the `wwwroot` directory contains millions of images, the service worker tries to fetch and cache them all, consuming excessive bandwidth and most likely not completing successfully.
+Since this list includes everything emitted to `wwwroot`, including content supplied by external packages and projects, you must be careful not to put too much content there. If the `wwwroot` directory contains millions of images, the service worker tries to fetch and cache them all, consuming excessive bandwidth and most likely not completing successfully.
 
 Implement arbitrary logic to control which subset of the manifest's contents should be fetched and cached by editing the `onInstall` function in `service-worker.published.js`.
 
@@ -349,7 +384,7 @@ Implement arbitrary logic to control which subset of the manifest's contents sho
 
 The PWA template can be used in conjunction with authentication. An offline-capable PWA can also support authentication when the user has initial network connectivity.
 
-When a user doesn't have network connectivity, they can't authenticate or obtain access tokens. By default, attempting to visit the login page without network access results in a "network error" message. You must design a UI flow that allows the user perform useful tasks while offline without attempting to authenticate the user or obtain access tokens. Alternatively, you can design the app to gracefully fail when the network isn't available. If the app can't be designed to handle these scenarios, you might not want to enable offline support.
+When a user doesn't have network connectivity, they can't authenticate or obtain access tokens. Attempting to visit the login page without network access results in a "network error" message. You must design a UI flow that allows the user perform useful tasks while offline without attempting to authenticate the user or obtain access tokens. Alternatively, you can design the app to gracefully fail when the network isn't available. If the app can't be designed to handle these scenarios, you might not want to enable offline support.
 
 When an app that's designed for online and offline use is online again:
 
@@ -359,7 +394,7 @@ When an app that's designed for online and offline use is online again:
 To create an offline PWA app that interacts with authentication:
 
 * Replace the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccountClaimsPrincipalFactory%601> with a factory that stores the last signed-in user and uses the stored user when the app is offline.
-* Queue operations while the app is offline and apply them when the app returns online.
+* Enqueue operations while the app is offline and apply them when the app returns online.
 * During sign out, clear the stored user.
 
 The [`CarChecker`](https://github.com/SteveSandersonMS/CarChecker) sample app demonstrates the preceding approaches. See the following parts of the app:
@@ -370,5 +405,5 @@ The [`CarChecker`](https://github.com/SteveSandersonMS/CarChecker) sample app de
 
 ## Additional resources
 
-* [Troubleshoot integrity PowerShell script](xref:blazor/host-and-deploy/webassembly#troubleshoot-integrity-powershell-script)
-* [SignalR cross-origin negotiation for authentication](xref:blazor/fundamentals/signalr#signalr-cross-origin-negotiation-for-authentication-blazor-webassembly)
+* [Troubleshoot integrity PowerShell script](xref:blazor/host-and-deploy/webassembly-caching/index#troubleshoot-integrity-powershell-script)
+* [Client-side SignalR cross-origin negotiation for authentication](xref:blazor/fundamentals/signalr#client-side-signalr-cross-origin-negotiation-for-authentication)

@@ -9,9 +9,11 @@ uid: fundamentals/localization/provide-resources
 ---
 # Provide localized resources for languages and cultures in an ASP.NET Core app
 
+[!INCLUDE[](~/includes/not-latest-version.md)]
+
 :::moniker range="> aspnetcore-5.0"
 
-By [Rick Anderson](https://twitter.com/RickAndMSFT), [Damien Bowden](https://twitter.com/damien_bod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Hisham Bin Ateya](https://twitter.com/hishambinateya)
+By [Rick Anderson](https://twitter.com/RickAndMSFT), [Damien Bowden](https://github.com/damienbod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Hisham Bin Ateya](https://twitter.com/hishambinateya)
 
 One task for localizing an app is to provide localized strings in resource files. This article is about working with resource files.
 
@@ -20,6 +22,8 @@ One task for localizing an app is to provide localized strings in resource files
 ASP.NET Core has two collections of culture values, `SupportedCultures` and `SupportedUICultures`. The <xref:System.Globalization.CultureInfo> object for `SupportedCultures` determines the results of culture-dependent functions, such as date, time, number, and currency formatting. `SupportedCultures` also determines the sorting order of text, casing conventions, and string comparisons. See <xref:System.StringComparer.CurrentCulture?displayProperty=nameWithType> for more info on how the server gets the culture. The `SupportedUICultures` determines which translated strings (from *.resx* files) are looked up by the <xref:System.Resources.ResourceManager>. The `ResourceManager` simply looks up culture-specific strings that are determined by `CurrentUICulture`. Every thread in .NET has `CurrentCulture` and `CurrentUICulture` objects. ASP.NET Core inspects these values when rendering culture-dependent functions. For example, if the current thread's culture is set to "en-US" (English, United States), `DateTime.Now.ToLongDateString()` displays "Thursday, February 18, 2016", but if `CurrentCulture` is set to "es-ES" (Spanish, Spain) the output will be "jueves, 18 de febrero de 2016".
 
 ## Resource files
+
+***NOTE:*** [ResX Viewer and Editor](https://marketplace.visualstudio.com/items?itemName=TimHeuer.resx-editor) provides an alternate mechanism to work with resource files using Visual Studio Code.
 
 A resource file is a useful mechanism for separating localizable strings from code. Translated strings for the non-default language are isolated in *.resx* resource files. For example, you might want to create a Spanish resource file named *Welcome.es.resx* containing translated strings. "es" is the language code for Spanish. To create this resource file in Visual Studio:
 
@@ -111,6 +115,8 @@ Localizing an app also involves the following tasks:
 
 ## Additional resources
 
+* [Url culture provider using middleware as filters in ASP.NET Core](https://andrewlock.net/url-culture-provider-using-middleware-as-mvc-filter-in-asp-net-core-1-1-0/)
+* [Applying the RouteDataRequest CultureProvider globally with middleware as filters](https://andrewlock.net/applying-the-routedatarequest-cultureprovider-globally-with-middleware-as-filters/)
 * <xref:fundamentals/localization>
 * <xref:fundamentals/localization/make-content-localizable>
 * <xref:fundamentals/localization/select-language-culture>

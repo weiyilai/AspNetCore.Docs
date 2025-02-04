@@ -3,11 +3,17 @@ title: Inter-process communication with gRPC and Named pipes
 author: jamesnk
 description: Learn how to use gRPC for inter-process communication with Named pipes.
 monikerRange: '>= aspnetcore-8.0'
-ms.author: jamesnk
+ms.author: wpickett
 ms.date: 01/18/2023
 uid: grpc/interprocess-namedpipes
 ---
 # Inter-process communication with gRPC and Named pipes
+
+<!-- UPDATE 9.0 Activate after release and INCLUDE is updated
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
+
+-->
 
 By [James Newton-King](https://twitter.com/jamesnk)
 
@@ -44,6 +50,9 @@ The preceding example:
 ## Client configuration
 
 `GrpcChannel` supports making gRPC calls over custom transports. When a channel is created, it can be configured with a <xref:System.Net.Http.SocketsHttpHandler> that has a custom <xref:System.Net.Http.SocketsHttpHandler.ConnectCallback>. The callback allows the client to make connections over custom transports and then send HTTP requests over that transport.
+
+> [!NOTE]
+> Some connectivity features of `GrpcChannel`, such as client side load balancing and channel status, can't be used together with named pipes.
 
 Named pipes connection factory example:
 
