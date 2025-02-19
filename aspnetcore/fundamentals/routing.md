@@ -1,12 +1,14 @@
 ---
 title: Routing in ASP.NET Core
-author: rick-anderson
+author: tdykstra
 description: Discover how ASP.NET Core routing is responsible for matching HTTP requests and dispatching to executable endpoints.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+content_well_notification: AI-contribution
+ms.author: tdykstra
 ms.custom: mvc
 ms.date: 6/14/2023
 uid: fundamentals/routing
+ai-usage: ai-assisted
 ---
 # Routing in ASP.NET Core
 
@@ -31,6 +33,7 @@ This article covers low-level details of ASP.NET Core routing. For information o
 
 * For controllers, see <xref:mvc/controllers/routing>.
 * For Razor Pages conventions, see <xref:razor-pages/razor-pages-conventions>.
+* For Blazor routing guidance, which adds to or supersedes the guidance in this article, see <xref:blazor/fundamentals/routing>.
 
 ## Routing basics
 
@@ -280,7 +283,7 @@ When a routing middleware executes, it sets an `Endpoint` and route values to a 
 * Calling [HttpContext.GetEndpoint](xref:Microsoft.AspNetCore.Http.EndpointHttpContextExtensions.GetEndpoint%2A) gets the endpoint.
 * `HttpRequest.RouteValues` gets the collection of route values.
 
-[Middleware](xref:fundamentals/middleware/index) runs after the routing middleware can inspect the endpoint and take action. For example, an authorization middleware can interrogate the endpoint's metadata collection for an authorization policy. After all of the middleware in the request processing pipeline is executed, the selected endpoint's delegate is invoked.
+[Middleware](xref:fundamentals/middleware/index) that runs after the routing middleware can inspect the endpoint and take action. For example, an authorization middleware can interrogate the endpoint's metadata collection for an authorization policy. After all of the middleware in the request processing pipeline is executed, the selected endpoint's delegate is invoked.
 
 The routing system in endpoint routing is responsible for all dispatching decisions. Because the middleware applies policies based on the selected endpoint, it's important that:
 
@@ -485,7 +488,7 @@ Regular expressions provide much more control over their matching behavior.
 
 <a name="greedy"></a>
 
-Greedy matching, also known as [lazy matching](https://wikipedia.org/wiki/Regular_expression#Lazy_matching), matches the largest possible string. Non-greedy matches the smallest possible string.
+Greedy matching, also known as *maximal matching* attempts to find the longest possible match in the input text that satisfies the [regex](/dotnet/standard/base-types/regular-expressions) pattern. Non-greedy matching, also known as *lazy matching*, seeks the shortest possible match in the input text that satisfies the regex pattern.
 
 [!INCLUDE[](~/includes/routeSlash.md)]
 
@@ -932,7 +935,7 @@ It is unlikely for an app to run into a situation where this is a problem unless
 
 #### How to address this issue
 
-There are several techniques and optimizations can be applied to routes that will largely improve this scenario:
+There are several techniques and optimizations that can be applied to routes that largely improve this scenario:
 * Apply route constraints to your parameters, for example `{parameter:int}`, `{parameter:guid}`, `{parameter:regex(\\d+)}`, etc. where possible.
   * This allows the routing algorithm to internally optimize the structures used for matching and drastically reduce the memory used.
   * In the vast majority of cases this will suffice to get back to an acceptable behavior.
@@ -1024,7 +1027,7 @@ app.MapMyFramework(...)
 app.MapHealthChecks("/healthz");
 ```
 
-**CONSIDER** writing your own <xref:Microsoft.AspNetCore.Routing.EndpointDataSource>. `EndpointDataSource` is the low-level primitive for declaring and updating a collection of endpoints. `EndpointDataSource` is a powerful API used by controllers and Razor Pages.
+**CONSIDER** writing your own <xref:Microsoft.AspNetCore.Routing.EndpointDataSource>. `EndpointDataSource` is the low-level primitive for declaring and updating a collection of endpoints. `EndpointDataSource` is a powerful API used by controllers and Razor Pages. For more information, see [Dynamic endpoint routing](https://www.mariusgundersen.net/dynamic-endpoint-routing/).
 
 The routing tests have a [basic example](https://github.com/dotnet/AspNetCore/blob/main/src/Http/Routing/test/testassets/RoutingSandbox/Framework/FrameworkEndpointDataSource.cs#L17) of a non-updating data source.
 

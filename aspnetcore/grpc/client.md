@@ -3,11 +3,13 @@ title: Call gRPC services with the .NET client
 author: jamesnk
 description: Learn how to call gRPC services with the .NET gRPC client.
 monikerRange: '>= aspnetcore-3.0'
-ms.author: jamesnk
-ms.date: 12/18/2020
+ms.author: wpickett
+ms.date: 01/08/2025
 uid: grpc/client
 ---
 # Call gRPC services with the .NET client
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 A .NET gRPC client library is available in the [Grpc.Net.Client](https://www.nuget.org/packages/Grpc.Net.Client) NuGet package. This document explains how to:
 
@@ -52,15 +54,13 @@ To call unsecured gRPC services, ensure the server address starts with `http`. F
 Channel and client performance and usage:
 
 * Creating a channel can be an expensive operation. Reusing a channel for gRPC calls provides performance benefits.
+* A channel manages connections to the server. If the connection is closed or lost, the channel automatically reconnects the next time a gRPC call is made.
 * gRPC clients are created with channels. gRPC clients are lightweight objects and don't need to be cached or reused.
 * Multiple gRPC clients can be created from a channel, including different types of clients.
 * A channel and clients created from the channel can safely be used by multiple threads.
 * Clients created from the channel can make multiple simultaneous calls.
 
 `GrpcChannel.ForAddress` isn't the only option for creating a gRPC client. If calling gRPC services from an ASP.NET Core app, consider [gRPC client factory integration](xref:grpc/clientfactory). gRPC integration with `HttpClientFactory` offers a centralized alternative to creating gRPC clients.
-
-> [!NOTE]
-> Calling gRPC over HTTP/2 with `Grpc.Net.Client` is currently not supported on Xamarin. We are working to improve HTTP/2 support in a future Xamarin release. [Grpc.Core](https://www.nuget.org/packages/Grpc.Core) and [gRPC-Web](xref:grpc/browser) are viable alternatives that work today.
 
 ## Make gRPC calls
 
@@ -118,6 +118,8 @@ await foreach (var response in call.ResponseStream.ReadAllAsync())
 }
 ```
 
+The type returned from starting a server streaming call implements `IDisposable`. Always dispose a streaming call to ensure it's stopped and all resources are cleaned up.
+
 ### Client streaming call
 
 A client streaming call starts *without* the client sending a message. The client can choose to send messages with `RequestStream.WriteAsync`. When the client has finished sending messages, `RequestStream.CompleteAsync()` should be called to notify the service. The call is finished when the service returns a response message.
@@ -136,6 +138,8 @@ var response = await call;
 Console.WriteLine($"Count: {response.Count}");
 // Count: 3
 ```
+
+The type returned from starting a client streaming call implements `IDisposable`. Always dispose a streaming call to ensure it's stopped and all resources are cleaned up.
 
 ### Bi-directional streaming call
 
@@ -182,6 +186,8 @@ For best performance, and to avoid unnecessary errors in the client and service,
 5. Waits until the background task has read all incoming messages.
 
 During a bi-directional streaming call, the client and service can send messages to each other at any time. The best client logic for interacting with a bi-directional call varies depending upon the service logic.
+
+The type returned from starting a bi-directional streaming call implements `IDisposable`. Always dispose a streaming call to ensure it's stopped and all resources are cleaned up.
 
 ## Access gRPC headers
 

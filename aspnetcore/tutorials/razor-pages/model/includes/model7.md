@@ -23,6 +23,10 @@ The `Movie` class contains:
   * Only the date is displayed, not time information.
 * The question mark after `string` indicates that the property is nullable. For more information, see [Nullable reference types](/dotnet/csharp/nullable-references).
 
+[DataAnnotations](xref:System.ComponentModel.DataAnnotations) are covered in a later tutorial.
+
+Build the project to verify there are no compilation errors.
+
 # [Visual Studio Code](#tab/visual-studio-code)
 
 1. Add a folder named `Models`.
@@ -41,11 +45,17 @@ The `Movie` class contains:
   * Only the date is displayed, not time information.
 * The question mark after `string` indicates that the property is nullable. For more information, see [Nullable reference types](/dotnet/csharp/nullable-references).
 
+[DataAnnotations](xref:System.ComponentModel.DataAnnotations) are covered in a later tutorial.
+
 <a name="dc7"></a>
 
 ### Add NuGet packages and EF tools
 
 [!INCLUDE[](~/includes/add-EF-NuGet-SQLite-CLI-7.md)]
+
+In Visual Studio Code, press <kbd>Ctrl</kbd>+<kbd>F5</kbd> to run the app without debugging.
+
+In the *Panel* below the editor region, select the *PROBLEMS* tab, or from the *View* menu, select *Problems* if it is not currently in view. Verify there are no compilation errors.
 
 # [Visual Studio for Mac](#tab/visual-studio-mac)
 
@@ -68,11 +78,11 @@ The `Movie` class contains:
   * The user isn't required to enter time information in the date field.
   * Only the date is displayed, not time information.
 
----
-
 [DataAnnotations](xref:System.ComponentModel.DataAnnotations) are covered in a later tutorial.
 
 Build the project to verify there are no compilation errors.
+
+---
 
 ## Scaffold the movie model
 
@@ -192,6 +202,8 @@ In each of the files, append `= default!;` to the `Movie` declaration. For examp
 Fixed in GA per https://github.com/dotnet/Scaffolding/issues/1594#issuecomment-1292422389
 -->
 
+[!INCLUDE [managed-identities-test-non-production](~/includes/managed-identities-test-non-production.md)]
+
 ### Files created and updated
 
 The scaffold process creates the following files:
@@ -279,6 +291,8 @@ In this section, the **Package Manager Console** (PMC) window is used to:
   ```
 
 * The `tool` commands install the latest [Entity Framework Core tools](/ef/core/get-started/overview/install#get-the-entity-framework-core-tools) after uninstalling any previous version, if one exists.
+
+  [!INCLUDE[](~/includes/dotnet-tool-install-arch-options.md)]
 
 * The `migrations` command generates code to create the initial database schema. The schema is based on the model specified in `DbContext`. The `InitialCreate` argument is used to name the migrations. Any name can be used, but by convention a name is selected that describes the migration.
 

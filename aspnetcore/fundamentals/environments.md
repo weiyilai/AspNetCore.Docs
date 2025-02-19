@@ -3,18 +3,22 @@ title: Use multiple environments in ASP.NET Core
 author: tdykstra
 description: Learn how to control app behavior across multiple environments in ASP.NET Core apps.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 01/13/2022
+ms.date: 04/26/2024
 uid: fundamentals/environments
 ---
 # Use multiple environments in ASP.NET Core
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 :::moniker range=">= aspnetcore-6.0"
 
 By [Rick Anderson](https://twitter.com/RickAndMSFT) and [Kirk Larkin](https://twitter.com/serpent5)
 
 ASP.NET Core configures app behavior based on the runtime environment using an environment variable.
+
+For Blazor environments guidance, which adds to or supersedes the guidance in this article, see <xref:blazor/fundamentals/environments>.
 
 ## Environments
 
@@ -136,7 +140,7 @@ Profiles can be selected:
 * Using the [`dotnet run`](/dotnet/core/tools/dotnet-run) CLI command with the `--launch-profile` option set to the profile's name. *This approach only supports Kestrel profiles.*
 
   ```dotnetcli
-  dotnet run --launch-profile "SampleApp"
+  dotnet run --launch-profile "EnvironmentsSample"
   ```
 
 > [!WARNING]
@@ -173,8 +177,8 @@ The [About page](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/
 To set the environment in an [Azure App Service](https://azure.microsoft.com/services/app-service/) app by using the portal:
 
 1. Select the app from the **App Services** page.
-1. In the **Settings** group, select **Configuration**.
-1. In the **Application settings** tab, select **New application setting**.
+1. In the **Settings** group, select **Environment variables**.
+1. In the **App settings** tab, select **+ Add**.
 1. In the **Add/Edit application setting** window, provide `ASPNETCORE_ENVIRONMENT` for the **Name**. For **Value**, provide the environment (for example, `Staging`).
 1. Select the **Deployment slot setting** checkbox if you wish the environment setting to remain with the current slot when deployment slots are swapped. For more information, see [Set up staging environments in Azure App Service](/azure/app-service/web-sites-staged-publishing) in the Azure documentation.
 1. Select **OK** to close the **Add/Edit application setting** dialog.
@@ -276,8 +280,6 @@ For Linux distributions, use the `export` command at a command prompt for sessio
 To set the environment in code, use <xref:Microsoft.AspNetCore.Builder.WebApplicationOptions.EnvironmentName?displayProperty=nameWithType> when creating <xref:Microsoft.AspNetCore.Builder.WebApplicationBuilder>, as shown in the following example:
 
 :::code language="csharp" source="environments/samples/6.x/EnvironmentsSample/Program.cs" id="SetInCode" highlight="1-4":::
-
-For more information, see <xref:fundamentals/host/generic-host#environmentname>.
 
 ## Configuration by environment
 

@@ -2,15 +2,15 @@
 title: Secure a hosted ASP.NET Core Blazor WebAssembly app with Identity Server
 author: guardrex
 description: Learn how to secure a hosted ASP.NET Core Blazor WebAssembly app with Identity Server.
-monikerRange: '>= aspnetcore-3.1'
+monikerRange: '>= aspnetcore-3.1 < aspnetcore-8.0'
 ms.author: riande
-ms.custom: mvc
-ms.date: 03/23/2023
+ms.custom: mvc, linux-related-content
+ms.date: 11/12/2024
 uid: blazor/security/webassembly/hosted-with-identity-server
 ---
 # Secure a hosted ASP.NET Core Blazor WebAssembly app with Identity Server
 
-[!INCLUDE[](~/includes/not-latest-version.md)]
+[!INCLUDE[](~/blazor/security/includes/hosted-blazor-webassembly-notice.md)]
 
 This article explains how to create a [hosted Blazor WebAssembly solution](xref:blazor/hosting-models#blazor-webassembly) that uses [Duende Identity Server](https://docs.duendesoftware.com) to authenticate users and API calls.
 
@@ -53,7 +53,7 @@ To create a new Blazor WebAssembly project with an authentication mechanism:
 
 1. Select the **Create** button to create the app.
 
-# [Visual Studio Code / .NET Core CLI](#tab/visual-studio-code+netcore-cli)
+# [Visual Studio Code / .NET CLI](#tab/visual-studio-code+net-cli)
 
 To create a new Blazor WebAssembly project with an authentication mechanism in an empty folder, specify the `Individual` authentication mechanism with the `-au|--auth` option to store users within the app using ASP.NET Core's [Identity](xref:security/authentication/identity) system:
 
@@ -70,18 +70,6 @@ The output location specified with the optional `-o|--output` option creates a p
 Avoid using dashes (`-`) in the project name that break the formation of the OIDC app identifier. Logic in the Blazor WebAssembly project template uses the project name for an OIDC app identifier in the solution's configuration, and dashes aren't permitted in an OIDC app identifier. Pascal case (`BlazorSample`) or underscores (`Blazor_Sample`) are acceptable alternatives.
 
 For more information, see the [`dotnet new`](/dotnet/core/tools/dotnet-new) command in the .NET Core Guide.
-
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-To create a new hosted Blazor WebAssembly solution with an authentication mechanism:
-
-1. Provide a **Project name** without using dashes. Confirm that the **Location** is correct.
-
-   Avoid using dashes (`-`) in the project name that break the formation of the OIDC app identifier. Logic in the Blazor WebAssembly project template uses the project name for an OIDC app identifier in the solution's configuration, and dashes aren't permitted in an OIDC app identifier. Pascal case (`BlazorSample`) or underscores (`Blazor_Sample`) are acceptable alternatives.
-
-1. Select **Individual Authentication (in-app)** from the **Authentication** dropdown to store users in the app with ASP.NET Core [Identity](xref:security/authentication/identity). Select the **ASP.NET Core Hosted** checkbox. For guidance on creating a hosted Blazor WebAssembly solution, see <xref:blazor/tooling>.
-
-1. Select the **Create** button to create the app.
 
 ---
 
@@ -101,7 +89,7 @@ The following services are registered.
 
 :::moniker range=">= aspnetcore-6.0"
 
-* In `Program.cs`:
+* In the `Program` file:
 
   * Entity Framework Core and ASP.NET Core Identity:
 
@@ -147,6 +135,8 @@ The following services are registered.
         .AddEntityFrameworkStores<ApplicationDbContext>();
     ```
 
+    [!INCLUDE[](~/blazor/security/includes/secure-authentication-flows.md)]
+
   * Identity Server with an additional <xref:Microsoft.Extensions.DependencyInjection.IdentityServerBuilderConfigurationExtensions.AddApiAuthorization%2A> helper method that sets up default ASP.NET Core conventions on top of Identity Server:
 
     ```csharp
@@ -171,7 +161,7 @@ The following services are registered.
 
 :::moniker range=">= aspnetcore-6.0"
 
-* In `Program.cs`:
+* In the `Program` file:
 
 :::moniker-end
 
@@ -254,7 +244,7 @@ In the app settings file (`appsettings.json`) at the project root, the `Identity
 }
 ```
 
-The placeholder `{ASSEMBLY NAME}` is the **:::no-loc text="Client":::** app's assembly name (for example, `BlazorSample.Client`).
+The `{ASSEMBLY NAME}` placeholder is the **:::no-loc text="Client":::** app's assembly name (for example, `BlazorSample.Client`).
 
 ### Authentication package
 
@@ -270,7 +260,7 @@ If adding authentication to an app, manually add the [`Microsoft.AspNetCore.Comp
 
 *This section pertains to the solution's **:::no-loc text="Client":::** app.*
 
-In `Program.cs`, a named <xref:System.Net.Http.HttpClient> is configured to supply <xref:System.Net.Http.HttpClient> instances that include access tokens when making requests to the server API. By default at solution creation, the named <xref:System.Net.Http.HttpClient> is `{PROJECT NAME}.ServerAPI`, where the `{PROJECT NAME}` placeholder is the project's name.
+In the `Program` file, a named <xref:System.Net.Http.HttpClient> is configured to supply <xref:System.Net.Http.HttpClient> instances that include access tokens when making requests to the server API. At solution creation, the named <xref:System.Net.Http.HttpClient> is `{PROJECT NAME}.ServerAPI`, where the `{PROJECT NAME}` placeholder is the project's name.
 
 ```csharp
 builder.Services.AddHttpClient("{PROJECT NAME}.ServerAPI", 
@@ -281,7 +271,7 @@ builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
     .CreateClient("{PROJECT NAME}.ServerAPI"));
 ```
 
-The placeholder `{PROJECT NAME}` is the project name at solution creation. For example, providing a project name of `BlazorSample` produces a named <xref:System.Net.Http.HttpClient> of `BlazorSample.ServerAPI`.
+The `{PROJECT NAME}` placeholder is the project name at solution creation. For example, providing a project name of `BlazorSample` produces a named <xref:System.Net.Http.HttpClient> of `BlazorSample.ServerAPI`.
 
 > [!NOTE]
 > If you're configuring a Blazor WebAssembly app to use an existing Identity Server instance that isn't part of a hosted Blazor solution, change the <xref:System.Net.Http.HttpClient> base address registration from <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`builder.HostEnvironment.BaseAddress`) to the server app's API authorization endpoint URL.
@@ -296,7 +286,7 @@ The support for authenticating users is plugged into the service container by th
 builder.Services.AddApiAuthorization();
 ```
 
-By default, configuration for the app is loaded by convention from `_configuration/{client-id}`. By convention, the client ID is set to the app's assembly name. This URL can be changed to point to a separate endpoint by calling the overload with options.
+Configuration for the app is loaded by convention from `_configuration/{client-id}`. By convention, the client ID is set to the app's assembly name. This URL can be changed to point to a separate endpoint by calling the overload with options.
 
 ### `Imports` file
 
@@ -314,7 +304,18 @@ By default, configuration for the app is loaded by convention from `_configurati
 
 *This section pertains to the solution's **:::no-loc text="Client":::** app.*
 
-[!INCLUDE[](~/blazor/security/includes/app-component.md)]
+The `App` component (`App.razor`) is similar to the `App` component found in Blazor Server apps:
+
+* The <xref:Microsoft.AspNetCore.Components.Authorization.CascadingAuthenticationState> component manages exposing the <xref:Microsoft.AspNetCore.Components.Authorization.AuthenticationState> to the rest of the app.
+* The <xref:Microsoft.AspNetCore.Components.Authorization.AuthorizeRouteView> component makes sure that the current user is authorized to access a given page or otherwise renders the `RedirectToLogin` component.
+* The `RedirectToLogin` component manages redirecting unauthorized users to the login page.
+
+Due to changes in the framework across releases of ASP.NET Core, Razor markup for the `App` component (`App.razor`) isn't shown in this section. To inspect the markup of the component for a given release, use ***either*** of the following approaches:
+
+* Create an app provisioned for authentication from the default Blazor WebAssembly project template for the version of ASP.NET Core that you intend to use. Inspect the `App` component (`App.razor`) in the generated app.
+* Inspect the `App` component (`App.razor`) in [reference source](https://github.com/dotnet/aspnetcore). Select the version from the branch selector, and search for the component in the `ProjectTemplates` folder of the repository because the `App` component's location has changed over the years.
+
+  [!INCLUDE[](~/includes/aspnetcore-repo-ref-source-links.md)]
 
 ### `RedirectToLogin` component
 
@@ -352,22 +353,15 @@ In the **:::no-loc text="Client":::** app, create a custom user factory. Identit
 
 `CustomUserFactory.cs`:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 using System.Security.Claims;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
 
-public class CustomUserFactory
-    : AccountClaimsPrincipalFactory<RemoteUserAccount>
+public class CustomUserFactory(IAccessTokenProviderAccessor accessor)
+    : AccountClaimsPrincipalFactory<RemoteUserAccount>(accessor)
 {
-    public CustomUserFactory(IAccessTokenProviderAccessor accessor)
-        : base(accessor)
-    {
-    }
-
     public override async ValueTask<ClaimsPrincipal> CreateUserAsync(
         RemoteUserAccount account,
         RemoteAuthenticationUserOptions options)
@@ -424,71 +418,7 @@ public class CustomUserFactory
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using System.Linq;
-using System.Security.Claims;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
-
-public class CustomUserFactory
-    : AccountClaimsPrincipalFactory<RemoteUserAccount>
-{
-    public CustomUserFactory(IAccessTokenProviderAccessor accessor)
-        : base(accessor)
-    {
-    }
-
-    public override async ValueTask<ClaimsPrincipal> CreateUserAsync(
-        RemoteUserAccount account,
-        RemoteAuthenticationUserOptions options)
-    {
-        var user = await base.CreateUserAsync(account, options);
-
-        if (user.Identity.IsAuthenticated)
-        {
-            var identity = (ClaimsIdentity)user.Identity;
-            var roleClaims = identity.FindAll(identity.RoleClaimType).ToArray();
-
-            if (roleClaims.Any())
-            {
-                foreach (var existingClaim in roleClaims)
-                {
-                    identity.RemoveClaim(existingClaim);
-                }
-
-                var rolesElem = account.AdditionalProperties[identity.RoleClaimType];
-
-                if (rolesElem is JsonElement roles)
-                {
-                    if (roles.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (var role in roles.EnumerateArray())
-                        {
-                            identity.AddClaim(new Claim(options.RoleClaim, role.GetString()));
-                        }
-                    }
-                    else
-                    {
-                        identity.AddClaim(new Claim(options.RoleClaim, roles.GetString()));
-                    }
-                }
-            }
-        }
-
-        return user;
-    }
-}
-```
-
-:::moniker-end
-
-In the **:::no-loc text="Client":::** app, register the factory in `Program.cs`:
+In the **:::no-loc text="Client":::** app, register the factory in the `Program` file:
 
 ```csharp
 builder.Services.AddApiAuthorization()
@@ -499,7 +429,7 @@ In the **:::no-loc text="Server":::** app, call <xref:Microsoft.AspNetCore.Ident
 
 :::moniker range=">= aspnetcore-6.0"
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 using Microsoft.AspNetCore.Identity;
@@ -547,7 +477,7 @@ In the **:::no-loc text="Server":::** app:
 
 :::moniker range=">= aspnetcore-6.0"
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 using System.IdentityModel.Tokens.Jwt;
@@ -596,8 +526,6 @@ In the **:::no-loc text="Server":::** app, create a `ProfileService` implementat
 
 `ProfileService.cs`:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 using IdentityModel;
 using Duende.IdentityServer.Models;
@@ -627,45 +555,9 @@ public class ProfileService : IProfileService
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using IdentityModel;
-using Duende.IdentityServer.Models;
-using Duende.IdentityServer.Services;
-using System.Threading.Tasks;
-
-public class ProfileService : IProfileService
-{
-    public ProfileService()
-    {
-    }
-
-    public async Task GetProfileDataAsync(ProfileDataRequestContext context)
-    {
-        var nameClaim = context.Subject.FindAll(JwtClaimTypes.Name);
-        context.IssuedClaims.AddRange(nameClaim);
-
-        var roleClaims = context.Subject.FindAll(JwtClaimTypes.Role);
-        context.IssuedClaims.AddRange(roleClaims);
-
-        await Task.CompletedTask;
-    }
-
-    public async Task IsActiveAsync(IsActiveContext context)
-    {
-        await Task.CompletedTask;
-    }
-}
-```
-
-:::moniker-end
-
 :::moniker range=">= aspnetcore-6.0"
 
-In the **:::no-loc text="Server":::** app, register the Profile Service in `Program.cs`:
+In the **:::no-loc text="Server":::** app, register the Profile Service in the `Program` file:
 
 ```csharp
 using Duende.IdentityServer.Services;
@@ -723,7 +615,7 @@ The following guidance explains:
 * How to deploy a hosted Blazor WebAssembly app with Identity Server to [Azure App Service](https://azure.microsoft.com/services/app-service/) with a custom domain.
 * How to create and use a TLS certificate for HTTPS protocol communication with browsers. Although the guidance focuses on using the certificate with a custom domain, the guidance is equally applicable to using a default Azure Apps domain, for example `contoso.azurewebsites.net`.
 
-For this hosting scenario, do **not** use the same certificate for [Identity Server's token signing key](https://docs.duendesoftware.com/identityserver/v5/fundamentals/keys/) and the site's HTTPS secure communication with browsers:
+For this hosting scenario, do **not** use the same certificate for [Duende Identity Server's](https://docs.duendesoftware.com) token signing key and the site's HTTPS secure communication with browsers:
 
 * Using different certificates for these two requirements is a good security practice because it isolates private keys for each purpose.
 * TLS certificates for communication with browsers is managed independently without affecting Identity Server's token signing.
@@ -794,7 +686,7 @@ To configure an app, Azure App Service, and Azure Key Vault to host with a custo
 
    No configuration changes to the default settings are required for the key vault service.
 
-   For testing purposes, an app's local [SQLite](https://www.sqlite.org/index.html) database, which is configured by default by the Blazor template, can be deployed with the app without additional configuration. Configuring a different database for Identity Server in production is beyond the scope of this article. For more information, see the database resources in the following documentation sets:
+   For testing purposes, an app's local [SQLite](https://www.sqlite.org/index.html) database, which is configured by the Blazor template, can be deployed with the app without additional configuration. Configuring a different database for Identity Server in production is beyond the scope of this article. For more information, see the database resources in the following documentation sets:
 
    * [App Service](/azure/app-service/)
    * [Duende Identity Server](https://docs.duendesoftware.com)
@@ -809,7 +701,7 @@ The Azure documentation contains additional detail on using Azure services and c
 * [Secure a custom DNS name with a TLS/SSL binding in Azure App Service](/azure/app-service/configure-ssl-bindings)
 * [Azure Key Vault](/azure/key-vault/)
 
-We recommend using a new in-private or incognito browser window for each app test run after a change to the app, app configuration, or Azure services in the Azure portal. Lingering cookies from a previous test run can result in failed authentication or authorization when testing the site even when the site's configuration is correct. For more information on how to configure Visual Studio to open a new in-private or incognito browser window for each test run, see the [Cookies and site data](#cookies-and-site-data) section.
+We recommend using a new private mode browser window (for example, Microsoft Edge InPrivate mode or Google Chrome Incognito mode) for each app test run after a change to the app, app configuration, or Azure services in the Azure portal. Lingering cookies from a previous test run can result in failed authentication or authorization when testing the site even when the site's configuration is correct. For more information on how to configure Visual Studio to open a new private browser window for each test run, see the [Cookies and site data](#cookies-and-site-data) section.
 
 When App Service configuration is changed in the Azure portal, the updates generally take effect quickly but aren't instant. Sometimes, you must wait a short period for an App Service to restart in order for a configuration change to take effect.
 
@@ -821,7 +713,7 @@ Get-ChildItem -path Cert:\CurrentUser\My -Recurse | Format-List DnsNameList, Sub
 
 ## Troubleshoot
 
-[!INCLUDE[](~/blazor/security/includes/troubleshoot.md)]
+[!INCLUDE[](~/blazor/security/includes/troubleshoot-wasm.md)]
 
 ## Additional resources
 

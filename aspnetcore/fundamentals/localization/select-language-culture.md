@@ -11,9 +11,9 @@ uid: fundamentals/localization/select-language-culture
 
 [!INCLUDE[](~/includes/not-latest-version.md)]
 
-:::moniker range="> aspnetcore-5.0"
+:::moniker range=">= aspnetcore-8.0"
 
-[Hisham Bin Ateya](https://twitter.com/hishambinateya), [Damien Bowden](https://twitter.com/damien_bod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Rick Anderson](https://twitter.com/RickAndMSFT)
+[Hisham Bin Ateya](https://twitter.com/hishambinateya), [Damien Bowden](https://github.com/damienbod), [Bart Calixto](https://twitter.com/bartmax), [Nadeem Afana](https://afana.me/), and [Rick Anderson](https://twitter.com/RickAndMSFT)
 
 One task for localizing an app is to implement a strategy for selecting the appropriate culture for each response the app returns.
 
@@ -21,7 +21,7 @@ One task for localizing an app is to implement a strategy for selecting the appr
 
 The current culture on a request is set in the localization [Middleware](xref:fundamentals/middleware/index). The localization middleware is enabled in `Program.cs`. The localization middleware must be configured before any middleware that might check the request culture (for example, `app.UseMvcWithDefaultRoute()`).
 
-[!code-csharp[](~/fundamentals/localization/sample/6.x/Localization/Program.cs?name=snippet_RequestLocalizationOptionsConfiguration)]
+[!code-csharp[](~/fundamentals/localization/sample/8.x/Localization/Program.cs?name=snippet_RequestLocalizationOptionsConfiguration)]
 
 <xref:Microsoft.AspNetCore.Builder.ApplicationBuilderExtensions.UseRequestLocalization%2A> initializes a <xref:Microsoft.AspNetCore.Builder.RequestLocalizationOptions> object. On every request the list of <xref:Microsoft.AspNetCore.Localization.RequestCultureProvider> in the <xref:Microsoft.AspNetCore.Builder.RequestLocalizationOptions> is enumerated and the first provider that can successfully determine the request culture is used. The default providers come from the `RequestLocalizationOptions` class:
 
@@ -49,7 +49,7 @@ http://localhost:5000/?culture=es-MX
 
 Production apps will often provide a mechanism to set the culture with the ASP.NET Core culture cookie. Use the <xref:Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.MakeCookieValue%2A> method to create a cookie.
 
-The xref:Microsoft.AspNetCore.Localization.CookieRequestCultureProvider> <xref:Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName> returns the default cookie name used to track the user's preferred culture information. The default cookie name is `.AspNetCore.Culture`.
+The <xref:Microsoft.AspNetCore.Localization.CookieRequestCultureProvider> <xref:Microsoft.AspNetCore.Localization.CookieRequestCultureProvider.DefaultCookieName> returns the default cookie name used to track the user's preferred culture information. The default cookie name is `.AspNetCore.Culture`.
 
 The cookie format is `c=%LANGCODE%|uic=%LANGCODE%`, where `c` is `Culture` and `uic` is `UICulture`, for example:
 
@@ -57,7 +57,7 @@ The cookie format is `c=%LANGCODE%|uic=%LANGCODE%`, where `c` is `Culture` and `
 c=en-UK|uic=en-US
 ```
 
-If only one of culture info or UI culture is provided, the provided culture is used for both culture info and UI culture.
+If only one of the cultures is provided and the other is empty, the provided culture is used for both culture and UI culture.
 
 ## The Accept-Language HTTP header
 
@@ -95,6 +95,15 @@ app.UseRequestLocalization(new RequestLocalizationOptions
     ApplyCurrentCultureToResponseHeaders = true
 });
 ```
+
+## Apply the RouteDataRequest CultureProvider
+
+The <xref:Microsoft.AspNetCore.Localization.Routing.RouteDataRequestCultureProvider> sets the culture based on the value of the `culture` route value. See [Url culture provider using middleware as filters](https://andrewlock.net/url-culture-provider-using-middleware-as-mvc-filter-in-asp-net-core-1-1-0/) for information on:
+
+* Using the middleware as filters feature of ASP.NET Core.
+* How to use `RouteDataRequestCultureProvider` to set the culture of an app from the url.
+
+See [Applying the RouteDataRequest CultureProvider globally with middleware as filters](https://andrewlock.net/applying-the-routedatarequest-cultureprovider-globally-with-middleware-as-filters/) for information on how to apply the `RouteDataRequestCultureProvider` globally.
 
 ## Use a custom provider
 
@@ -142,19 +151,30 @@ In the preceding example, the order of `QueryStringRequestCultureProvider` and `
 
 As previously mentioned, add a custom provider via <xref:Microsoft.AspNetCore.Builder.RequestLocalizationOptionsExtensions.AddInitialRequestCultureProvider%2A> which sets the order to `0`, so this provider takes the precedence over the others.
 
+## User override culture
+
+The [RequestLocalizationOptions.CultureInfoUseUserOverride](xref:Microsoft.AspNetCore.Builder.RequestLocalizationOptions.CultureInfoUseUserOverride) property allows the app to decide whether or not to use non-default Windows settings for the <xref:System.Globalization.CultureInfo> <xref:System.Globalization.CultureInfo.DateTimeFormat> and <xref:System.Globalization.CultureInfo.NumberFormat> properties. This has ***no*** impact on Linux. This directly corresponds to <xref:System.Globalization.CultureInfo.UseUserOverride>.
+
+```csharp
+    app.UseRequestLocalization(options =>
+    {
+        options.CultureInfoUseUserOverride = false;
+    });
+```
+
 ## Set the culture programmatically
 
 This sample **Localization.StarterWeb** project on [GitHub](https://github.com/aspnet/entropy) contains UI to set the `Culture`. The `Views/Shared/_SelectLanguagePartial.cshtml` file allows you to select the culture from the list of supported cultures:
 
-[!code-cshtml[](~/fundamentals/localization/sample/6.x/Localization/Views/Shared/_SelectLanguagePartial.cshtml)]
+[!code-cshtml[](~/fundamentals/localization/sample/8.x/Localization/Views/Shared/_SelectLanguagePartial.cshtml)]
 
 The `Views/Shared/_SelectLanguagePartial.cshtml` file is added to the `footer` section of the layout file so it will be available to all views:
 
-[!code-cshtml[](~/fundamentals/localization/sample/6.x/Localization/Views/Shared/_Layout.cshtml?range=43-56&highlight=10)]
+[!code-cshtml[](~/fundamentals/localization/sample/8.x/Localization/Views/Shared/_Layout.cshtml?range=43-56&highlight=10)]
 
 The `SetLanguage` method sets the culture cookie.
 
-[!code-csharp[](~/fundamentals/localization/sample/6.x/Localization/Controllers/HomeController.cs?range=57-67)]
+[!code-csharp[](~/fundamentals/localization/sample/8.x/Localization/Controllers/HomeController.cs?range=57-67)]
 
 You can't plug in the `_SelectLanguagePartial.cshtml` to sample code for this project. The **Localization.StarterWeb** project on [GitHub](https://github.com/aspnet/entropy) has code to flow the `RequestLocalizationOptions` to a Razor partial through the [Dependency Injection](~/fundamentals/dependency-injection.md) container.
 
@@ -171,6 +191,8 @@ Localizing an app also involves the following tasks:
 
 ## Additional resources
 
+* [Url culture provider using middleware as filters in ASP.NET Core](https://andrewlock.net/url-culture-provider-using-middleware-as-mvc-filter-in-asp-net-core-1-1-0/)
+* [Applying the RouteDataRequest CultureProvider globally with middleware as filters](https://andrewlock.net/applying-the-routedatarequest-cultureprovider-globally-with-middleware-as-filters/)
 * <xref:fundamentals/localization>
 * <xref:fundamentals/localization/make-content-localizable>
 * <xref:fundamentals/localization/provide-resources>
@@ -183,4 +205,5 @@ Localizing an app also involves the following tasks:
 
 :::moniker-end
 
+[!INCLUDE [select-language-culture67](~/fundamentals/localization/includes/select-language-culture67.md)]
 [!INCLUDE [select-language-culture5](~/fundamentals/localization/includes/select-language-culture5.md)]

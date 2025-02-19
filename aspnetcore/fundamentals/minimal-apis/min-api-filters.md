@@ -2,13 +2,15 @@
 title: Filters in Minimal API apps
 author: rick-anderson
 description: Use filters in Minimal API apps
-ms.author: riande
+ms.author: wpickett
 ms.date: 8/11/2022
 monikerRange: '>= aspnetcore-7.0'
 uid: fundamentals/minimal-apis/min-api-filters
 ---
 
 # Filters in Minimal API apps
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 By [Fiyaz Bin Hasan](https://github.com/fiyazbinhasan), [Martin Costello](https://twitter.com/martin_costello), and [Rick Anderson](https://twitter.com/RickAndMSFT)
 
@@ -85,7 +87,7 @@ In the preceding code:
 * The `EndpointFilterInvocationContext` object provides access to the parameters associated with a particular request issued to the endpoint via the `GetArguments` method.
 * The filter is registered using a `delegate` that takes a `EndpointFilterInvocationContext` and returns a `EndpointFilterDelegate`.
 
-In addition to being passed as delegates, filters can be registered by implementing the `IEndpointFilter` interface. The follow code shows the preceding filter encapsulated in a class which implements `IEndpointFilter`:
+In addition to being passed as delegates, filters can be registered by implementing the `IEndpointFilter` interface. The following code shows the preceding filter encapsulated in a class which implements `IEndpointFilter`:
 
 [!code-csharp[](~/fundamentals/minimal-apis/min-api-filters/7samples/todo/EndpointFilters/ToDoIsValidFilter.cs?name=snippet)]
 

@@ -5,10 +5,12 @@ description: Learn how to host ASP.NET Core apps on Windows Server Internet Info
 monikerRange: '>= aspnetcore-2.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 5/7/2020
+ms.date: 04/26/2024
 uid: host-and-deploy/iis/index
 ---
 # Host ASP.NET Core on Windows with IIS
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 :::moniker range=">= aspnetcore-5.0"
 
@@ -362,7 +364,7 @@ net start w3svc
 
 ## Install Web Deploy when publishing with Visual Studio
 
-When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, use the [Web Platform Installer (WebPI)](https://www.microsoft.com/web/downloads/platform.aspx) or obtain an installer directly from the [Microsoft Download Center](https://www.microsoft.com/download/details.aspx?id=43717). The preferred method is to use WebPI. WebPI offers a standalone setup and a configuration for hosting providers.
+When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, use the [Web Platform Installer (WebPI)](https://www.microsoft.com/web/downloads/platform.aspx) or see [IIS Downloads: Web Deploy](https://www.iis.net/downloads/microsoft/web-deploy). The preferred method is to use WebPI. WebPI offers a standalone setup and a configuration for hosting providers.
 
 ## Create the IIS site
 
@@ -931,7 +933,7 @@ ASP.NET Core adopts roll-forward behavior for patch releases of shared framework
 
 ## Install Web Deploy when publishing with Visual Studio
 
-When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, use the [Web Platform Installer (WebPI)](https://www.microsoft.com/web/downloads/platform.aspx) or obtain an installer directly from the [Microsoft Download Center](https://www.microsoft.com/download/details.aspx?id=43717). The preferred method is to use WebPI. WebPI offers a standalone setup and a configuration for hosting providers.
+When deploying apps to servers with [Web Deploy](/iis/install/installing-publishing-technologies/installing-and-configuring-web-deploy-on-iis-80-or-later), install the latest version of Web Deploy on the server. To install Web Deploy, use the [Web Platform Installer (WebPI)](https://www.microsoft.com/web/downloads/platform.aspx) or [IIS Downloads: Web Deploy](https://www.iis.net/downloads/microsoft/web-deploy). The preferred method is to use WebPI. WebPI offers a standalone setup and a configuration for hosting providers.
 
 ## Create the IIS site
 

@@ -65,7 +65,7 @@ The preceding code:
 
 With endpoint routing, the CORS middleware **must** be configured to execute between the calls to `UseRouting` and  `UseEndpoints`.
 
-See [Test CORS](#testc6) for instructions on testing code similar to the preceding code.
+
 
 The <xref:Microsoft.Extensions.DependencyInjection.MvcCorsMvcCoreBuilderExtensions.AddCors%2A> method call adds CORS services to the app's service container:
 
@@ -153,7 +153,7 @@ For the finest control of limiting CORS requests:
 
 The code in the next section meets the preceding list.
 
-See [Test CORS](#testc6) for instructions on testing code similar to the preceding code.
+
 
 <a name="dc6"></a>
 
@@ -318,6 +318,8 @@ For some CORS requests, the browser sends an additional [OPTIONS](https://develo
 
 The rule on request headers set for the client request applies to headers that the app sets by calling `setRequestHeader` on the `XMLHttpRequest` object. The CORS specification calls these headers [author request headers](https://www.w3.org/TR/cors/#author-request-headers). The rule doesn't apply to headers the browser can set, such as `User-Agent`, `Host`, or `Content-Length`.
 
+
+
 The following is an example response similar to the preflight request made from the **[Put test]** button in the [Test CORS](#testc6) section of this document.
 
 ```
@@ -419,7 +421,6 @@ This section describes what happens in a [CORS](https://developer.mozilla.org/do
 * An API isn't safer by allowing CORS.
   * It's up to the client (browser) to enforce CORS. The server executes the request and returns the response, it's the client that returns an error and blocks the response. For example, any of the following tools will display the server response:
     * [Fiddler](https://www.telerik.com/fiddler)
-    * [Postman](https://www.getpostman.com/)
     * [.NET HttpClient](/dotnet/csharp/tutorials/console-webapiclient)
     * A web browser by entering the URL in the address bar.
 * It's a way for a server to allow browsers to execute a cross-origin [XHR](https://developer.mozilla.org/docs/Web/API/XMLHttpRequest) or [Fetch API](https://developer.mozilla.org/docs/Web/API/Fetch_API) request that otherwise would be forbidden.
@@ -427,9 +428,7 @@ This section describes what happens in a [CORS](https://developer.mozilla.org/do
 
 The [CORS specification](https://www.w3.org/TR/cors/) introduced several new HTTP headers that enable cross-origin requests. If a browser supports CORS, it sets these headers automatically for cross-origin requests. Custom JavaScript code isn't required to enable CORS.
 
-The  [PUT test button](https://cors3.azurewebsites.net/test) on the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI)
-
-The following is an example of a cross-origin request from the [Values](https://cors3.azurewebsites.net/) test button to `https://cors1.azurewebsites.net/api/values`. The `Origin` header:
+The following is an example of a cross-origin request from the **Values** test button to `https://cors1.azurewebsites.net/api/values`. The `Origin` header:
 
 * Provides the domain of the site that's making the request.
 * Is required and must be different from the host.
@@ -560,7 +559,7 @@ The following `ValuesController` provides the endpoints for testing:
 
 Test the preceding sample code by using one of the following approaches:
 
-* Use the deployed sample app at [https://cors3.azurewebsites.net/](https://cors3.azurewebsites.net/). There is no need to download the sample.
+
 * Run the sample with `dotnet run` using the default URL of `https://localhost:5001`.
 * Run the sample from Visual Studio with the port set to 44398 for a URL of `https://localhost:44398`.
 
@@ -572,7 +571,7 @@ Using a browser with the F12 tools:
 
      Access to fetch at `'https://cors1.azurewebsites.net/api/values/GetValues2'` from origin `'https://cors3.azurewebsites.net'` has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
      
-CORS-enabled endpoints can be tested with a tool, such as [curl](https://curl.haxx.se/), [Fiddler](https://www.telerik.com/fiddler), or [Postman](https://www.getpostman.com/). When using a tool, the origin of the request specified by the `Origin` header must differ from the host receiving the request. If the request isn't *cross-origin* based on the value of the `Origin` header:
+CORS-enabled endpoints can be tested with a tool, such as [curl](https://curl.haxx.se/) or [Fiddler](https://www.telerik.com/fiddler). When using a tool, the origin of the request specified by the `Origin` header must differ from the host receiving the request. If the request isn't *cross-origin* based on the value of the `Origin` header:
 
 * There's no need for CORS Middleware to process the request.
 * CORS headers aren't returned in the response.
@@ -586,7 +585,7 @@ curl -X OPTIONS https://cors3.azurewebsites.net/api/TodoItems2/5 -i
 <!--
 curl come with Git. Add to path variable
 C:\Program Files\Git\mingw64\bin\
-zz
+
 -->
 
 <a name="tcer"></a>
@@ -601,7 +600,7 @@ The following `TodoItems1Controller` provides endpoints for testing:
 
 [!code-csharp[](~/security/cors/6.0sample/Cors/WebAPI/Controllers/TodoItems1Controller.cs?name=snippet2)]
 
-Test the preceding code from the [test page](https://cors1.azurewebsites.net/test?number=1) of the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI).
+Test the preceding code from the test page (`https://cors1.azurewebsites.net/test?number=1`) of the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI).
 
 The **Delete [EnableCors]** and **GET [EnableCors]** buttons succeed, because the endpoints have `[EnableCors]` and respond to preflight requests. The other endpoints fails. The **GET** button fails, because the [JavaScript](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI/wwwroot/js/MyJS.js) sends:
 
@@ -615,12 +614,12 @@ The following `TodoItems2Controller` provides similar endpoints, but includes ex
 
 [!code-csharp[](~/security/cors/6.0sample/Cors/WebAPI/Controllers/TodoItems2Controller.cs?name=snippet2)]
 
-Test the preceding code from the [test page](https://cors1.azurewebsites.net/test?number=2) of the deployed sample. In the **Controller** drop down list, select **Preflight** and then **Set Controller**. All the CORS calls to the `TodoItems2Controller` endpoints succeed.
+The preceding code can be tested by deploying the sample to Azure.In the **Controller** drop down list, select **Preflight** and then **Set Controller**. All the CORS calls to the `TodoItems2Controller` endpoints succeed.
 
 ## Additional resources
 
 * [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/docs/Web/HTTP/CORS)
-* [Getting started with the IIS CORS module](https://blogs.iis.net/iisteam/getting-started-with-the-iis-cors-module)
+* [IIS CORS module Configuration Reference](/iis/extensions/cors-module/cors-module-configuration-reference)
 
 :::moniker-end
 
@@ -932,6 +931,8 @@ For some CORS requests, the browser sends an additional [OPTIONS](https://develo
 
 The rule on request headers set for the client request applies to headers that the app sets by calling `setRequestHeader` on the `XMLHttpRequest` object. The CORS specification calls these headers [author request headers](https://www.w3.org/TR/cors/#author-request-headers). The rule doesn't apply to headers the browser can set, such as `User-Agent`, `Host`, or `Content-Length`.
 
+
+
 The following is an example response similar to the preflight request made from the **[Put test]** button in the [Test CORS](#testc) section of this document.
 
 ```
@@ -1032,7 +1033,6 @@ This section describes what happens in a [CORS](https://developer.mozilla.org/do
 * An API isn't safer by allowing CORS.
   * It's up to the client (browser) to enforce CORS. The server executes the request and returns the response, it's the client that returns an error and blocks the response. For example, any of the following tools will display the server response:
     * [Fiddler](https://www.telerik.com/fiddler)
-    * [Postman](https://www.getpostman.com/)
     * [.NET HttpClient](/dotnet/csharp/tutorials/console-webapiclient)
     * A web browser by entering the URL in the address bar.
 * It's a way for a server to allow browsers to execute a cross-origin [XHR](https://developer.mozilla.org/docs/Web/API/XMLHttpRequest) or [Fetch API](https://developer.mozilla.org/docs/Web/API/Fetch_API) request that otherwise would be forbidden.
@@ -1040,9 +1040,7 @@ This section describes what happens in a [CORS](https://developer.mozilla.org/do
 
 The [CORS specification](https://www.w3.org/TR/cors/) introduced several new HTTP headers that enable cross-origin requests. If a browser supports CORS, it sets these headers automatically for cross-origin requests. Custom JavaScript code isn't required to enable CORS.
 
-The  [PUT test button](https://cors3.azurewebsites.net/test) on the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI)
-
-The following is an example of a cross-origin request from the [Values](https://cors3.azurewebsites.net/) test button to `https://cors1.azurewebsites.net/api/values`. The `Origin` header:
+The following is an example of a cross-origin request from the **Values** test button to `https://cors1.azurewebsites.net/api/values`. The `Origin` header:
 
 * Provides the domain of the site that's making the request.
 * Is required and must be different from the host.
@@ -1165,7 +1163,7 @@ The following `ValuesController` provides the endpoints for testing:
 
 Test the preceding sample code by using one of the following approaches:
 
-* Use the deployed sample app at [https://cors3.azurewebsites.net/](https://cors3.azurewebsites.net/). There is no need to download the sample.
+
 * Run the sample with `dotnet run` using the default URL of `https://localhost:5001`.
 * Run the sample from Visual Studio with the port set to 44398 for a URL of `https://localhost:44398`.
 
@@ -1177,7 +1175,7 @@ Using a browser with the F12 tools:
 
      Access to fetch at `'https://cors1.azurewebsites.net/api/values/GetValues2'` from origin `'https://cors3.azurewebsites.net'` has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource. If an opaque response serves your needs, set the request's mode to 'no-cors' to fetch the resource with CORS disabled.
      
-CORS-enabled endpoints can be tested with a tool, such as [curl](https://curl.haxx.se/), [Fiddler](https://www.telerik.com/fiddler), or [Postman](https://www.getpostman.com/). When using a tool, the origin of the request specified by the `Origin` header must differ from the host receiving the request. If the request isn't *cross-origin* based on the value of the `Origin` header:
+CORS-enabled endpoints can be tested with a tool, such as [curl](https://curl.haxx.se/) or [Fiddler](https://www.telerik.com/fiddler). When using a tool, the origin of the request specified by the `Origin` header must differ from the host receiving the request. If the request isn't *cross-origin* based on the value of the `Origin` header:
 
 * There's no need for CORS Middleware to process the request.
 * CORS headers aren't returned in the response.
@@ -1205,7 +1203,7 @@ The following `TodoItems1Controller` provides endpoints for testing:
 
 [!code-csharp[](~/security/cors/3.1sample/Cors/WebAPI/Controllers/TodoItems1Controller.cs?name=snippet2)]
 
-Test the preceding code from the [test page](https://cors1.azurewebsites.net/test?number=1) of the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI).
+Test the preceding code from the test page (`https://cors1.azurewebsites.net/test?number=1`) of the deployed [sample](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI).
 
 The **Delete [EnableCors]** and **GET [EnableCors]** buttons succeed, because the endpoints have `[EnableCors]` and respond to preflight requests. The other endpoints fails. The **GET** button fails, because the [JavaScript](https://github.com/dotnet/AspNetCore.Docs/tree/main/aspnetcore/security/cors/3.1sample/Cors/WebAPI/wwwroot/js/MyJS.js) sends:
 
@@ -1219,12 +1217,12 @@ The following `TodoItems2Controller` provides similar endpoints, but includes ex
 
 [!code-csharp[](~/security/cors/3.1sample/Cors/WebAPI/Controllers/TodoItems2Controller.cs?name=snippet2)]
 
-Test the preceding code from the [test page](https://cors1.azurewebsites.net/test?number=2) of the deployed sample. In the **Controller** drop down list, select **Preflight** and then **Set Controller**. All the CORS calls to the `TodoItems2Controller` endpoints succeed.
+The preceding code can be tested by deploying the sample to Azure.In the **Controller** drop down list, select **Preflight** and then **Set Controller**. All the CORS calls to the `TodoItems2Controller` endpoints succeed.
 
 ## Additional resources
 
 * [Cross-Origin Resource Sharing (CORS)](https://developer.mozilla.org/docs/Web/HTTP/CORS)
-* [Getting started with the IIS CORS module](https://blogs.iis.net/iisteam/getting-started-with-the-iis-cors-module)
+* [IIS CORS module Configuration Reference](/iis/extensions/cors-module/cors-module-configuration-reference)
 
 :::moniker-end
 

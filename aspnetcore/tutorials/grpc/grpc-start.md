@@ -3,13 +3,13 @@ title: Create a .NET Core gRPC client and server in ASP.NET Core
 author: jamesnk
 description: This tutorial shows how to create a gRPC Service and gRPC client on ASP.NET Core. Learn how to create a gRPC Service project, edit a proto file, and add a duplex streaming call.
 monikerRange: '>= aspnetcore-3.0'
-ms.author: jamesnk
-ms.date: 05/05/2023
+ms.author: wpickett
+ms.date: 01/30/2025
 uid: tutorials/grpc/grpc-start
 ---
 # Tutorial: Create a gRPC client and server in ASP.NET Core
 
-:::moniker range=">= aspnetcore-8.0"
+:::moniker range=">= aspnetcore-9.0"
 This tutorial shows how to create a .NET Core [gRPC](xref:grpc/index) client and an ASP.NET Core gRPC Server. At the end, you'll have a gRPC client that communicates with the gRPC Greeter service.
 
 In this tutorial, you:
@@ -23,19 +23,11 @@ In this tutorial, you:
 
 # [Visual Studio](#tab/visual-studio)
 
-[!INCLUDE[](~/includes/net-prereqs-vs-8.0.md)]
+[!INCLUDE[](~/includes/net-prereqs-vs-9.0.md)]
 
 # [Visual Studio Code](#tab/visual-studio-code)
 
-[!INCLUDE[](~/includes/net-prereqs-vsc-8.0.md)]
-
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-[!INCLUDE[](~/includes/net-prereqs-mac-8.0.md)]
--->
+[!INCLUDE[](~/includes/net-prereqs-vsc-9.0.md)]
 
 ---
 
@@ -47,13 +39,13 @@ For Visual Studio for Mac, see the .NET 7 version of this tutorial.
 * In the **Create a new project** dialog, search for `gRPC`. Select **ASP.NET Core gRPC Service** and select **Next**.
 * In the **Configure your new project** dialog, enter `GrpcGreeter` for **Project name**. It's important to name the project *GrpcGreeter* so the namespaces match when you copy and paste code.
 * Select **Next**.
-* In the **Additional information** dialog, select **.NET 8.0 (Preview)** and then select **Create**.
+* In the **Additional information** dialog, select **.NET 9.0 (Standard Term Support)** and then select **Create**.
 
 # [Visual Studio Code](#tab/visual-studio-code)
 
-The tutorial assumes familiarity with VS Code. For more information, see [Getting started with VS Code](https://code.visualstudio.com/docs)
+The tutorial assumes familiarity with VS Code. For more information, see [Getting started with VS Code](https://code.visualstudio.com/docs).
 
-* Open the [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal).
+* Select **New Terminal** from the **Terminal** menu to open the [integrated terminal](https://code.visualstudio.com/docs/terminal/basics).
 * Change to the directory (`cd`) that will contain the project.
 * Run the following commands:
 
@@ -62,26 +54,17 @@ The tutorial assumes familiarity with VS Code. For more information, see [Gettin
   code -r GrpcGreeter
   ```
 
-  * The `dotnet new` command creates a new gRPC service in the *GrpcGreeter* folder.
-  * The `code` command opens the *GrpcGreeter* folder in a new instance of Visual Studio Code.
+  The `dotnet new` command creates a new gRPC service in the *GrpcGreeter* folder.
 
-# [Visual Studio for Mac](#tab/visual-studio-mac)
+  The `code` command opens the *GrpcGreeter* project folder in the current instance of Visual Studio Code.
 
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-* Start Visual Studio for Mac and select **File** > **New Project**.
-* In the **Choose a template for your new project** dialog, select **Web and Console** > **App** > **gRPC Service** and select **Continue**.
-* Select **.NET 6.0** for the target framework and select **Continue**.
-* Name the project **GrpcGreeter**. It's important to name the project *GrpcGreeter* so the namespaces match when you copy and paste code.
-* Select **Continue**.
--->
+[!INCLUDE[](~/includes/vscode-trust-authors-add-assets.md)]
 
 ---
 
 ### Run the service
  
-[!INCLUDE[](~/includes/run-the-app6.0.md)]
+[!INCLUDE[](~/includes/run-the-app9.0.md)]
 
 The logs show the service listening on `https://localhost:<port>`, where `<port>` is the localhost port number randomly assigned when the project is created and set in `Properties/launchSettings.json`.
 
@@ -115,11 +98,11 @@ info: Microsoft.Hosting.Lifetime[0]
 * Open a second instance of Visual Studio and select **New Project**.
 * In the **Create a new project** dialog, select **Console App**, and select **Next**.
 * In the **Project name** text box, enter **GrpcGreeterClient** and select **Next**.
-* In the **Additional information** dialog, select **.NET 8.0 (Preview)** and then select **Create**.
+* In the **Additional information** dialog, select **.NET 9.0 (Standard Term Support)** and then select **Create**.
 
 # [Visual Studio Code](#tab/visual-studio-code)
 
-* Open the [integrated terminal](https://code.visualstudio.com/docs/editor/integrated-terminal).
+* Open the [integrated terminal](https://code.visualstudio.com/docs/terminal/basics).
 * Change directories (`cd`) to a folder for the project.
 * Run the following commands:
 
@@ -128,13 +111,7 @@ info: Microsoft.Hosting.Lifetime[0]
   code -r GrpcGreeterClient
   ```
 
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-Follow the instructions in [Building a complete .NET Core solution on macOS using Visual Studio for Mac](/dotnet/core/tutorials/using-on-mac-vs-full-solution) to create a console app with the name *GrpcGreeterClient*.
--->
+[!INCLUDE[](~/includes/vscode-trust-authors-add-assets.md)]
 
 ---
 
@@ -180,19 +157,6 @@ dotnet add GrpcGreeterClient.csproj package Google.Protobuf
 dotnet add GrpcGreeterClient.csproj package Grpc.Tools
 ```
 
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-* Right-click **GrpcGreeterClient** project in the **Solution Pad** and select **Manage NuGet Packages**.
-* Enter **Grpc.Net.Client** in the search box.
-* Select the **Grpc.Net.Client** package from the results pane and select **Add Package**.
-* In **Select Projects** select **OK**.
-* If the **License Acceptance** dialog appears, select **Accept** if you agree to the license terms.
-* Repeat for `Google.Protobuf` and `Grpc.Tools`.
--->
-
 ---
 
 ### Add greet.proto
@@ -214,14 +178,6 @@ For Visual Studio for Mac, see the .NET 7 version of this tutorial.
 # [Visual Studio Code](#tab/visual-studio-code)
 
   Select the `GrpcGreeterClient.csproj` file.
-
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-  Right-click the project and select **Edit Project File**.
--->
 
   ---
 
@@ -247,7 +203,7 @@ For Visual Studio for Mac, see the .NET 7 version of this tutorial.
 
 * Update the gRPC client `Program.cs` file with the following code.
 
-  [!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample8/GrpcGreeterClient/Program.cs?name=snippet2&highlight=6)]
+  [!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample9/GrpcGreeterClient/Program.cs?name=snippet2&highlight=5)]
 
 * In the preceding highlighted code, replace the localhost port number `7042` with the `HTTPS` port number specified in `Properties/launchSettings.json` within the `GrpcGreeter` service project.
 
@@ -258,36 +214,27 @@ The Greeter client is created by:
 * Instantiating a `GrpcChannel` containing the information for creating the connection to the gRPC service.
 * Using the `GrpcChannel` to construct the Greeter client:
 
-[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample8/GrpcGreeterClient/Program.cs?name=snippet&highlight=1-3)]
+[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample9/GrpcGreeterClient/Program.cs?name=snippet&highlight=1-3)]
 
 The Greeter client calls the asynchronous `SayHello` method. The result of the `SayHello` call is displayed:
 
-[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample8/GrpcGreeterClient/Program.cs?name=snippet&highlight=4-7)]
+[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample9/GrpcGreeterClient/Program.cs?name=snippet&highlight=4-6)]
 
 ## Test the gRPC client with the gRPC Greeter service
 
 Update the `appsettings.Development.json` file by adding the following highlighted lines:
 
-[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample8/GrpcGreeter/appsettings.Development.json?highlight=6-7)]
+[!code-csharp[](~/tutorials/grpc/grpc-start/sample/sample9/GrpcGreeter/appsettings.Development.json?highlight=6-7)]
 
 # [Visual Studio](#tab/visual-studio)
 
-* In the Greeter service, press `Ctrl+F5` to start the server without the debugger.
-* In the `GrpcGreeterClient` project, press `Ctrl+F5` to start the client without the debugger.
+* In the `GrpcGreeter` service project, press `Ctrl+F5` to start the server without the debugger.
+* In the `GrpcGreeterClient` console project, press `Ctrl+F5` to start the client without the debugger.
 
 # [Visual Studio Code](#tab/visual-studio-code)
 
 * Start the Greeter service.
 * Start the client.
-
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-For Visual Studio for Mac, see the .NET 7 version of this tutorial.
-
-<!--
-* Start the Greeter service.
-* Start the client.
--->
 
 ---
 
@@ -310,13 +257,13 @@ info: Microsoft.Hosting.Lifetime[0]
 info: Microsoft.Hosting.Lifetime[0]
       Content root path: C:\GH\aspnet\docs\4\Docs\aspnetcore\tutorials\grpc\grpc-start\sample\GrpcGreeter
 info: Microsoft.AspNetCore.Hosting.Diagnostics[1]
-      Request starting HTTP/2 POST https://localhost:<port>/Greet.Greeter/SayHello application/grpc
+      Request starting HTTP/2 POST https://localhost:<port>/greet.Greeter/SayHello application/grpc
 info: Microsoft.AspNetCore.Routing.EndpointMiddleware[0]
-      Executing endpoint 'gRPC - /Greet.Greeter/SayHello'
+      Executing endpoint 'gRPC - /greet.Greeter/SayHello'
 info: Microsoft.AspNetCore.Routing.EndpointMiddleware[1]
-      Executed endpoint 'gRPC - /Greet.Greeter/SayHello'
+      Executed endpoint 'gRPC - /greet.Greeter/SayHello'
 info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
-      Request finished in 78.32260000000001ms 200 application/grpc
+      Request finished HTTP/2 POST https://localhost:7042/greet.Greeter/SayHello - 200 - application/grpc 40.4615ms
 ```
 
 > [!NOTE]
@@ -330,6 +277,8 @@ info: Microsoft.AspNetCore.Hosting.Diagnostics[2]
 * <xref:grpc/migration>
 
 :::moniker-end
+
+[!INCLUDE[](~/tutorials/grpc/grpc-start/includes/grpc-start8.md)]
 
 [!INCLUDE[](~/tutorials/grpc/grpc-start/includes/grpc-start7.md)]
 

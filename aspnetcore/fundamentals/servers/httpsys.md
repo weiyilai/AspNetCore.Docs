@@ -3,12 +3,14 @@ title: HTTP.sys web server implementation in ASP.NET Core
 author: tdykstra
 description: Learn about HTTP.sys, a web server for ASP.NET Core on Windows. Built on the HTTP.sys kernel-mode driver, HTTP.sys is an alternative to Kestrel that can be used for direct connection to the Internet without IIS.
 monikerRange: '>= aspnetcore-2.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 06/26/2023
+ms.date: 10/30/2023
 uid: fundamentals/servers/httpsys
 ---
 # HTTP.sys web server implementation in ASP.NET Core
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 By [Tom Dykstra](https://github.com/tdykstra) and [Chris Ross](https://github.com/Tratcher)
 
@@ -64,13 +66,13 @@ HTTP/2 is enabled by default. If an HTTP/2 connection isn't established, the con
 
 ## HTTP/3 support
 
-[HTTP/3](https://quicwg.org/base-drafts/v2-samples/draft-ietf-quic-http.html) is enabled for ASP.NET Core apps when the following base requirements are met:
+[HTTP/3](https://datatracker.ietf.org/doc/rfc9114/) is enabled for ASP.NET Core apps when the following base requirements are met:
 
 * Windows Server 2022/Windows 11 or later
 * An `https` url binding is used.
 * The [EnableHttp3 registry key](https://techcommunity.microsoft.com/t5/networking-blog/enabling-http-3-support-on-windows-server-2022/ba-p/2676880) is set.
 
-The preceding Windows 11 Build versions may require the use of a [Windows Insider](https://insider.windows.com) build.
+The preceding Windows 11 Build versions may require the use of a [Windows Insider](https://www.microsoft.com/en-us/windowsinsider/) build.
 
 HTTP/3 is discovered as an upgrade from HTTP/1.1 or HTTP/2 via the `alt-svc` header. That means the first request will normally use HTTP/1.1 or HTTP/2 before switching to HTTP/3. Http.Sys doesn't automatically add the `alt-svc` header, it must be added by the application. The following code is a middleware example that adds the `alt-svc` response header.
 
@@ -171,7 +173,12 @@ In Visual Studio, the default launch profile is for IIS Express. To run the proj
 
    The settings in `UrlPrefixes` override `UseUrls`/`urls`/`ASPNETCORE_URLS` settings. Therefore, an advantage of `UseUrls`, `urls`, and the `ASPNETCORE_URLS` environment variable is that it's easier to switch between Kestrel and HTTP.sys.
 
-   HTTP.sys uses the [HTTP Server API UrlPrefix string formats](/windows/win32/http/urlprefix-strings).
+   HTTP.sys recognizes two types of wild cards in URL prefixes:   
+
+   * `*` is a *weak binding*, also known as a *fallback binding*. If the URL prefix is `http://*:5000`, and something else is bound to port 5000, this binding won't be used.
+   * `+` is a *strong binding*. If the URL prefix is `http://+:5000`, this binding will be used before other port 5000 bindings.
+
+   For more information, see [UrlPrefix Strings](/windows/win32/http/urlprefix-strings).
 
    > [!WARNING]
    > Top-level wildcard bindings (`http://*:80/` and `http://+:80`) should **not** be used. Top-level wildcard bindings create app security vulnerabilities. This applies to both strong and weak wildcards. Use explicit host names or IP addresses rather than wildcards. Subdomain wildcard binding (for example, `*.mysub.com`) isn't a security risk if you control the entire parent domain (as opposed to `*.com`, which is vulnerable). For more information, see [RFC 9110: Section 7.2: Host and :authority](https://www.rfc-editor.org/rfc/rfc9110#field.host).
@@ -232,7 +239,7 @@ In Visual Studio, the default launch profile is for IIS Express. To run the proj
 
        ```xml
        <PropertyGroup>
-         <PackageTags>9412ee86-c21b-4eb8-bd89-f650fbf44931</PackageTags>
+         <PackageTags>00001111-aaaa-2222-bbbb-3333cccc4444</PackageTags>
        </PropertyGroup>
        ```
 
@@ -245,7 +252,7 @@ In Visual Studio, the default launch profile is for IIS Express. To run the proj
    netsh http add sslcert 
        ipport=10.0.0.4:443 
        certhash=b66ee04419d4ee37464ab8785ff02449980eae10 
-       appid="{9412ee86-c21b-4eb8-bd89-f650fbf44931}"
+       appid="{00001111-aaaa-2222-bbbb-3333cccc4444}"
    ```
 
    When a certificate is registered, the tool responds with `SSL Certificate successfully added`.
@@ -281,20 +288,21 @@ For apps hosted by HTTP.sys that interact with requests from the Internet or a c
 <!--
 <xref:Microsoft.AspNetCore.Server.HttpSys.IHttpSysRequestTimingFeature> 
 -->
-[IHttpSysRequestTimingFeature](https://source.dot.net/#Microsoft.AspNetCore.Server.HttpSys/IHttpSysRequestTimingFeature.cs,3c5dc86dc837b1f4) provides detailed timing information for requests:
+[IHttpSysRequestTimingFeature](/dotnet/api/microsoft.aspnetcore.server.httpsys.ihttpsysrequesttimingfeature)  provides detailed timing information for requests:
 
 * Timestamps are obtained using [QueryPerformanceCounter](/windows/win32/api/profileapi/nf-profileapi-queryperformancecounter).
 * The timestamp frequency can be obtained via [QueryPerformanceFrequency](/windows/win32/api/profileapi/nf-profileapi-queryperformancefrequency).
-* The index of the timing can be cast to [HttpSysRequestTimingType](https://source.dot.net/#Microsoft.AspNetCore.Server.HttpSys/HttpSysRequestTimingType.cs,e62e7bcd02f8589e) to know what the timing represents.
+* The index of the timing can be cast to [HttpSysRequestTimingType](/dotnet/api/microsoft.aspnetcore.server.httpsys.httpsysrequesttimingtype) to know what the timing represents.
 * The value may be 0 if the timing isn't available for the current request.
+* Requires Windows 10 version 2004, Windows Server 2022, or later.
 
 :::code language="csharp" source="~/fundamentals/request-features/samples/8.x/IHttpSysRequestTimingFeature/Program.cs" id="snippet_WithTimestamps":::
 
-[IHttpSysRequestTimingFeature.TryGetTimestamp](https://source.dot.net/#Microsoft.AspNetCore.Server.HttpSys/IHttpSysRequestTimingFeature.cs,3c5dc86dc837b1f4) retrieves the timestamp for the provided timing type:
+[IHttpSysRequestTimingFeature.TryGetTimestamp](xref:Microsoft.AspNetCore.Server.HttpSys.IHttpSysRequestTimingFeature.TryGetTimestamp%2A) retrieves the timestamp for the provided timing type:
 
 :::code language="csharp" source="~/fundamentals/request-features/samples/8.x/IHttpSysRequestTimingFeature/Program.cs" id="snippet_WithTryGetTimestamp":::
 
-[IHttpSysRequestTimingFeature.TryGetElapsedTime](https://source.dot.net/#Microsoft.AspNetCore.Server.HttpSys/IHttpSysRequestTimingFeature.cs,3c5dc86dc837b1f4) gives the elapsed time between two specified timings:
+[IHttpSysRequestTimingFeature.TryGetElapsedTime](/dotnet/api/microsoft.aspnetcore.server.httpsys.ihttpsysrequesttimingfeature.trygetelapsedtime yields the elapsed time between two specified timings:
 
 :::code language="csharp" source="~/fundamentals/request-features/samples/8.x/IHttpSysRequestTimingFeature/Program.cs" id="snippet_WithTryGetElapsedTime":::
 
@@ -314,6 +322,10 @@ Requirements to run gRPC with HTTP.sys:
 ### Reset
 
 [!INCLUDE[](~/includes/reset.md)]
+
+## Tracing
+
+For information about how to get traces from HTTP.sys, see [HTTP.sys Manageability Scenarios](/windows/win32/http/http-sys-manageability-scenarios).
 
 ## Additional resources
 

@@ -1,9 +1,9 @@
 ---
 title: Upload files in ASP.NET Core
-author: rick-anderson
+author: tdykstra
 description: How to use model binding and streaming to upload files in ASP.NET Core MVC.
 monikerRange: '>= aspnetcore-2.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
 ms.date: 08/21/2020
 uid: mvc/models/file-uploads
@@ -20,7 +20,7 @@ ASP.NET Core supports uploading one or more files using buffered model binding f
 
 ## Security considerations
 
-Use caution when providing users with the ability to upload files to a server. Attackers may attempt to:
+Use caution when providing users with the ability to upload files to a server. Cyberattackers may attempt to:
 
 * Execute [denial of service](/windows-hardware/drivers/ifs/denial-of-service) attacks.
 * Upload viruses or malware.
@@ -47,7 +47,7 @@ Security steps that reduce the likelihood of a successful attack are:
 > * Compromise user or system data.
 > * Apply graffiti to a public UI.
 >
-> For information on reducing the attack surface area when accepting files from users, see the following resources:
+> For information on reducing vulnerabilities when accepting files from users, see the following resources:
 >
 > * [Unrestricted File Upload](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)
 > * [Azure Security: Ensure appropriate controls are in place when accepting files from users](/azure/security/azure-security-threat-modeling-tool-input-validation#controls-users)
@@ -85,13 +85,15 @@ Common storage options for files include:
 
 The definition of small and large files depend on the computing resources available. Apps should benchmark the storage approach used to ensure it can handle the expected sizes. Benchmark memory, CPU, disk, and database performance.
 
-While specific boundaries can't be provided on what is small vs large for your deployment, here are some of AspNetCore's related defaults for [FormOptions](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/Features/FormOptions.cs):
+While specific boundaries can't be provided on what is small versus large for your deployment, here are some of ASP.NET Core's related defaults for [`FormOptions`](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/Features/FormOptions.cs) ([API documentation](xref:Microsoft.AspNetCore.Http.Features.FormOptions)):
 
-- By default, [HttpRequest.Form](xref:Microsoft.AspNetCore.Http.HttpRequest.Form) does not buffer the entire request body (<xref:Microsoft.AspNetCore.Http.Features.FormOptions.BufferBody>), but it does buffer any multipart form files included.
-- <xref:Microsoft.AspNetCore.Http.Features.FormOptions.MultipartBodyLengthLimit> is the max size for buffered form files, defaults to 128MB.
-- <xref:Microsoft.AspNetCore.Http.Features.FormOptions.MemoryBufferThreshold> indicates how much to buffer files in memory before transitioning to a buffer file on disk, defaults to 64KB. `MemoryBufferThreshold` acts as a boundary between small and large files which is raised or lowered depending on the apps resources and scenarios.
+* By default, [`HttpRequest.Form`](xref:Microsoft.AspNetCore.Http.HttpRequest.Form) doesn't buffer the entire request body (<xref:Microsoft.AspNetCore.Http.Features.FormOptions.BufferBody>), but it does buffer any multipart form files included.
+* <xref:Microsoft.AspNetCore.Http.Features.FormOptions.MultipartBodyLengthLimit> is the maximum size for buffered form files (default: 128 MB).
+* <xref:Microsoft.AspNetCore.Http.Features.FormOptions.MemoryBufferThreshold> indicates the buffering threshold in memory before transitioning to a buffer file on disk (default: 64 KB). `MemoryBufferThreshold` acts as a boundary between small and large files, which is raised or lowered depending on the apps resources and scenarios.
 
-Fore more information on `FormOptions`, see the [source code](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/Features/FormOptions.cs).
+For more information on <xref:Microsoft.AspNetCore.Http.Features.FormOptions>, see the [`FormOptions` class](https://github.com/dotnet/aspnetcore/blob/main/src/Http/Http/src/Features/FormOptions.cs) in the ASP.NET Core reference source.
+
+[!INCLUDE[](~/includes/aspnetcore-repo-ref-source-links.md)]
 
 ## File upload scenarios
 
@@ -131,7 +133,7 @@ The following example demonstrates the use of a Razor Pages form to upload a sin
             <label asp-for="FileUpload.FormFile"></label>
         </dt>
         <dd>
-            <input asp-for="FileUpload.FormFile" type="file">
+            <input asp-for="FileUpload.FormFile" type="file" />
             <span asp-validation-for="FileUpload.FormFile"></span>
         </dd>
     </dl>
@@ -215,7 +217,7 @@ In order to support file uploads, HTML forms must specify an encoding type (`enc
 For a `files` input element to support uploading multiple files provide the `multiple` attribute on the `<input>` element:
 
 ```cshtml
-<input asp-for="FileUpload.FormFiles" type="file" multiple>
+<input asp-for="FileUpload.FormFiles" type="file" multiple />
 ```
 
 The individual files uploaded to the server can be accessed through [Model Binding](xref:mvc/models/model-binding) using <xref:Microsoft.AspNetCore.Http.IFormFile>. The sample app demonstrates multiple buffered file uploads for database and physical storage scenarios.
@@ -223,7 +225,7 @@ The individual files uploaded to the server can be accessed through [Model Bindi
 <a name="filename"></a>
 
 > [!WARNING]
-> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. An attacker can provide a malicious filename, including full paths or relative paths. Applications should:
+> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. A cyberattacker can provide a malicious filename, including full paths or relative paths. Applications should:
 >
 > * Remove the path from the user-supplied filename.
 > * Save the HTML-encoded, path-removed filename for UI or logging.
@@ -308,7 +310,7 @@ Files uploaded using the <xref:Microsoft.AspNetCore.Http.IFormFile> technique ar
 For another example that loops over multiple files for upload and uses safe file names, see `Pages/BufferedMultipleFileUploadPhysical.cshtml.cs` in the sample app.
 
 > [!WARNING]
-> [Path.GetTempFileName](xref:System.IO.Path.GetTempFileName*) throws an <xref:System.IO.IOException> if more than 65,535 files are created without deleting previous temporary files. The limit of 65,535 files is a per-server limit. For more information on this limit on Windows OS, see the remarks in the following topics:
+> In .NET 7 and earlier versions, [Path.GetTempFileName](xref:System.IO.Path.GetTempFileName%2A) throws an <xref:System.IO.IOException> when more than 65,535 files are created without deleting previous temporary files. The limit of 65,535 files is a per-server limit. For more information on this limit on Windows OS, see the remarks in the following articles:
 >
 > * [GetTempFileNameA function](/windows/desktop/api/fileapi/nf-fileapi-gettempfilenamea#remarks)
 > * <xref:System.IO.Path.GetTempFileName*>
@@ -759,7 +761,7 @@ ASP.NET Core supports uploading one or more files using buffered model binding f
 
 ## Security considerations
 
-Use caution when providing users with the ability to upload files to a server. Attackers may attempt to:
+Use caution when providing users with the ability to upload files to a server. Cyberattackers may attempt to:
 
 * Execute [denial of service](/windows-hardware/drivers/ifs/denial-of-service) attacks.
 * Upload viruses or malware.
@@ -786,7 +788,7 @@ Security steps that reduce the likelihood of a successful attack are:
 > * Compromise user or system data.
 > * Apply graffiti to a public UI.
 >
-> For information on reducing the attack surface area when accepting files from users, see the following resources:
+> For information on reducing vulnerabilities when accepting files from users, see the following resources:
 >
 > * [Unrestricted File Upload](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)
 > * [Azure Security: Ensure appropriate controls are in place when accepting files from users](/azure/security/azure-security-threat-modeling-tool-input-validation#controls-users)
@@ -947,7 +949,7 @@ The individual files uploaded to the server can be accessed through [Model Bindi
 <a name="filename"></a>
 
 > [!WARNING]
-> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. An attacker can provide a malicious filename, including full paths or relative paths. Applications should:
+> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. A cyberattacker can provide a malicious filename, including full paths or relative paths. Applications should:
 >
 > * Remove the path from the user-supplied filename.
 > * Save the HTML-encoded, path-removed filename for UI or logging.
@@ -1494,7 +1496,7 @@ ASP.NET Core supports uploading one or more files using buffered model binding f
 
 ## Security considerations
 
-Use caution when providing users with the ability to upload files to a server. Attackers may attempt to:
+Use caution when providing users with the ability to upload files to a server. Cyberattackers may attempt to:
 
 * Execute [denial of service](/windows-hardware/drivers/ifs/denial-of-service) attacks.
 * Upload viruses or malware.
@@ -1521,7 +1523,7 @@ Security steps that reduce the likelihood of a successful attack are:
 > * Compromise user or system data.
 > * Apply graffiti to a public UI.
 >
-> For information on reducing the attack surface area when accepting files from users, see the following resources:
+> For information on reducing vulnerabilities when accepting files from users, see the following resources:
 >
 > * [Unrestricted File Upload](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)
 > * [Azure Security: Ensure appropriate controls are in place when accepting files from users](/azure/security/azure-security-threat-modeling-tool-input-validation#controls-users)
@@ -1682,7 +1684,7 @@ The individual files uploaded to the server can be accessed through [Model Bindi
 <a name="filename2"></a>
 
 > [!WARNING]
-> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. An attacker can provide a malicious filename, including full paths or relative paths. Applications should:
+> Do **not** use the `FileName` property of <xref:Microsoft.AspNetCore.Http.IFormFile> other than for display and logging. When displaying or logging, HTML encode the file name. A cyberattacker can provide a malicious filename, including full paths or relative paths. Applications should:
 >
 > * Remove the path from the user-supplied filename.
 > * Save the HTML-encoded, path-removed filename for UI or logging.

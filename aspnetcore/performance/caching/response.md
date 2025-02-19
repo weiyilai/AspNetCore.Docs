@@ -3,7 +3,7 @@ title: Response caching in ASP.NET Core
 author: tdykstra
 description: Learn how to use response caching to lower bandwidth requirements and increase performance of ASP.NET Core apps.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.date: 1/11/2022
 uid: performance/caching/response
 ---
@@ -22,7 +22,6 @@ The [ResponseCache attribute](#responsecache-attribute) sets response caching he
 For server-side caching that follows the HTTP 1.1 Caching specification, use [Response Caching Middleware](xref:performance/caching/middleware). The middleware can use the <xref:Microsoft.AspNetCore.Mvc.ResponseCacheAttribute> properties to influence server-side caching behavior.
 
 [!INCLUDE[](~/includes/response-caching-mid.md)]
-<!--Postman:  GET: Headers > Postman > go to settings > uncheck Send no-cache header -->
 
 ## HTTP-based response caching
 

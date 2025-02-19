@@ -1,88 +1,178 @@
 ---
-title: "ASP.NET Core docs: What's new for June 2023"
-description: "What's new in the ASP.NET Core docs for June 2023."
-ms.custom: June-2023
-ms.date: 07/01/2023
+title: "ASP.NET Core docs: What's new for June 2024"
+description: "What's new in the ASP.NET Core docs for June 2024."
+ms.custom: June-2024
+ms.date: 07/01/2024
 ---
 
-# ASP.NET Core docs: What's new for June 2023
+# ASP.NET Core docs: What's new for June 2024
 
-Welcome to what's new in the ASP.NET Core docs for June 2023. This article lists some of the major changes to docs during this period.
+Welcome to what's new in the ASP.NET Core docs for June 2024. This article lists some of the major changes to docs during this period.
 
 ## Blazor
 
-### New articles
+### Updated articles
 
-- <xref:blazor/tutorials/signalr-blazor-preview>
+- <xref:blazor/components/quickgrid>
+  - QuickGrid display name support
+  - Scaffolding tool doc overhaul with added generators
+- <xref:blazor/components/event-handling>
+  - Document reserved event names
+  - Clarify interactive requirement for event handlers in BWAs
+- <xref:blazor/file-downloads> - Downloading files with static SSR
+- <xref:blazor/forms/index>
+  - Mitigate overposting attacks
+  - BWA client-side validation requires a circuit
+- <xref:blazor/forms/validation> - BWA client-side validation requires a circuit
+- <xref:blazor/components/render-modes>
+  - Prerendering behavior updates
+  - Interactive SSR RCs in global WASM/Auto projects
+  - Detect the current render mode at runtime
+- <xref:blazor/fundamentals/signalr> - Blazor Server reconnection coverage
+- <xref:blazor/fundamentals/static-files> - Map Static Assets Blazor-specific coverage
+- <xref:blazor/security/webassembly/additional-scenarios> - Update RemoteAuthenticatorView param value
+- <xref:blazor/hybrid/tutorials/maui-blazor-web-app>
+  - Place code for sample cross-link in MAUI project
+  - Article updates
+  - .NET MAUI BH BWA tutorial updates
+  - Update .NET MAUI BH BWA tutorial
+  - Clarify per-page/component scenario
+  - Patch the Pre5 .NET MAUI Blazor Hybrid BWA coverage (PR 2)
+  - Patch the Pre5 .NET MAUI Blazor Hybrid BWA coverage (PR 1)
+  - New .NET MAUI Blazor Hybrid template
+- <xref:blazor/host-and-deploy/configure-trimmer> - Clarify Blazor trim mode
+- <xref:blazor/debug> - Blazor CLI commands moving to `dotnet watch`
+- <xref:blazor/host-and-deploy/index> - Blazor CLI commands moving to `dotnet watch`
+- <xref:blazor/host-and-deploy/webassembly>
+  - Blazor CLI commands moving to `dotnet watch`
+  - Update Apache coverage (drop CentOS mentions)
+  - Fix spacing in Apache configuration example
+- <xref:blazor/js-interop/import-export-interop> - Import-Export interop: collocated JS with RCL
+- <xref:blazor/components/integration> - Use 'reconnection UI' for all references
+- <xref:blazor/security/blazor-web-app-oidc> - Interactive SSR RCs in global WASM/Auto projects
+- <xref:blazor/security/index> - Simplified auth state serialization for BWAs
+- <xref:blazor/tooling> - Change Tooling article content layout
+- <xref:blazor/tutorials/signalr-blazor>
+  - Blazor CLI commands moving to `dotnet watch`
+  - Blazor SignalR tutorial updates
+  - Blazor SignalR tutorial refactor
+
+## Client-side development
 
 ### Updated articles
 
-- <xref:blazor/tutorials/build-a-blazor-app>  - Blazor ToDo tutorial updates
-- <xref:blazor/tooling>
-  - Tooling article updates
-  - Update Tooling article lists
-  - Drop lists in Tooling article
-- <xref:blazor/project-structure> - Project structure article updates
-- <xref:blazor/host-and-deploy/webassembly> - .NET assembly packaging (Webcil)
-- <xref:blazor/forms-and-input-components>
-  - Message size limit enhancements
-  - Forms/input components article NRT updates
-- <xref:blazor/fundamentals/signalr> - Message size limit enhancements
-- <xref:blazor/js-interop/call-dotnet-from-javascript>
-  - Call JS from .NET article versioning
-  - Call .NET from JS article versioning
-- <xref:blazor/js-interop/call-javascript-from-dotnet> - Call JS from .NET article versioning
-- <xref:blazor/tutorials/signalr-blazor> - SignalR-Blazor tutorial versioning
-- <xref:blazor/globalization-localization> - Glob-loc article versioning
-- <xref:blazor/components/event-handling> - Event handling/Lifecycle article versioning
-- <xref:blazor/components/lifecycle> - Event handling/Lifecycle article versioning
-- <xref:blazor/components/data-binding> - Data binding article versioning
-- <xref:blazor/host-and-deploy/server>
-  - Security article versioning
-  - Server timeout and Keep Alive interval config
-- <xref:blazor/components/class-libraries> - Class libs article versioning
+- <xref:client-side/using-browserlink> - Package installation no longer needed
+- <xref:client-side/dotnet-interop/wasm-browser-app> - .NET JS interop article updates
 
 ## Fundamentals
 
-### New articles
+### Updated articles
 
-- <xref:fundamentals/servers/kestrel/connection-middleware>
+- <xref:fundamentals/tools/dotnet-aspnet-codegenerator> - Scaffolding tool doc overhaul with added generators
+- <xref:fundamentals/error-handling> - May Content Health - freshness review
+- <xref:fundamentals/minimal-apis/responses> - Inline code --> snippet references
+- <xref:fundamentals/minimal-apis/handle-errors> - May Content Health - freshness review
+- <xref:fundamentals/static-files> - moniker prep:
+
+## Getting started
 
 ### Updated articles
 
-- <xref:fundamentals/servers/kestrel/endpoints> - Improve Kestrel endpoints
+- <xref:getting-started> - May Content Health - freshness review
+
+## gRPC
+
+### Updated articles
+
+- <xref:grpc/client> - Dispose gRPC streaming calls
+- <xref:grpc/performance> - Add gRPC perf docs around gracefully completing and disposing streaming calls
+
+## Hosting and deployment
+
+### New articles
+
+- <xref:host-and-deploy/azure-iis-errors-reference>
+
+### Updated articles
+
+- <xref:host-and-deploy/azure-apps/index>
+  - Revert "refactor azure troubleshooting/1"
+  - Update index.md
+- <xref:host-and-deploy/iis/index> - Revert "refactor azure troubleshooting/1"
+
+## Migration
+
+### Updated articles
+
+- <xref:migration/70-to-80> - Follow-up .NET 8 updates
+
+## Mobile development
+
+### Updated articles
+
+- <xref:mobile/native-mobile-backend> - Lowercase the code name
+
+## Performance
+
+### Updated articles
+
+- <xref:performance/caching/hybrid> - Add serialization sample app
+- <xref:performance/caching/output> - Note about code sample
 
 ## Release notes
 
 ### Updated articles
 
-- <xref:aspnetcore-8>
+- <xref:aspnetcore-9>
+  - Render mode detection, static web asset delivery, dynamic compression
+  - Add three Blazor What's New sections
 
 ## Security
 
-### New articles
+### Updated articles
 
-- <xref:security/identity-management-solutions>
-- <xref:security/authorization/iard>
+- <xref:security/authentication/windowsauth> - Fix broken links
+- <xref:security/enforcing-ssl> - May Content Health - freshness review
+- <xref:security/authentication/otherlogins> - Scaffolding tool doc overhaul with added generators
+
+## Testing
+
+### Updated articles
+
+- <xref:test/troubleshoot-azure-iis>
+  - refactor azure troubleshooting/1
+
+## Tutorials
+
+### Updated articles
+
+- <xref:tutorials/get-started-with-swashbuckle> - mon split
+- <xref:tutorials/razor-pages/model> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/page> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/sql> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/da1> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/search> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/new-field> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/razor-pages/validation> - .NET 9 update: Prep RP tutorial series
+- <xref:tutorials/first-mvc-app/validation> - First MVC: Validation: Clear old null values
+- <xref:tutorials/min-web-api>
+  - v9 Update: Min Web API Tutorial
+  - Prework-Min Web API .NET 9 update
+- <xref:tutorials/razor-pages/razor-pages-start> - .NET 9 update: Prep RP tutorial series
+
+## Web API
+
+### Updated articles
+
+- <xref:web-api/handle-errors> - May Content Health - freshness review
 
 ## Community contributors
 
 The following people contributed to the ASP.NET Core docs during this period. Thank you! Learn how to contribute by following the links under "Get involved" in the [what's new landing page](index.yml).
 
-- [postmeback](https://github.com/postmeback) - Arka Poddar ![There were 5 pull requests merged by Arka Poddar.](https://img.shields.io/badge/Merged%20Pull%20Requests-5-green)
-- [david-acker](https://github.com/david-acker) - David Acker ![There were 2 pull requests merged by David Acker.](https://img.shields.io/badge/Merged%20Pull%20Requests-2-green)
-- [brockallen](https://github.com/brockallen) - Brock Allen ![There were 1 pull requests merged by Brock Allen.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [DavideDunne](https://github.com/DavideDunne) - Davide Dunne ![There were 1 pull requests merged by Davide Dunne.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [derekpotts](https://github.com/derekpotts) -  ![There were 1 pull requests merged by .](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [dlemstra](https://github.com/dlemstra) - Dirk Lemstra ![There were 1 pull requests merged by Dirk Lemstra.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [mirna-salem](https://github.com/mirna-salem) - Mirna  ![There were 1 pull requests merged by Mirna .](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [mrkaarel](https://github.com/mrkaarel) - Kaarel ![There were 1 pull requests merged by Kaarel.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [ndlozano1990](https://github.com/ndlozano1990) - Nicolás Díaz Lozano ![There were 1 pull requests merged by Nicolás Díaz Lozano.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [poornimanayar](https://github.com/poornimanayar) - Poornima Nayar ![There were 1 pull requests merged by Poornima Nayar.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [rufer7](https://github.com/rufer7) - Rufer Marc ![There were 1 pull requests merged by Rufer Marc.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [sammychinedu2ky](https://github.com/sammychinedu2ky) - Samson Amaugo ![There were 1 pull requests merged by Samson Amaugo.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [sergeipetrashko8](https://github.com/sergeipetrashko8) - Sergei Petrashko ![There were 1 pull requests merged by Sergei Petrashko.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [sguitardude](https://github.com/sguitardude) -  ![There were 1 pull requests merged by .](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [soroshsabz](https://github.com/soroshsabz) -  ![There were 1 pull requests merged by .](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [tristan-pgit](https://github.com/tristan-pgit) -  ![There were 1 pull requests merged by .](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
-- [VahidFarahmandian](https://github.com/VahidFarahmandian) - Vahid Farahmandian ![There were 1 pull requests merged by Vahid Farahmandian.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
+- [hakenr](https://github.com/hakenr) - Robert Haken ![5 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-5-green)
+- [aidmsu](https://github.com/aidmsu) - Andrey Dorokhov ![1 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
+- [DickBaker](https://github.com/DickBaker) - Dick Baker ![1 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
+- [Marjani](https://github.com/Marjani) - AmirHossein ![1 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
+- [saborrie](https://github.com/saborrie) - Steven Borrie ![1 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)
+- [waedi](https://github.com/waedi) -  ![1 pull requests.](https://img.shields.io/badge/Merged%20Pull%20Requests-1-green)

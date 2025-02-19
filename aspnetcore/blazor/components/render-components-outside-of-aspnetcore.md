@@ -5,10 +5,12 @@ description: Render Razor components outside of the context of an HTTP request.
 monikerRange: '>= aspnetcore-8.0'
 ms.author: riande
 ms.custom: mvc
-ms.date: 05/10/2023
+ms.date: 11/12/2024
 uid: blazor/components/render-outside-of-aspnetcore
 ---
 # Render Razor components outside of ASP.NET Core
+
+[!INCLUDE[](~/includes/not-latest-version-without-not-supported-content.md)]
 
 Razor components can be rendered outside of the context of an HTTP request. You can render Razor components as HTML directly to a string or stream independently of the ASP.NET Core hosting environment. This is convenient for scenarios where you want to generate HTML fragments, such as for generating email content, generating static site content, or for building a content templating engine.
 
@@ -24,8 +26,8 @@ cd ConsoleApp1
 In a command shell in the `ConsoleApp1` folder, add package references for <xref:Microsoft.AspNetCore.Components.Web?displayProperty=fullName> and <xref:Microsoft.Extensions.Logging?displayProperty=fullName> to the console app:
 
 ```dotnetcli
-dotnet add package Microsoft.AspNetCore.Components.Web --prerelease
-dotnet add package Microsoft.Extensions.Logging --prerelease
+dotnet add package Microsoft.AspNetCore.Components.Web
+dotnet add package Microsoft.Extensions.Logging
 ```
 
 In the console app's project file (`ConsoleApp1.csproj`), update the console app project to use the Razor SDK:
@@ -50,12 +52,12 @@ Add the following `RenderMessage` component to the project.
 }
 ```
 
-Update `Program.cs`:
+Update the `Program` file:
 
 * Set up dependency injection (<xref:Microsoft.Extensions.DependencyInjection.IServiceCollection>/<xref:Microsoft.Extensions.DependencyInjection.ServiceCollectionContainerBuilderExtensions.BuildServiceProvider%2A>) and logging (<xref:Microsoft.Extensions.DependencyInjection.LoggingServiceCollectionExtensions.AddLogging%2A>/<xref:Microsoft.Extensions.Logging.ILoggerFactory>).
-* Create an `HtmlRenderer` and render the `RenderMessage` component by calling `RenderComponentAsync`.
+* Create an <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer> and render the `RenderMessage` component by calling <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.RenderComponentAsync%2A>.
 
-Any calls to `RenderComponentAsync` must be made in the context of calling `InvokeAsync` on a component dispatcher. A component dispatcher is available from the `HtmlRender.Dispatcher` property.
+Any calls to <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.RenderComponentAsync%2A> must be made in the context of calling `InvokeAsync` on a component dispatcher. A component dispatcher is available from the <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.Dispatcher?displayProperty=nameWithType> property.
 
 ```csharp
 using Microsoft.AspNetCore.Components;
@@ -89,8 +91,8 @@ Console.WriteLine(html);
 ```
 
 > [!NOTE]
-> Pass <xref:Microsoft.AspNetCore.Components.ParameterView.Empty?displayProperty=nameWithType> to `RenderComponentAsync` when rendering the component without passing parameters.
+> Pass <xref:Microsoft.AspNetCore.Components.ParameterView.Empty?displayProperty=nameWithType> to <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.RenderComponentAsync%2A> when rendering the component without passing parameters.
 
 Alternatively, you can write the HTML to a <xref:System.IO.TextWriter> by calling `output.WriteHtmlTo(textWriter)`.
 
-The task returned by `RenderComponentAsync` completes when the component is fully rendered, including completing any asynchronous lifecycle methods. If you want to observe the rendered HTML earlier, call `BeginRenderComponentAsync` instead. Then, wait for the component rendering to complete by awaiting `WaitForQuiescenceAsync` on the returned `HtmlComponent` instance.
+The task returned by <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.RenderComponentAsync%2A> completes when the component is fully rendered, including completing any asynchronous lifecycle methods. If you want to observe the rendered HTML earlier, call <xref:Microsoft.AspNetCore.Components.Web.HtmlRenderer.BeginRenderingComponent%2A> instead. Then, wait for the component rendering to complete by awaiting <xref:Microsoft.AspNetCore.Components.Web.HtmlRendering.HtmlRootComponent.QuiescenceTask%2A?displayProperty=nameWithType> on the returned <xref:Microsoft.AspNetCore.Components.Web.HtmlRendering.HtmlRootComponent> instance.

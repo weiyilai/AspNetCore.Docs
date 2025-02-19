@@ -80,7 +80,7 @@ Follow the <xref:getting-started> tutorial to create a Razor Pages app.
    * If you're unable to deploy directly to the IIS site folder on the IIS server, publish to a folder on removable media and physically move the published app to the IIS site folder on the server, which is the site's **Physical path** in IIS Manager. Move the contents of the `bin/Release/{TARGET FRAMEWORK}/publish` folder to the IIS site folder on the server, which is the site's **Physical path** in IIS Manager.
 1. Select the **Publish** button.
 
-# [.NET Core CLI](#tab/netcore-cli)
+# [.NET CLI](#tab/net-cli)
 
 1. In a command shell, publish the app in Release configuration with the [dotnet publish](/dotnet/core/tools/dotnet-publish) command:
 
@@ -126,13 +126,13 @@ To learn more about hosting ASP.NET Core apps on IIS, see the IIS Overview artic
 * <xref:host-and-deploy/directory-structure>
 * <xref:test/troubleshoot-azure-iis>
 * <xref:security/enforcing-ssl>
+* [WebSockets on IIS](xref:fundamentals/websockets#enabling-websockets-on-iis)
 
 ### Articles pertaining to ASP.NET Core app deployment
 
 * <xref:tutorials/publish-to-azure-webapp-using-vs>
 * <xref:tutorials/publish-to-azure-webapp-using-vscode>
 * <xref:host-and-deploy/visual-studio-publish-profiles>
-* [Publish a Web app to a folder using Visual Studio for Mac](/visualstudio/mac/publish-folder)
 
 ### Articles on IIS HTTPS configuration
 
@@ -154,3 +154,4 @@ To learn more about hosting ASP.NET Core apps on IIS, see the IIS Overview artic
 * <xref:host-and-deploy/iis/modules>
 * <xref:test/troubleshoot-azure-iis>
 * <xref:host-and-deploy/azure-iis-errors-reference>
+* [Sticky sessions with Application Request Routing](/iis/extensions/configuring-application-request-routing-arr/http-load-balancing-using-application-request-routing)

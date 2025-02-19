@@ -173,7 +173,7 @@ The [`WithOpenApi`](https://github.com/dotnet/aspnetcore/blob/8a4b4deb09c04134f2
 
 Minimal APIs now support annotating operations with descriptions and summaries for OpenAPI spec generation. You can call extension methods <xref:Microsoft.AspNetCore.Http.OpenApiRouteHandlerBuilderExtensions.WithDescription%2A> and <xref:Microsoft.AspNetCore.Http.OpenApiRouteHandlerBuilderExtensions.WithSummary%2A> or use attributes [[EndpointDescription]](xref:Microsoft.AspNetCore.Http.EndpointDescriptionAttribute) and [[EndpointSummary]](xref:Microsoft.AspNetCore.Http.EndpointSummaryAttribute)).
 
-For more information, see [OpenAPI in minimal API apps](xref:fundamentals/minimal-apis/openapi?view=aspnetcore-7.0)
+For more information, see [OpenAPI in minimal API apps](xref:fundamentals/openapi/aspnetcore-openapi?view=aspnetcore-7.0)
 
 ### File uploads using IFormFile and IFormFileCollection
 
@@ -371,7 +371,7 @@ Examples:
 }
 ```
 
-For more information on the `InputText` component, see <xref:blazor/forms-and-input-components>.
+For more information on the `InputText` component, see <xref:blazor/forms/input-components>.
 
 <!--
 
@@ -437,13 +437,13 @@ For more information, see [Developers targeting browser-wasm can use Web Crypto 
 
 You can now inject services into custom validation attributes. Blazor sets up the `ValidationContext` so that it can be used as a service provider.
 
-For more information, see <xref:blazor/forms-and-input-components?view=aspnetcore-7.0#custom-validation-attributes>.
+For more information, see <xref:blazor/forms/validation?view=aspnetcore-7.0#custom-validation-attributes>.
 
 ### `Input*` components outside of an `EditContext`/`EditForm`
 
 The built-in input components are now supported outside of a form in Razor component markup.
 
-For more information, see <xref:blazor/forms-and-input-components?view=aspnetcore-7.0#built-in-input-components>.
+For more information, see <xref:blazor/forms/input-components?view=aspnetcore-7.0>.
 
 ### Project template changes
 
@@ -498,7 +498,7 @@ JavaScript `[JSImport]`/`[JSExport]` interop API is a new low-level mechanism fo
 For more information:
 
 * <xref:blazor/js-interop/import-export-interop>: Pertains only to Blazor WebAssembly apps.
-* <xref:client-side/dotnet-interop>: Pertains only to JavaScript apps that don't depend on the Blazor UI component model.
+* <xref:client-side/dotnet-interop/index>: Pertains only to JavaScript apps that don't depend on the Blazor UI component model.
 
 ### Conditional registration of the authentication state provider
 
@@ -517,10 +517,10 @@ In the preceding example, `ExternalAuthStateProvider` is the developer's service
 
 New features in the `wasm-tools` workload for .NET 7 that help improve performance and handle exceptions:
 
-* [WebAssembly Single Instruction, Multiple Data (SIMD)](https://github.com/WebAssembly/simd/blob/master/proposals/simd/SIMD.md) support (only with AOT, not supported by Apple Safari)
+* [WebAssembly Single Instruction, Multiple Data (SIMD)](https://wikipedia.org/wiki/Single_instruction,_multiple_data) support (only with AOT, not supported by Apple Safari)
 * WebAssembly exception handling support
 
-For more information, see <xref:blazor/tooling?view=aspnetcore-7.0#net-webassembly-build-tools>.
+For more information, see <xref:blazor/tooling/webassembly?view=aspnetcore-7.0>.
 
 ## Blazor Hybrid
 
@@ -584,7 +584,7 @@ Changes were made in the HTTP/2 frame writing code that improves performance whe
 
 ### Http/2 WebSockets support
 
-.NET 7 introduces Websockets over HTTP/2 support for Kestrel, the SignalR JavaScript client, and SignalR with Blazor WebAssembly.
+.NET 7 introduces WebSockets over HTTP/2 support for Kestrel, the SignalR JavaScript client, and SignalR with Blazor WebAssembly.
 
 Using WebSockets over HTTP/2 takes advantage of new features such as:
 
@@ -605,7 +605,7 @@ In .NET 7, Kestrel's memory pool is partitioned the same way as its I/O queue, w
 
 ### `ServerReady` event to measure startup time
 
-Apps using [EventSource](/dotnet/api/system.diagnostics.tracing.eventsource) can measure the startup time to understand and optimize startup performance. The new [`ServerReady`](https://source.dot.net/#Microsoft.AspNetCore.Hosting/Internal/HostingEventSource.cs,76) event in <xref:Microsoft.AspNetCore.Hosting?displayProperty=fullName> represents the point where the server is ready to respond to requests.
+Apps using <!--keep--> [EventSource](/dotnet/api/system.diagnostics.tracing.eventsource) can measure the startup time to understand and optimize startup performance. The new [`ServerReady`](https://source.dot.net/#Microsoft.AspNetCore.Hosting/Internal/HostingEventSource.cs,76) event in <xref:Microsoft.AspNetCore.Hosting?displayProperty=fullName> represents the point where the server is ready to respond to requests.
 
 ## Server
 

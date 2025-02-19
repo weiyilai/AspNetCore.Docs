@@ -6,7 +6,6 @@ ms.author: riande
 monikerRange: '>= aspnetcore-6.0'
 ms.date: 11/9/2022
 ms.topic: article
-ms.prod: aspnet-core
 uid: migration/inc/remote-app-setup
 ---
 
@@ -41,7 +40,7 @@ In the options configuration method passed to the `AddRemoteAppServer` call, an 
 * The same API key provided to the ASP.NET Core app when it is configured.
 * A string and must be parsable as a [GUID](/dotnet/api/system.guid). Hyphens in the key are optional.
 
-3. **Optional :** Add the `SystemWebAdapterModule` module to to the `web.config` if it wasn't already added by NuGet. The `SystemWebAdapterModule` module is not added automatically when using SDK style projects for ASP.NET Core.
+3. **Optional :** Add the `SystemWebAdapterModule` module to the `web.config` if it wasn't already added by NuGet. The `SystemWebAdapterModule` module is not added automatically when using SDK style projects for ASP.NET Core.
 
 ```diff
   <system.webServer>

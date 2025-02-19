@@ -155,7 +155,7 @@ Kestrel can be used by itself or with a *reverse proxy server*. A reverse proxy 
 * [Internet Information Services (IIS)](https://www.iis.net/)
 * [Nginx](https://nginx.org)
 * [Apache](https://httpd.apache.org/)
-* [YARP: Yet Another Reverse Proxy](https://microsoft.github.io/reverse-proxy/)
+* [YARP: Yet Another Reverse Proxy](https://dotnet.github.io/yarp/)
 
 Kestrel used as an edge (Internet-facing) web server:
 
@@ -174,7 +174,7 @@ Even if a reverse proxy server isn't required, using a reverse proxy server migh
 A reverse proxy:
 
 * Can limit the exposed public surface area of the apps that it hosts.
-* Provide an additional layer of configuration and defense.
+* Provide an additional layer of configuration and defense-in-depth cybersecurity.
 * Might integrate better with existing infrastructure.
 * Simplify load balancing and secure communication (HTTPS) configuration. Only the reverse proxy server requires an X.509 certificate, and that server can communicate with the app's servers on the internal network using plain HTTP.
 

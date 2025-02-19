@@ -6,7 +6,6 @@ ms.author: riande
 monikerRange: '>= aspnetcore-6.0'
 ms.date: 11/9/2022
 ms.topic: article
-ms.prod: aspnet-core
 uid: migration/inc/remote-session
 ---
 
@@ -18,13 +17,7 @@ Remote app session state will enable communication between the ASP.NET Core and 
 
 The <xref:System.Web.SessionState.HttpSessionState> object must be serialized for remote app session state to be enabled. This is accomplished through implementation of the type `Microsoft.AspNetCore.SystemWebAdapters.SessionState.Serialization.ISessionSerializer`, of which a default binary writer implementation is provided. This is added by the following code:
 
-```csharp
-builder.Services.AddSystemWebAdapters()
-    .AddSessionSerializer(options =>
-    {
-        // Customize session serialization here
-    });
-```
+:::code language="csharp" source="~/migration/inc/samples/remote-session/Program.cs" id="snippet_Serialization" :::
 
 ## Configuration
 
@@ -32,58 +25,21 @@ First, follow the [remote app setup](xref:migration/inc/remote-app-setup) instru
 
 Configuration for ASP.NET Core involves calling `AddRemoteAppSession` and `AddJsonSessionSerializer` to register known session item types. The code should look similar to the following:
 
-```csharp
-builder.Services.AddSystemWebAdapters()
-    .AddJsonSessionSerializer(options =>
-    {
-        // Serialization/deserialization requires each session key to be registered to a type
-        options.RegisterKey<int>("test-value");
-        options.RegisterKey<SessionDemoModel>("SampleSessionItem");
-    })
-    .AddRemoteAppClient(options =>
-    {
-        // Provide the URL for the remote app that has enabled session querying
-        options.RemoteAppUrl = new(builder.Configuration["ReverseProxy:Clusters:fallbackCluster:Destinations:fallbackApp:Address"]);
-
-        // Provide a strong API key that will be used to authenticate the request on the remote app for querying the session
-        options.ApiKey = builder.Configuration["RemoteAppApiKey"];
-    })
-    .AddSessionClient();
-```
+:::code language="csharp" source="~/migration/inc/samples/remote-session/Program.cs" id="snippet_Configuration" :::
 
 Session support requires additional work for the ASP.NET Core pipeline, and is not turned on by default. It can be configured on a per-route basis via ASP.NET Core metadata.
 
 For example, session support requires either to annotate a controller:
 
-```cs
-[Session]
-public class SomeController : Controller
-{
-}
-```
+:::code language="csharp" source="~/migration/inc/samples/remote-session/SomeController.cs" id="snippet_Controller" :::
 
 or to enable for all endpoints by default:
 
-```cs
-app.MapDefaultControllerRoute()
-    .RequireSystemWebAdapterSession();
-```
+:::code language="csharp" source="~/migration/inc/samples/remote-session/Program.cs" id="snippet_RequireSystemWebAdapterSession" :::
 
 The framework equivalent would look like the following change in `Global.asax.cs`:
 
-```csharp
-SystemWebAdapterConfiguration.AddSystemWebAdapters(this)
-    .AddJsonSessionSerializer(options =>
-    {
-        // Serialization/deserialization requires each session key to be registered to a type
-        options.RegisterKey<int>("test-value");
-        options.RegisterKey<SessionDemoModel>("SampleSessionItem");
-    })
-    // Provide a strong API key that will be used to authenticate the request on the remote app for querying the session
-    // ApiKey is a string representing a GUID
-    .AddRemoteAppServer(options => options.ApiKey = ConfigurationManager.AppSettings["RemoteAppApiKey"])
-    .AddSessionServer();
-```
+:::code language="csharp" source="~/migration/inc/samples/remote-session/Global.asax.cs":::
 
 ## Protocol
 
@@ -100,4 +56,4 @@ Writeable session state protocol starts with the same as the readonly, but diffe
 - Requires an additional `PUT` request to update the state
 - The initial `GET` request must be kept open until the session is done; if closed, the session will not be able to be updated
 
-![Writeable session state protocol starts with the the same as the readonl](~/migration/inc/overview/static/writesession.png)
+![Writeable session state protocol starts with the same as the readonly](~/migration/inc/overview/static/writesession.png)

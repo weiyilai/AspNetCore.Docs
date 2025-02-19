@@ -1,49 +1,49 @@
 ---
 title: ASP.NET Core Blazor routing and navigation
 author: guardrex
-description: Learn how to manage request routing in Blazor apps and how to use the Navigation Manager and NavLink component for navigation.
+description: Learn how to manage Blazor app request routing and how to use the Navigation Manager and NavLink component for navigation.
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 12/07/2022
+ms.date: 11/12/2024
 uid: blazor/fundamentals/routing
 ---
 # ASP.NET Core Blazor routing and navigation
 
 [!INCLUDE[](~/includes/not-latest-version.md)]
 
-This article explains how to manage request routing and how to use the <xref:Microsoft.AspNetCore.Components.Routing.NavLink> component to create navigation links in Blazor apps.
+This article explains how to manage Blazor app request routing and how to use the <xref:Microsoft.AspNetCore.Components.Routing.NavLink> component to create navigation links.
 
 > [!IMPORTANT]
 > Code examples throughout this article show methods called on `Navigation`, which is an injected <xref:Microsoft.AspNetCore.Components.NavigationManager> in classes and components.
 
+:::moniker range=">= aspnetcore-8.0"
+
+## Static versus interactive routing
+
+*This section applies to Blazor Web Apps.*
+
+If [prerendering is enabled](xref:blazor/components/render-modes#prerendering), the Blazor router (`Router` component, `<Router>` in `Routes.razor`) performs static routing to components during static server-side rendering (static SSR). This type of routing is called *static routing*.
+
+When an interactive render mode is assigned to the `Routes` component, the Blazor router becomes interactive after static SSR with static routing on the server. This type of routing is called *interactive routing*.
+
+Static routers use endpoint routing and the HTTP request path to determine which component to render. When the router becomes interactive, it uses the document's URL (the URL in the browser's address bar) to determine which component to render. This means that the interactive router can dynamically change which component is rendered if the document's URL dynamically changes to another valid internal URL, and it can do so without performing an HTTP request to fetch new page content.
+
+Interactive routing also prevents prerendering because new page content isn't requested from the server with a normal page request. For more information, see <xref:blazor/components/prerender#interactive-routing-and-prerendering>.
+
+:::moniker-end
+
 ## Route templates
 
-The <xref:Microsoft.AspNetCore.Components.Routing.Router> component enables routing to Razor components in a Blazor app. The <xref:Microsoft.AspNetCore.Components.Routing.Router> component is used in the `App` component of Blazor apps.
+:::moniker range=">= aspnetcore-8.0"
 
-`App.razor`:
-
-:::moniker range=">= aspnetcore-7.0"
-
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/routing/App1.razor":::
+The <xref:Microsoft.AspNetCore.Components.Routing.Router> component enables routing to Razor components and is located in the app's `Routes` component (`Components/Routes.razor`).
 
 :::moniker-end
 
-:::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
+:::moniker range="< aspnetcore-8.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/routing/App1.razor":::
-
-:::moniker-end
-
-:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
-
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/routing/App1.razor":::
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/routing/App1.razor":::
+The <xref:Microsoft.AspNetCore.Components.Routing.Router> component enables routing to Razor components. The <xref:Microsoft.AspNetCore.Components.Routing.Router> component is used in the `App` component (`App.razor`).
 
 :::moniker-end
 
@@ -56,38 +56,50 @@ At runtime, the <xref:Microsoft.AspNetCore.Components.RouteView> component:
 * Receives the <xref:Microsoft.AspNetCore.Components.RouteData> from the <xref:Microsoft.AspNetCore.Components.Routing.Router> along with any route parameters.
 * Renders the specified component with its [layout](xref:blazor/components/layouts), including any further nested layouts.
 
-Optionally specify a <xref:Microsoft.AspNetCore.Components.RouteView.DefaultLayout> parameter with a layout class for components that don't specify a layout with the [`@layout` directive](xref:blazor/components/layouts#apply-a-layout-to-a-component). The framework's [Blazor project templates](xref:blazor/project-structure) specify the `MainLayout` component (`Shared/MainLayout.razor`) as the app's default layout. For more information on layouts, see <xref:blazor/components/layouts>.
+Optionally specify a <xref:Microsoft.AspNetCore.Components.RouteView.DefaultLayout> parameter with a layout class for components that don't specify a layout with the [`@layout` directive](xref:blazor/components/layouts#apply-a-layout-to-a-component). The framework's [Blazor project templates](xref:blazor/project-structure) specify the `MainLayout` component (`MainLayout.razor`) as the app's default layout. For more information on layouts, see <xref:blazor/components/layouts>.
 
 Components support multiple route templates using multiple [`@page` directives](xref:mvc/views/razor#page). The following example component loads on requests for `/blazor-route` and `/different-blazor-route`.
 
-`Pages/BlazorRoute.razor`:
+`BlazorRoute.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor" highlight="1-2":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/BlazorRoute.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/BlazorRoute.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor" highlight="1-2":::
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor" highlight="1-2":::
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor" highlight="1-2":::
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/BlazorRoute.razor":::
 
 :::moniker-end
 
 > [!IMPORTANT]
-> For URLs to resolve correctly, the app must include a `<base>` tag ([location of `<head>` content](xref:blazor/project-structure#location-of-head-content)) with the app base path specified in the `href` attribute. For more information, see <xref:blazor/host-and-deploy/index#app-base-path>.
+> For URLs to resolve correctly, the app must include a `<base>` tag ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)) with the app base path specified in the `href` attribute. For more information, see <xref:blazor/host-and-deploy/index#app-base-path>.
 
 :::moniker range="< aspnetcore-6.0"
 
@@ -104,16 +116,20 @@ In the following example, the `@page` directive in a component is replaced with 
 + @attribute [Route(Constants.CounterRoute)]
 ```
 
+:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
+
+[!INCLUDE[](~/blazor/includes/prefer-exact-matches.md)]
+
+:::moniker-end
+
 :::moniker range=">= aspnetcore-6.0"
 
 ## Focus an element on navigation
 
-Use the <xref:Microsoft.AspNetCore.Components.Routing.FocusOnNavigate> component to set the UI focus to an element based on a CSS selector after navigating from one page to another. You can see the <xref:Microsoft.AspNetCore.Components.Routing.FocusOnNavigate> component in use by the `App` component of an app generated from a Blazor project template.
-
-In `App.razor`:
+The <xref:Microsoft.AspNetCore.Components.Routing.FocusOnNavigate> component sets the UI focus to an element based on a CSS selector after navigating from one page to another.
 
 ```razor
-<FocusOnNavigate RouteData="@routeData" Selector="h1" />
+<FocusOnNavigate RouteData="routeData" Selector="h1" />
 ```
 
 When the <xref:Microsoft.AspNetCore.Components.Routing.Router> component navigates to a new page, the <xref:Microsoft.AspNetCore.Components.Routing.FocusOnNavigate> component sets the focus to the page's top-level header (`<h1>`). This is a common strategy for ensuring that a page navigation is announced when using a screen reader.
@@ -124,85 +140,138 @@ When the <xref:Microsoft.AspNetCore.Components.Routing.Router> component navigat
 
 The <xref:Microsoft.AspNetCore.Components.Routing.Router> component allows the app to specify custom content if content isn't found for the requested route.
 
-In the `App` component, set custom content in the <xref:Microsoft.AspNetCore.Components.Routing.Router> component's <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> template.
-
-`App.razor`:
-
-:::moniker range=">= aspnetcore-7.0"
-
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/routing/App2.razor" highlight="5-8":::
-
-:::moniker-end
-
-:::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
-
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/routing/App2.razor" highlight="5-8":::
-
-:::moniker-end
-
-:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
-
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/routing/App2.razor" highlight="5-8":::
-
-[!INCLUDE[](~/blazor/includes/prefer-exact-matches.md)]
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/routing/App2.razor" highlight="5-8":::
-
-:::moniker-end
-
-Arbitrary items are supported as content of the `<NotFound>` tags, such as other interactive components. To apply a default layout to <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> content, see <xref:blazor/components/layouts#apply-a-layout-to-arbitrary-content-layoutview-component>.
-
-## Route to components from multiple assemblies
-
-Use the <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies> parameter to specify additional assemblies for the <xref:Microsoft.AspNetCore.Components.Routing.Router> component to consider when searching for routable components. Additional assemblies are scanned in addition to the assembly specified to `AppAssembly`. In the following example, `Component1` is a routable component defined in a referenced [component class library](xref:blazor/components/class-libraries). The following <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies> example results in routing support for `Component1`.
-
-`App.razor`:
+Set custom content for the <xref:Microsoft.AspNetCore.Components.Routing.Router> component's <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> parameter:
 
 ```razor
-<Router
-    AppAssembly="@typeof(App).Assembly"
-    AdditionalAssemblies="new[] { typeof(Component1).Assembly }">
-    @* ... Router component elements ... *@
+<Router ...>
+    ...
+    <NotFound>
+        ...
+    </NotFound>
 </Router>
 ```
 
-:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
+Arbitrary items are supported as content of the <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> parameter, such as other interactive components. To apply a default layout to <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> content, see <xref:blazor/components/layouts#apply-a-layout-to-arbitrary-content-layoutview-component>.
 
-[!INCLUDE[](~/blazor/includes/prefer-exact-matches.md)]
+:::moniker range=">= aspnetcore-8.0"
+
+> [!IMPORTANT]
+> Blazor Web Apps don't use the <xref:Microsoft.AspNetCore.Components.Routing.Router.NotFound> parameter (`<NotFound>...</NotFound>` markup), but the parameter is supported&dagger; for backward compatibility to avoid a breaking change in the framework. The server-side ASP.NET Core middleware pipeline processes requests on the server. Use server-side techniques to handle bad requests.
+>
+> &dagger;*Supported* in this context means that placing `<NotFound>...</NotFound>` markup doesn't result in an exception, but using the markup isn't effective either.
+>
+> For more information, including a recommended approach for handling bad requests, see <xref:blazor/components/render-modes#static-server-side-rendering-static-ssr>.
+
+:::moniker-end
+
+## Route to components from multiple assemblies
+
+:::moniker range=">= aspnetcore-8.0"
+
+*This section applies to Blazor Web Apps.*
+
+Use the <xref:Microsoft.AspNetCore.Components.Routing.Router> component's <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies> parameter and the endpoint convention builder <xref:Microsoft.AspNetCore.Builder.RazorComponentsEndpointConventionBuilderExtensions.AddAdditionalAssemblies%2A> to discover routable components in additional assemblies. The following subsections explain when and how to use each API.
+
+### Static routing
+
+To discover routable components from additional assemblies for static server-side rendering (static SSR), even if the router later becomes interactive for interactive rendering, the assemblies must be disclosed to the Blazor framework. Call the <xref:Microsoft.AspNetCore.Builder.RazorComponentsEndpointConventionBuilderExtensions.AddAdditionalAssemblies%2A> method with the additional assemblies chained to <xref:Microsoft.AspNetCore.Builder.RazorComponentsEndpointRouteBuilderExtensions.MapRazorComponents%2A> in the server project's `Program` file.
+
+The following example includes the routable components in the `BlazorSample.Client` project's assembly using the project's `_Imports.razor` file:
+
+```csharp
+app.MapRazorComponents<App>()
+    .AddAdditionalAssemblies(typeof(BlazorSample.Client._Imports).Assembly);
+```
+
+> [!NOTE]
+> The preceding guidance also applies in [component class library](xref:blazor/components/class-libraries) scenarios. Additional important guidance for class libraries and static SSR is found in <xref:blazor/components/class-libraries-with-static-ssr>.
+
+### Interactive routing
+
+An interactive render mode can be assigned to the `Routes` component (`Routes.razor`) that makes the Blazor router become interactive after static SSR and static routing on the server. For example, `<Routes @rendermode="InteractiveServer" />` assigns interactive server-side rendering (interactive SSR) to the `Routes` component. The `Router` component inherits interactive server-side rendering (interactive SSR) from the `Routes` component. The router becomes interactive after static routing on the server.
+
+Internal navigation for interactive routing doesn't involve requesting new page content from the server. Therefore, prerendering doesn't occur for internal page requests. For more information, see <xref:blazor/components/prerender#interactive-routing-and-prerendering>.
+
+If the `Routes` component is defined in the server project, the <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies> parameter of the `Router` component should include the `.Client` project's assembly. This allows the router to work correctly when rendered interactively.
+
+In the following example, the `Routes` component is in the server project, and the `_Imports.razor` file of the `BlazorSample.Client` project indicates the assembly to search for routable components:
+
+```razor
+<Router
+    AppAssembly="..."
+    AdditionalAssemblies="[ typeof(BlazorSample.Client._Imports).Assembly ]">
+    ...
+</Router>
+```
+
+Additional assemblies are scanned in addition to the assembly specified to <xref:Microsoft.AspNetCore.Components.Routing.Router.AppAssembly%2A>.
+
+> [!NOTE]
+> The preceding guidance also applies in [component class library](xref:blazor/components/class-libraries) scenarios.
+
+Alternatively, routable components only exist in the `.Client` project with global Interactive WebAssembly or Auto rendering applied, and the `Routes` component is defined in the `.Client` project, not the server project. In this case, there aren't external assemblies with routable components, so it isn't necessary to specify a value for <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies>.
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+*This section applies to Blazor Server apps.*
+
+Use the <xref:Microsoft.AspNetCore.Components.Routing.Router> component's <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies> parameter and the endpoint convention builder <xref:Microsoft.AspNetCore.Builder.RazorComponentsEndpointConventionBuilderExtensions.AddAdditionalAssemblies%2A> to discover routable components in additional assemblies.
+
+In the following example, `Component1` is a routable component defined in a referenced [component class library](xref:blazor/components/class-libraries) named `ComponentLibrary`:
+
+```razor
+<Router
+    AppAssembly="..."
+    AdditionalAssemblies="new[] { typeof(ComponentLibrary.Component1).Assembly }">
+    ...
+</Router>
+```
+
+Additional assemblies are scanned in addition to the assembly specified to <xref:Microsoft.AspNetCore.Components.Routing.Router.AppAssembly%2A>.
 
 :::moniker-end
 
 ## Route parameters
 
-The router uses route parameters to populate the corresponding [component parameters](xref:blazor/components/index#component-parameters) with the same name. Route parameter names are case insensitive. In the following example, the `text` parameter assigns the value of the route segment to the component's `Text` property. When a request is made for `/route-parameter-1/amazing`, the `<h1>` tag content is rendered as `Blazor is amazing!`.
+The router uses route parameters to populate the corresponding [component parameters](xref:blazor/components/index#component-parameters) with the same name. Route parameter names are case insensitive. In the following example, the `text` parameter assigns the value of the route segment to the component's `Text` property. When a request is made for `/route-parameter-1/amazing`, the content is rendered as `Blazor is amazing!`.
 
-`Pages/RouteParameter1.razor`:
+`RouteParameter1.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/RouteParameter1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/RouteParameter1.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/RouteParameter1.razor":::
 
 :::moniker-end
 
@@ -218,40 +287,45 @@ Optional parameters aren't supported. In the following example, two [`@page` dir
 
 :::moniker-end
 
-`Pages/RouteParameter2.razor`:
+`RouteParameter2.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/RouteParameter2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/RouteParameter2.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/RouteParameter2.razor":::
 
 :::moniker-end
 
-Use [`OnParametersSet`](xref:blazor/components/lifecycle#after-parameters-are-set-onparameterssetasync) instead of [`OnInitialized{Async}`](xref:blazor/components/lifecycle#component-initialization-oninitializedasync) to permit app navigation to the same component with a different optional parameter value. Based on the preceding example, use `OnParametersSet` when the user should be able to navigate from `/route-parameter-2` to `/route-parameter-2/amazing` or from `/route-parameter-2/amazing` to `/route-parameter-2`:
-
-```csharp
-protected override void OnParametersSet()
-{
-    Text = Text ?? "fantastic";
-}
-```
+When the [`OnInitialized{Async}` lifecycle method](xref:blazor/components/lifecycle#component-initialization-oninitializedasync) is used instead of the [`OnParametersSet{Async}` lifecycle method](xref:blazor/components/lifecycle#after-parameters-are-set-onparameterssetasync), the default assignment of the `Text` property to `fantastic` doesn't occur if the user navigates within the same component. For example, this situation arises when the user navigates from `/route-parameter-2/amazing` to `/route-parameter-2`. As the component instance persists and accepts new parameters, the `OnInitialized` method isn't invoked again.
 
 :::moniker range="< aspnetcore-6.0"
 
@@ -269,29 +343,24 @@ In the following example, the route to the `User` component only matches if:
 * An `Id` route segment is present in the request URL.
 * The `Id` segment is an integer (`int`) type.
 
-`Pages/User.razor`:
+`User.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+```razor
+@page "/user/{Id:int}"
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/User.razor" highlight="1":::
+<PageTitle>User</PageTitle>
 
-:::moniker-end
+<h1>User Example</h1>
 
-:::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
+<p>User Id: @Id</p>
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/User.razor" highlight="1":::
-
-:::moniker-end
-
-:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
-
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/User.razor" highlight="1":::
-
-:::moniker-end
+@code {
+    [Parameter]
+    public int Id { get; set; }
+}
+```
 
 :::moniker range="< aspnetcore-5.0"
-
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/User.razor" highlight="1":::
 
 > [!NOTE]
 > Route constraints don't work with query string values. To work with query strings, see the [Query strings](#query-strings) section.
@@ -300,16 +369,17 @@ In the following example, the route to the `User` component only matches if:
 
 The route constraints shown in the following table are available. For the route constraints that match the invariant culture, see the warning below the table for more information.
 
-| Constraint | Example           | Example Matches                                                                  | Invariant<br>culture<br>matching |
-| ---------- | ----------------- | -------------------------------------------------------------------------------- | :------------------------------: |
-| `bool`     | `{active:bool}`   | `true`, `FALSE`                                                                  | No                               |
-| `datetime` | `{dob:datetime}`  | `2016-12-31`, `2016-12-31 7:32pm`                                                | Yes                              |
-| `decimal`  | `{price:decimal}` | `49.99`, `-1,000.01`                                                             | Yes                              |
-| `double`   | `{weight:double}` | `1.234`, `-1,001.01e8`                                                           | Yes                              |
-| `float`    | `{weight:float}`  | `1.234`, `-1,001.01e8`                                                           | Yes                              |
-| `guid`     | `{id:guid}`       | `CD2C1638-1638-72D5-1638-DEADBEEF1638`, `{CD2C1638-1638-72D5-1638-DEADBEEF1638}` | No                               |
-| `int`      | `{id:int}`        | `123456789`, `-123456789`                                                        | Yes                              |
-| `long`     | `{ticks:long}`    | `123456789`, `-123456789`                                                        | Yes                              |
+Constraint | Example | Example Matches | Invariant<br>culture<br>matching
+--- | --- | --- | :---:
+`bool` | `{active:bool}` | `true`, `FALSE` | No
+`datetime` | `{dob:datetime}` | `2016-12-31`, `2016-12-31 7:32pm` | Yes
+`decimal` | `{price:decimal}` | `49.99`, `-1,000.01` | Yes
+`double` | `{weight:double}` | `1.234`, `-1,001.01e8` | Yes
+`float` | `{weight:float}` | `1.234`, `-1,001.01e8` | Yes
+`guid` | `{id:guid}` | `00001111-aaaa-2222-bbbb-3333cccc4444`, `{00001111-aaaa-2222-bbbb-3333cccc4444}` | No
+`int` | `{id:int}` | `123456789`, `-123456789` | Yes
+`long` | `{ticks:long}` | `123456789`, `-123456789` | Yes
+`nonfile` | `{parameter:nonfile}` | Not `BlazorSample.styles.css`, not `favicon.ico` | Yes
 
 > [!WARNING]
 > Route constraints that verify the URL and are converted to a CLR type (such as `int` or <xref:System.DateTime>) always use the invariant culture. These constraints assume that the URL is non-localizable.
@@ -318,10 +388,10 @@ The route constraints shown in the following table are available. For the route 
 
 Route constraints also work with [optional parameters](#route-parameters). In the following example, `Id` is required, but `Option` is an optional boolean route parameter.
 
-`Pages/User.razor`:
+`User.razor`:
 
 ```razor
-@page "/user/{Id:int}/{Option:bool?}"
+@page "/user/{id:int}/{option:bool?}"
 
 <p>
     Id: @Id
@@ -342,51 +412,82 @@ Route constraints also work with [optional parameters](#route-parameters). In th
 
 :::moniker-end
 
+## Avoid file capture in a route parameter
+
+The following route template inadvertently captures static asset paths in its optional route parameter (`Optional`). For example, the app's stylesheet (`.styles.css`) is captured, which breaks the app's styles:
+
+```razor
+@page "/{optional?}"
+
+...
+
+@code {
+    [Parameter]
+    public string? Optional { get; set; }
+}
+```
+
+To restrict a route parameter to capturing non-file paths, use the [`:nonfile` constraint](#route-constraints) in the route template:
+
+```razor
+@page "/{optional:nonfile?}"
+```
+
+:::moniker range="< aspnetcore-8.0"
+
+<!--
+    NOTE: Section removed at 8.0 when routing with dots became supported.
+-->
+
 ## Routing with URLs that contain dots
 
-For hosted Blazor WebAssembly and Blazor Server apps, the server-side default route template assumes that if the last segment of a request URL contains a dot (`.`) that a file is requested. For example, the relative URL `/example/some.thing` is interpreted by the router as a request for a file named `some.thing`. Without additional configuration, an app returns a *404 - Not Found* response if `some.thing` was meant to route to a component with an [`@page`](xref:mvc/views/razor#page) directive and `some.thing` is a route parameter value. To use a route with one or more parameters that contain a dot, the app must configure the route with a custom template.
+A ***server-side*** default route template assumes that if the last segment of a request URL contains a dot (`.`) that a file is requested. For example, the relative URL `/example/some.thing` is interpreted by the router as a request for a file named `some.thing`. Without additional configuration, an app returns a *404 - Not Found* response if `some.thing` was meant to route to a component with an [`@page`](xref:mvc/views/razor#page) directive and `some.thing` is a route parameter value. To use a route with one or more parameters that contain a dot, the app must configure the route with a custom template.
 
 Consider the following `Example` component that can receive a route parameter from the last segment of the URL.
 
-`Pages/Example.razor`:
+`Example.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker-end
 
-:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/Example.razor" highlight="1":::
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+:::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_Server/Pages/routing/Example.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/routing/Example.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_Server/Pages/routing/Example.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
-:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/routing/Example.razor" highlight="1":::
+:::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_Server/Pages/routing/Example.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
 
-:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/routing/Example.razor" highlight="2":::
+:::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_Server/Pages/routing/Example.razor":::
 
 :::moniker-end
 
-:::moniker range=">= aspnetcore-6.0"
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
 
-To permit the **:::no-loc text="Server":::** app of a hosted Blazor WebAssembly [solution](xref:blazor/tooling#visual-studio-solution-file-sln) to route the request with a dot in the `param` route parameter, add a fallback file route template with the optional parameter in `Program.cs`:
+To permit the **:::no-loc text="Server":::** app of a hosted Blazor WebAssembly [solution](xref:blazor/tooling#visual-studio-solution-file-sln) to route the request with a dot in the `param` route parameter, add a fallback file route template with the optional parameter in the `Program` file:
 
 ```csharp
 app.MapFallbackToFile("/example/{param?}", "index.html");
 ```
 
-To configure a Blazor Server app to route the request with a dot in the `param` route parameter, add a fallback page route template with the optional parameter in `Program.cs`:
+To configure a Blazor Server app to route the request with a dot in the `param` route parameter, add a fallback page route template with the optional parameter in the `Program` file:
 
 ```csharp
 app.MapFallbackToPage("/example/{param?}", "/_Host");
 ```
+
+For more information, see <xref:fundamentals/routing>.
 
 :::moniker-end
 
@@ -408,9 +509,9 @@ To configure a Blazor Server app to route the request with a dot in the `param` 
 endpoints.MapFallbackToPage("/example/{param?}", "/_Host");
 ```
 
-:::moniker-end
-
 For more information, see <xref:fundamentals/routing>.
+
+:::moniker-end
 
 :::moniker range=">= aspnetcore-5.0"
 
@@ -424,11 +525,23 @@ Catch-all route parameters are:
 * A `string` type. The framework doesn't provide automatic casting.
 * At the end of the URL.
 
-`Pages/CatchAll.razor`:
+`CatchAll.razor`:
 
 :::moniker-end
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/Catchall.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/Catchall.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/CatchAll.razor":::
 
@@ -458,45 +571,60 @@ Slashes and segments of the captured path are decoded. For a route template of `
 
 Use <xref:Microsoft.AspNetCore.Components.NavigationManager> to manage URIs and navigation in C# code. <xref:Microsoft.AspNetCore.Components.NavigationManager> provides the event and methods shown in the following table.
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-8.0"
 
-| Member | Description |
-| ------ | ----------- |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-content)). |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul>If `replace` is `true`, the current URI in the browser history is replaced instead of pushing a new URI onto the history stack. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. For more information, see the [Location changes](#location-changes) section. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Given a base URI (for example, a URI previously returned by <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri>), converts an absolute URI into a URI relative to the base URI prefix. |
-| [`RegisterLocationChangingHandler`](#handleprevent-location-changes) | Registers a handler to process incoming navigation events. Calling <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> always invokes the handler. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> | Returns a URI constructed by updating <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri?displayProperty=nameWithType> with a single parameter added, updated, or removed. For more information, see the [Query strings](#query-strings) section. |
+Member | Description
+--- | ---
+<xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)).
+<xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `false`:<ul><li>And enhanced navigation is available at the current URL, Blazor's enhanced navigation is activated.</li><li>Otherwise, Blazor performs a full-page reload for the requested URL.</li></ul>If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side interactive router.</li></ul><p>For more information, see the [Enhanced navigation and form handling](#enhanced-navigation-and-form-handling) section.</p><p>If `replace` is `true`, the current URI in the browser history is replaced instead of pushing a new URI onto the history stack.</p>
+<xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. For more information, see the [Location changes](#location-changes) section.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Based on the app's base URI, converts an absolute URI into a URI relative to the base URI prefix. For an example, see the [Produce a URI relative to the base URI prefix](#produce-a-uri-relative-to-the-base-uri-prefix) section.
+[`RegisterLocationChangingHandler`](#handleprevent-location-changes) | Registers a handler to process incoming navigation events. Calling <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> always invokes the handler.
+<xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> | Returns a URI constructed by updating <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri?displayProperty=nameWithType> with a single parameter added, updated, or removed. For more information, see the [Query strings](#query-strings) section.
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+Member | Description
+--- | ---
+<xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)).
+<xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul>If `replace` is `true`, the current URI in the browser history is replaced instead of pushing a new URI onto the history stack.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. For more information, see the [Location changes](#location-changes) section.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Based on the app's base URI, converts an absolute URI into a URI relative to the base URI prefix. For an example, see the [Produce a URI relative to the base URI prefix](#produce-a-uri-relative-to-the-base-uri-prefix) section.
+[`RegisterLocationChangingHandler`](#handleprevent-location-changes) | Registers a handler to process incoming navigation events. Calling <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> always invokes the handler.
+<xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> | Returns a URI constructed by updating <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri?displayProperty=nameWithType> with a single parameter added, updated, or removed. For more information, see the [Query strings](#query-strings) section.
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-| Member | Description |
-| ------ | ----------- |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-content)). |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul>If `replace` is `true`, the current URI in the browser history is replaced instead of pushing a new URI onto the history stack. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. For more information, see the [Location changes](#location-changes) section. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Given a base URI (for example, a URI previously returned by <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri>), converts an absolute URI into a URI relative to the base URI prefix. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> | Returns a URI constructed by updating <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri?displayProperty=nameWithType> with a single parameter added, updated, or removed. For more information, see the [Query strings](#query-strings) section. |
+Member | Description
+--- | ---
+<xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)).
+<xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul>If `replace` is `true`, the current URI in the browser history is replaced instead of pushing a new URI onto the history stack.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. For more information, see the [Location changes](#location-changes) section.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Based on the app's base URI, converts an absolute URI into a URI relative to the base URI prefix. For an example, see the [Produce a URI relative to the base URI prefix](#produce-a-uri-relative-to-the-base-uri-prefix) section.
+<xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> | Returns a URI constructed by updating <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri?displayProperty=nameWithType> with a single parameter added, updated, or removed. For more information, see the [Query strings](#query-strings) section.
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-6.0"
 
-| Member | Description |
-| ------ | ----------- |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element in `wwwroot/index.html` (Blazor WebAssembly) or `Pages/_Host.cshtml` (Blazor Server). |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul> |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI. |
-| <xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Given a base URI (for example, a URI previously returned by <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri>), converts an absolute URI into a URI relative to the base URI prefix. |
+Member | Description
+--- | ---
+<xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> | Gets the current absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> | Gets the base URI (with a trailing slash) that can be prepended to relative URI paths to produce an absolute URI. Typically, <xref:Microsoft.AspNetCore.Components.NavigationManager.BaseUri> corresponds to the `href` attribute on the document's `<base>` element ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)).
+<xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> | Navigates to the specified URI. If `forceLoad` is `true`:<ul><li>Client-side routing is bypassed.</li><li>The browser is forced to load the new page from the server, whether or not the URI is normally handled by the client-side router.</li></ul>
+<xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged> | An event that fires when the navigation location has changed.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToAbsoluteUri%2A> | Converts a relative URI into an absolute URI.
+<xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> | Based on the app's base URI, converts an absolute URI into a URI relative to the base URI prefix. For an example, see the [Produce a URI relative to the base URI prefix](#produce-a-uri-relative-to-the-base-uri-prefix) section.
 
 :::moniker-end
 
@@ -509,16 +637,28 @@ For the <xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged>
 
 The following component:
 
-* Navigates to the app's `Counter` component (`Pages/Counter.razor`) when the button is selected using <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A>.
+* Navigates to the app's `Counter` component (`Counter.razor`) when the button is selected using <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A>.
 * Handles the location changed event by subscribing to <xref:Microsoft.AspNetCore.Components.NavigationManager.LocationChanged?displayProperty=nameWithType>.
   * The `HandleLocationChanged` method is unhooked when `Dispose` is called by the framework. Unhooking the method permits garbage collection of the component.
   * The logger implementation logs the following information when the button is selected:
 
     > :::no-loc text="BlazorSample.Pages.Navigate: Information: URL of new location: https://localhost:{PORT}/counter":::
 
-`Pages/Navigate.razor`:
+`Navigate.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/Navigate.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/Navigate.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/routing/Navigate.razor":::
 
@@ -543,6 +683,152 @@ The following component:
 :::moniker-end
 
 For more information on component disposal, see <xref:blazor/components/lifecycle#component-disposal-with-idisposable-and-iasyncdisposable>.
+
+:::moniker range=">= aspnetcore-8.0"
+
+## Enhanced navigation and form handling
+
+*This section applies to Blazor Web Apps.*
+
+Blazor Web Apps are capable of two types of routing for page navigation and form handling requests:
+
+* Normal navigation (cross-document navigation): a full-page reload is triggered for the request URL.
+* Enhanced navigation (same-document navigation): Blazor intercepts the request and performs a `fetch` request instead. Blazor then patches the response content into the page's DOM. Blazor's enhanced navigation and form handling avoid the need for a full-page reload and preserves more of the page state, so pages load faster, usually without losing the user's scroll position on the page.
+
+Enhanced navigation is available when:
+
+* The Blazor Web App script (`blazor.web.js`) is used, not the Blazor Server script (`blazor.server.js`) or Blazor WebAssembly script (`blazor.webassembly.js`).
+* The feature isn't [explicitly disabled](xref:blazor/fundamentals/startup#disable-enhanced-navigation-and-form-handling).
+* The destination URL is within the internal base URI space (the app's base path).
+
+If server-side routing and enhanced navigation are enabled, [location changing handlers](#location-changes) are only invoked for programmatic navigation initiated from an interactive runtime. In future releases, additional types of navigation, such as following a link, may also invoke location changing handlers.
+
+When an enhanced navigation occurs, [`LocationChanged` event handlers](#location-changes) registered with Interactive Server and WebAssembly runtimes are typically invoked. There are cases when location changing handlers might not intercept an enhanced navigation. For example, the user might switch to another page before an interactive runtime becomes available. Therefore, it's important that app logic not rely on invoking a location changing handler, as there's no guarantee of the handler executing.
+
+When calling <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A>:
+
+* If `forceLoad` is `false`, which is the default:
+  * And enhanced navigation is available at the current URL, Blazor's enhanced navigation is activated.
+  * Otherwise, Blazor performs a full-page reload for the requested URL.
+* If `forceLoad` is `true`: Blazor performs a full-page reload for the requested URL, whether enhanced navigation is available or not.
+
+You can refresh the current page by calling `NavigationManager.Refresh(bool forceLoad = false)`, which always performs an enhanced navigation, if available. If enhanced navigation isn't available, Blazor performs a full-page reload.
+
+```csharp
+Navigation.Refresh();
+```
+
+Pass `true` to the `forceLoad` parameter to ensure a full-page reload is always performed, even if enhanced navigation is available:
+
+```csharp
+Navigation.Refresh(true);
+```
+
+Enhanced navigation is enabled by default, but it can be controlled hierarchically and on a per-link basis using the `data-enhance-nav` HTML attribute.
+
+The following examples disable enhanced navigation:
+
+```html
+<a href="redirect" data-enhance-nav="false">
+    GET without enhanced navigation
+</a>
+```
+
+```razor
+<ul data-enhance-nav="false">
+    <li>
+        <a href="redirect">GET without enhanced navigation</a>
+    </li>
+    <li>
+        <a href="redirect-2">GET without enhanced navigation</a>
+    </li>
+</ul>
+```
+
+If the destination is a non-Blazor endpoint, enhanced navigation doesn't apply, and the client-side JavaScript retries as a full page load. This ensures no confusion to the framework about external pages that shouldn't be patched into an existing page.
+
+To enable enhanced form handling, add the <xref:Microsoft.AspNetCore.Components.Forms.EditForm.Enhance%2A> parameter to <xref:Microsoft.AspNetCore.Components.Forms.EditForm> forms or the `data-enhance` attribute to HTML forms (`<form>`):
+
+```razor
+<EditForm ... Enhance ...>
+    ...
+</EditForm>
+```
+
+```html
+<form ... data-enhance ...>
+    ...
+</form>
+```
+
+Enhanced form handling isn't hierarchical and doesn't flow to child forms:
+
+<span aria-hidden="true">❌</span><span class="visually-hidden">Unsupported:</span> You can't set enhanced navigation on a form's ancestor element to enable enhanced navigation for the form.
+
+```html
+<div ... data-enhance ...>
+    <form ...>
+        <!-- NOT enhanced -->
+    </form>
+</div>
+```
+
+Enhanced form posts only work with Blazor endpoints. Posting an enhanced form to non-Blazor endpoint results in an error.
+
+To disable enhanced navigation:
+
+* For an <xref:Microsoft.AspNetCore.Components.Forms.EditForm>, remove the <xref:Microsoft.AspNetCore.Components.Forms.EditForm.Enhance%2A> parameter from the form element (or set it to `false`: `Enhance="false"`).
+* For an HTML `<form>`, remove the `data-enhance` attribute from form element (or set it to `false`: `data-enhance="false"`).
+
+Blazor's enhanced navigation and form handing may undo dynamic changes to the DOM if the updated content isn't part of the server rendering. To preserve the content of an element, use the `data-permanent` attribute.
+
+In the following example, the content of the `<div>` element is updated dynamically by a script when the page loads:
+
+```html
+<div data-permanent>
+    ...
+</div>
+```
+
+Once Blazor has started on the client, you can use the `enhancedload` event to listen for enhanced page updates. This allows for re-applying changes to the DOM that may have been undone by an enhanced page update.
+
+```javascript
+Blazor.addEventListener('enhancedload', () => console.log('Enhanced update!'));
+```
+
+To disable enhanced navigation and form handling globally, see <xref:blazor/fundamentals/startup#disable-enhanced-navigation-and-form-handling>.
+
+Enhanced navigation with [static server-side rendering (static SSR)](xref:blazor/components/render-modes#static-server-side-rendering-static-ssr) requires special attention when loading JavaScript. For more information, see <xref:blazor/js-interop/ssr>.
+
+:::moniker-end
+
+## Produce a URI relative to the base URI prefix
+
+Based on the app's base URI, <xref:Microsoft.AspNetCore.Components.NavigationManager.ToBaseRelativePath%2A> converts an absolute URI into a URI relative to the base URI prefix.
+
+Consider the following example:
+
+```csharp
+try
+{
+    baseRelativePath = Navigation.ToBaseRelativePath(inputURI);
+}
+catch (ArgumentException ex)
+{
+    ...
+}
+```
+
+If the base URI of the app is `https://localhost:8000`, the following results are obtained:
+
+* Passing `https://localhost:8000/segment` in `inputURI` results in a `baseRelativePath` of `segment`.
+* Passing `https://localhost:8000/segment1/segment2` in `inputURI` results in a `baseRelativePath` of `segment1/segment2`.
+
+If the base URI of the app doesn't match the base URI of `inputURI`, an <xref:System.ArgumentException> is thrown.
+
+Passing `https://localhost:8001/segment` in `inputURI` results in the following exception:
+
+> :::no-loc text="System.ArgumentException: 'The URI 'https://localhost:8001/segment' is not contained by the base URI 'https://localhost:8000/'.'":::
 
 :::moniker range=">= aspnetcore-7.0"
 
@@ -604,14 +890,18 @@ Specify the `[SupplyParameterFromQuery]` attribute's <xref:Microsoft.AspNetCore.
 
 :::moniker range=">= aspnetcore-8.0"
 
+Unlike component parameter properties (`[Parameter]`), `[SupplyParameterFromQuery]` properties can be marked `private` in addition to `public`.
+
 ```csharp
 [SupplyParameterFromQuery(Name = "{QUERY PARAMETER NAME}")]
-public string? {COMPONENT PARAMETER NAME} { get; set; }
+private string? {COMPONENT PARAMETER NAME} { get; set; }
 ```
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+Just like component parameter properties (`[Parameter]`), `[SupplyParameterFromQuery]` properties are always `public` properties in .NET 6/7. In .NET 8 or later, `[SupplyParameterFromQuery]` properties can be marked `public` or `private`.
 
 ```csharp
 [Parameter]
@@ -634,9 +924,9 @@ In the following example with a URL of `/search?filter=scifi%20stars&page=3&star
 :::moniker range=">= aspnetcore-8.0"
 
 > [!NOTE]
-> The query string parameters in the following routable page component also work in a *non-routable* component without an `@page` directive (for example, `Shared/Search.razor` for a shared `Search` component used in other components).
+> The query string parameters in the following routable page component also work in a *non-routable* component without an `@page` directive (for example, `Search.razor` for a shared `Search` component used in other components).
 
-`Pages/Search.razor`:
+`Search.razor`:
 
 ```razor
 @page "/search"
@@ -661,13 +951,13 @@ In the following example with a URL of `/search?filter=scifi%20stars&page=3&star
 
 @code {
     [SupplyParameterFromQuery]
-    public string? Filter { get; set; }
+    private string? Filter { get; set; }
 
     [SupplyParameterFromQuery]
-    public int? Page { get; set; }
+    private int? Page { get; set; }
 
     [SupplyParameterFromQuery(Name = "star")]
-    public string[]? Stars { get; set; }
+    private string[]? Stars { get; set; }
 }
 ```
 
@@ -675,7 +965,7 @@ In the following example with a URL of `/search?filter=scifi%20stars&page=3&star
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
 
-`Pages/Search.razor`:
+`Search.razor`:
 
 ```razor
 @page "/search"
@@ -717,7 +1007,7 @@ In the following example with a URL of `/search?filter=scifi%20stars&page=3&star
 
 :::moniker range=">= aspnetcore-6.0"
 
-Use [`NavigationManager.GetUriWithQueryParameter`](xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A) to add, change, or remove one or more query parameters on the current URL:
+Use <xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameter%2A> to add, change, or remove one or more query parameters on the current URL:
 
 ```razor
 @inject NavigationManager Navigation
@@ -738,7 +1028,7 @@ For the preceding example:
 * The query parameter name and value are URL-encoded.
 * All of the values with the matching query parameter name are replaced if there are multiple instances of the type.
 
-Call [`NavigationManager.GetUriWithQueryParameters`](xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameters%2A) to create a URI constructed from <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> with multiple parameters added, updated, or removed. For each value, the framework uses `value?.GetType()` to determine the runtime type for each query parameter and selects the correct culture-invariant formatting. The framework throws an error for unsupported types.
+Call <xref:Microsoft.AspNetCore.Components.NavigationManagerExtensions.GetUriWithQueryParameters%2A> to create a URI constructed from <xref:Microsoft.AspNetCore.Components.NavigationManager.Uri> with multiple parameters added, updated, or removed. For each value, the framework uses `value?.GetType()` to determine the runtime type for each query parameter and selects the correct culture-invariant formatting. The framework throws an error for unsupported types.
 
 ```razor
 @inject NavigationManager Navigation
@@ -780,19 +1070,21 @@ Supported types include:
 * Nullable variants of the preceding types.
 * Arrays of the preceding types, whether they're nullable or not nullable.
 
+[!INCLUDE[](~/blazor/includes/compression-with-untrusted-data.md)]
+
 ### Replace a query parameter value when the parameter exists
 
 ```csharp
 Navigation.GetUriWithQueryParameter("full name", "Morena Baccarin")
 ```
 
-| Current URL | Generated URL |
-| --- | --- |
-| `scheme://host/?full%20name=David%20Krumholtz&age=42` | `scheme://host/?full%20name=Morena%20Baccarin&age=42` |
-| `scheme://host/?fUlL%20nAmE=David%20Krumholtz&AgE=42` | `scheme://host/?full%20name=Morena%20Baccarin&AgE=42` |
-| `scheme://host/?full%20name=Jewel%20Staite&age=42&full%20name=Summer%20Glau` | `scheme://host/?full%20name=Morena%20Baccarin&age=42&full%20name=Morena%20Baccarin` |
-| `scheme://host/?full%20name=&age=42` | `scheme://host/?full%20name=Morena%20Baccarin&age=42` |
-| `scheme://host/?full%20name=` | `scheme://host/?full%20name=Morena%20Baccarin` |
+Current URL | Generated URL
+--- | ---
+`scheme://host/?full%20name=David%20Krumholtz&age=42` | `scheme://host/?full%20name=Morena%20Baccarin&age=42`
+`scheme://host/?fUlL%20nAmE=David%20Krumholtz&AgE=42` | `scheme://host/?full%20name=Morena%20Baccarin&AgE=42`
+`scheme://host/?full%20name=Jewel%20Staite&age=42&full%20name=Summer%20Glau` | `scheme://host/?full%20name=Morena%20Baccarin&age=42&full%20name=Morena%20Baccarin`
+`scheme://host/?full%20name=&age=42` | `scheme://host/?full%20name=Morena%20Baccarin&age=42`
+`scheme://host/?full%20name=` | `scheme://host/?full%20name=Morena%20Baccarin`
 
 ### Append a query parameter and value when the parameter doesn't exist
 
@@ -800,11 +1092,11 @@ Navigation.GetUriWithQueryParameter("full name", "Morena Baccarin")
 Navigation.GetUriWithQueryParameter("name", "Morena Baccarin")
 ```
 
-| Current URL | Generated URL |
-| --- | --- |
-| `scheme://host/?age=42` | `scheme://host/?age=42&name=Morena%20Baccarin` |
-| `scheme://host/` | `scheme://host/?name=Morena%20Baccarin` |
-| `scheme://host/?` | `scheme://host/?name=Morena%20Baccarin` |
+Current URL | Generated URL 
+--- | --- 
+`scheme://host/?age=42` | `scheme://host/?age=42&name=Morena%20Baccarin`
+`scheme://host/` | `scheme://host/?name=Morena%20Baccarin`
+`scheme://host/?` | `scheme://host/?name=Morena%20Baccarin`
 
 ### Remove a query parameter when the parameter value is `null`
 
@@ -812,13 +1104,13 @@ Navigation.GetUriWithQueryParameter("name", "Morena Baccarin")
 Navigation.GetUriWithQueryParameter("full name", (string)null)
 ```
 
-| Current URL | Generated URL |
-| --- | --- |
-| `scheme://host/?full%20name=David%20Krumholtz&age=42` | `scheme://host/?age=42` |
-| `scheme://host/?full%20name=Sally%20Smith&age=42&full%20name=Summer%20Glau` | `scheme://host/?age=42` |
-| `scheme://host/?full%20name=Sally%20Smith&age=42&FuLl%20NaMe=Summer%20Glau` | `scheme://host/?age=42` |
-| `scheme://host/?full%20name=&age=42` | `scheme://host/?age=42` |
-| `scheme://host/?full%20name=` | `scheme://host/` |
+Current URL | Generated URL
+--- | ---
+`scheme://host/?full%20name=David%20Krumholtz&age=42` | `scheme://host/?age=42`
+`scheme://host/?full%20name=Sally%20Smith&age=42&full%20name=Summer%20Glau` | `scheme://host/?age=42`
+`scheme://host/?full%20name=Sally%20Smith&age=42&FuLl%20NaMe=Summer%20Glau` | `scheme://host/?age=42`
+`scheme://host/?full%20name=&age=42` | `scheme://host/?age=42`
+`scheme://host/?full%20name=` | `scheme://host/`
 
 ### Add, update, and remove query parameters
 
@@ -838,14 +1130,14 @@ Navigation.GetUriWithQueryParameters(
     })
 ```
 
-| Current URL | Generated URL |
-| --- | --- |
-| `scheme://host/?name=David%20Krumholtz&age=42` | `scheme://host/?age=25&eye%20color=green` |
-| `scheme://host/?NaMe=David%20Krumholtz&AgE=42` | `scheme://host/?age=25&eye%20color=green` |
-| `scheme://host/?name=David%20Krumholtz&age=42&keepme=true` | `scheme://host/?age=25&keepme=true&eye%20color=green` |
-| `scheme://host/?age=42&eye%20color=87` | `scheme://host/?age=25&eye%20color=green` |
-| `scheme://host/?` | `scheme://host/?age=25&eye%20color=green` |
-| `scheme://host/` | `scheme://host/?age=25&eye%20color=green` |
+Current URL | Generated URL
+--- | ---
+`scheme://host/?name=David%20Krumholtz&age=42` | `scheme://host/?age=25&eye%20color=green`
+`scheme://host/?NaMe=David%20Krumholtz&AgE=42` | `scheme://host/?age=25&eye%20color=green`
+`scheme://host/?name=David%20Krumholtz&age=42&keepme=true` | `scheme://host/?age=25&keepme=true&eye%20color=green`
+`scheme://host/?age=42&eye%20color=87` | `scheme://host/?age=25&eye%20color=green`
+`scheme://host/?` | `scheme://host/?age=25&eye%20color=green`
+`scheme://host/` | `scheme://host/?age=25&eye%20color=green`
 
 ### Support for enumerable values
 
@@ -863,11 +1155,11 @@ Navigation.GetUriWithQueryParameters(
     })
 ```
 
-| Current URL | Generated URL |
-| --- | --- |
-| `scheme://host/?full%20name=David%20Krumholtz&ping=8&ping=300` | `scheme://host/?full%20name=Morena%20Baccarin&ping=35&ping=16&ping=87&ping=240` |
-| `scheme://host/?ping=8&full%20name=David%20Krumholtz&ping=300` | `scheme://host/?ping=35&full%20name=Morena%20Baccarin&ping=16&ping=87&ping=240` |
-| `scheme://host/?ping=8&ping=300&ping=50&ping=68&ping=42` | `scheme://host/?ping=35&ping=16&ping=87&ping=240&full%20name=Morena%20Baccarin` |
+Current URL | Generated URL
+--- | ---
+`scheme://host/?full%20name=David%20Krumholtz&ping=8&ping=300` | `scheme://host/?full%20name=Morena%20Baccarin&ping=35&ping=16&ping=87&ping=240`
+`scheme://host/?ping=8&full%20name=David%20Krumholtz&ping=300` | `scheme://host/?ping=35&full%20name=Morena%20Baccarin&ping=16&ping=87&ping=240`
+`scheme://host/?ping=8&ping=300&ping=50&ping=68&ping=42` | `scheme://host/?ping=35&ping=16&ping=87&ping=240&full%20name=Morena%20Baccarin`
 
 ### Navigate with an added or modified query string
 
@@ -935,7 +1227,7 @@ Examples for each of the following approaches demonstrate navigation to an eleme
 
 The following example demonstrates hashed routing to named H2 headings within a component and to external components.
 
-In the `Index` (`Pages/Index.razor`) and `Counter` (`Pages/Counter.razor`) components, place the following markup at the bottoms of the existing component markup to serve as navigation targets. The `<div>` creates artificial vertical space to demonstrate browser scrolling behavior:
+In the `Home` (`Home.razor`) and `Counter` (`Counter.razor`) components, place the following markup at the bottoms of the existing component markup to serve as navigation targets. The `<div>` creates artificial vertical space to demonstrate browser scrolling behavior:
 
 ```razor
 <div class="border border-info rounded bg-info" style="height:500px"></div>
@@ -946,7 +1238,7 @@ In the `Index` (`Pages/Index.razor`) and `Counter` (`Pages/Counter.razor`) compo
 
 Add the following `HashedRouting` component to the app.
 
-`Pages/HashedRouting.razor`:
+`HashedRouting.razor`:
 
 ```razor
 @page "/hashed-routing"
@@ -964,7 +1256,7 @@ Add the following `HashedRouting` component to the app.
     </li>
     <li>
         <a href="/#targetElement">
-            Anchor to the <code>Index</code> component
+            Anchor to the <code>Home</code> component
         </a>
     </li>
     <li>
@@ -1004,17 +1296,17 @@ Add the following `HashedRouting` component to the app.
 
 ## User interaction with `<Navigating>` content
 
-The <xref:Microsoft.AspNetCore.Components.Routing.Router> component can indicate to the user that a page transition is occurring.
+If there's a significant delay during navigation, such as while [lazy-loading assemblies in a Blazor WebAssembly app](xref:blazor/webassembly-lazy-load-assemblies) or for a slow network connection to a Blazor server-side app, the <xref:Microsoft.AspNetCore.Components.Routing.Router> component can indicate to the user that a page transition is occurring.
 
-At the top of the `App` component (`App.razor`), add an [`@using`](xref:mvc/views/razor#using) directive for the <xref:Microsoft.AspNetCore.Components.Routing?displayProperty=fullName> namespace:
+At the top of the component that specifies the <xref:Microsoft.AspNetCore.Components.Routing.Router> component, add an [`@using`](xref:mvc/views/razor#using) directive for the <xref:Microsoft.AspNetCore.Components.Routing?displayProperty=fullName> namespace:
 
 ```razor
 @using Microsoft.AspNetCore.Components.Routing
 ```
 
-Add a `<Navigating>` tag to the component with markup to display during page transition events. For more information, see <xref:Microsoft.AspNetCore.Components.Routing.Router.Navigating> (API documentation).
+Provide content to the <xref:Microsoft.AspNetCore.Components.Routing.Router.Navigating> parameter for display during page transition events.
 
-In the router element content (`<Router>...</Router>`) of the `App` component (`App.razor`):
+In the router element (`<Router>...</Router>`) content:
 
 ```razor
 <Navigating>
@@ -1035,15 +1327,13 @@ The <xref:Microsoft.AspNetCore.Components.Routing.Router> component supports an 
 * Visits a route for the first time by navigating to it directly in their browser.
 * Navigates to a new route using a link or a <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A?displayProperty=nameWithType> invocation.
 
-In the `App` component (`App.razor`):
-
 :::moniker-end
 
 :::moniker range=">= aspnetcore-6.0"
 
 ```razor
-<Router AppAssembly="@typeof(App).Assembly" 
-    OnNavigateAsync="@OnNavigateAsync">
+<Router AppAssembly="typeof(App).Assembly" 
+    OnNavigateAsync="OnNavigateAsync">
     ...
 </Router>
 
@@ -1060,8 +1350,8 @@ In the `App` component (`App.razor`):
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
 ```razor
-<Router AppAssembly="@typeof(Program).Assembly" 
-    OnNavigateAsync="@OnNavigateAsync">
+<Router AppAssembly="typeof(Program).Assembly" 
+    OnNavigateAsync="OnNavigateAsync">
     ...
 </Router>
 
@@ -1073,20 +1363,28 @@ In the `App` component (`App.razor`):
 }
 ```
 
-[!INCLUDE[](~/blazor/includes/prefer-exact-matches.md)]
-
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0"
 
 For an example that uses <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync>, see <xref:blazor/webassembly-lazy-load-assemblies>.
 
-When prerendering on the server in a Blazor Server app or hosted Blazor WebAssembly app, <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> is executed *twice*:
+When prerendering on the server, <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> is executed *twice*:
 
 * Once when the requested endpoint component is initially rendered statically.
 * A second time when the browser renders the endpoint component.
 
-To prevent developer code in <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> from executing twice, the `App` component can store the <xref:Microsoft.AspNetCore.Components.Routing.NavigationContext> for use in [`OnAfterRender{Async}`](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync), where `firstRender` can be checked. For more information, see [Prerendering with JavaScript interop](xref:blazor/components/lifecycle#prerendering-with-javascript-interop) in the *Blazor Lifecycle* article.
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+To prevent developer code in <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> from executing twice, the `Routes` component can store the <xref:Microsoft.AspNetCore.Components.Routing.NavigationContext> for use in the [`OnAfterRender{Async}` lifecycle method](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync), where `firstRender` can be checked. For more information, see [Prerendering with JavaScript interop](xref:blazor/components/lifecycle#prerendering-with-javascript-interop).
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-5.0 < aspnetcore-8.0"
+
+To prevent developer code in <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> from executing twice, the `App` component can store the <xref:Microsoft.AspNetCore.Components.Routing.NavigationContext> for use in [`OnAfterRender{Async}`](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync), where `firstRender` can be checked. For more information, see [Prerendering with JavaScript interop](xref:blazor/components/lifecycle#prerendering-with-javascript-interop).
 
 :::moniker-end
 
@@ -1098,12 +1396,10 @@ The <xref:Microsoft.AspNetCore.Components.Routing.NavigationContext> object pass
 
 If a user navigates to an endpoint but then immediately navigates to a new endpoint, the app shouldn't continue running the <xref:Microsoft.AspNetCore.Components.Routing.Router.OnNavigateAsync> callback for the first endpoint.
 
-In the following `App` component example:
+In the following example:
 
 * The cancellation token is passed in the call to `PostAsJsonAsync`, which can cancel the POST if the user navigates away from the `/about` endpoint.
 * The cancellation token is set during a product prefetch operation if the user navigates away from the `/store` endpoint.
-
-`App.razor`:
 
 :::moniker-end
 
@@ -1113,8 +1409,8 @@ In the following `App` component example:
 @inject HttpClient Http
 @inject ProductCatalog Products
 
-<Router AppAssembly="@typeof(App).Assembly" 
-    OnNavigateAsync="@OnNavigateAsync">
+<Router AppAssembly="typeof(App).Assembly" 
+    OnNavigateAsync="OnNavigateAsync">
     ...
 </Router>
 
@@ -1149,8 +1445,8 @@ In the following `App` component example:
 @inject HttpClient Http
 @inject ProductCatalog Products
 
-<Router AppAssembly="@typeof(Program).Assembly" 
-    OnNavigateAsync="@OnNavigateAsync">
+<Router AppAssembly="typeof(Program).Assembly" 
+    OnNavigateAsync="OnNavigateAsync">
     ...
 </Router>
 
@@ -1176,8 +1472,6 @@ In the following `App` component example:
     }
 }
 ```
-
-[!INCLUDE[](~/blazor/includes/prefer-exact-matches.md)]
 
 :::moniker-end
 
@@ -1200,7 +1494,7 @@ In the following `App` component example:
 * <xref:Microsoft.AspNetCore.Components.Routing.LocationChangingContext.CancellationToken>: Gets a <xref:System.Threading.CancellationToken> to determine if the navigation was canceled, for example, to determine if the user triggered a different navigation.
 * <xref:Microsoft.AspNetCore.Components.Routing.LocationChangingContext.PreventNavigation%2A>: Called to prevent the navigation from continuing.
 
-A component can register multiple location changing handlers in its [`OnAfterRender` or `OnAfterRenderAsync` methods](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync). Navigation invokes all of the location changing handlers registered across the entire app (across multiple components), and any internal navigation executes them all in parallel. In addition to <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> handlers are invoked:
+A component can register multiple location changing handlers in the [`OnAfterRender{Async}` lifecycle method](xref:blazor/components/lifecycle#after-component-render-onafterrenderasync). Navigation invokes all of the location changing handlers registered across the entire app (across multiple components), and any internal navigation executes them all in parallel. In addition to <xref:Microsoft.AspNetCore.Components.NavigationManager.NavigateTo%2A> handlers are invoked:
 
 * When selecting internal links, which are links that point to URLs under the app's base path.
 * When navigating using the forward and back buttons in a browser.
@@ -1210,16 +1504,16 @@ Handlers are only executed for internal navigation within the app. If the user s
 Implement <xref:System.IDisposable> and dispose registered handlers to unregister them. For more information, see <xref:blazor/components/lifecycle#component-disposal-with-idisposable-and-iasyncdisposable>.
 
 > [!IMPORTANT]
-> Don't attempt to execute Document Object Model (DOM) cleanup tasks via JavaScript (JS) interop when handling location changes. Use the [`MutationObserver`](https://developer.mozilla.org/docs/Web/API/MutationObserver) pattern in JS on the client. For more information, see <xref:blazor/js-interop/index#document-object-model-dom-cleanup-tasks-during-component-disposal>.
+> Don't attempt to execute DOM cleanup tasks via JavaScript (JS) interop when handling location changes. Use the [`MutationObserver` pattern](https://developer.mozilla.org/docs/Web/API/MutationObserver) in JS on the client. For more information, see <xref:blazor/js-interop/index#dom-cleanup-tasks-during-component-disposal>.
 
 In the following example, a location changing handler is registered for navigation events.
 
-`Pages/NavHandler.razor`:
+`NavHandler.razor`:
 
 ```razor
 @page "/nav-handler"
-@inject NavigationManager Navigation
 @implements IDisposable
+@inject NavigationManager Navigation
 
 <p>
     <button @onclick="@(() => Navigation.NavigateTo("/"))">
@@ -1281,7 +1575,7 @@ In the following `NavLock` component:
 * An attempt to follow the link to Microsoft's website must be confirmed by the user before the navigation to `https://www.microsoft.com` succeeds.
 * <xref:Microsoft.AspNetCore.Components.Routing.LocationChangingContext.PreventNavigation%2A> is called to prevent navigation from occurring if the user declines to confirm the navigation via a [JavaScript (JS) interop call](xref:blazor/js-interop/call-javascript-from-dotnet) that spawns the [JS `confirm` dialog](https://developer.mozilla.org/docs/Web/API/Window/confirm).
 
-`Pages/NavLock.razor`:
+`NavLock.razor`:
 
 ```razor
 @page "/nav-lock"
@@ -1308,7 +1602,7 @@ In the following `NavLock` component:
     private async Task OnBeforeInternalNavigation(LocationChangingContext context)
     {
         var isConfirmed = await JSRuntime.InvokeAsync<bool>("confirm", 
-            "Are you sure you want to navigate to the Index page?");
+            "Are you sure you want to navigate to the root page?");
 
         if (!isConfirmed)
         {
@@ -1322,12 +1616,9 @@ For additional example code, see the [`ConfigurableNavigationLock` component in 
 
 :::moniker-end
 
-## `NavLink` and `NavMenu` components
+## `NavLink` component
 
 Use a <xref:Microsoft.AspNetCore.Components.Routing.NavLink> component in place of HTML hyperlink elements (`<a>`) when creating navigation links. A <xref:Microsoft.AspNetCore.Components.Routing.NavLink> component behaves like an `<a>` element, except it toggles an `active` CSS class based on whether its `href` matches the current URL. The `active` class helps a user understand which page is the active page among the navigation links displayed. Optionally, assign a CSS class name to <xref:Microsoft.AspNetCore.Components.Routing.NavLink.ActiveClass?displayProperty=nameWithType> to apply a custom CSS class to the rendered link when the current route matches the `href`.
-
-> [!NOTE]
-> The `NavMenu` component (`NavMenu.razor`) is provided in the `Shared` folder of an app generated from the [Blazor project templates](xref:blazor/project-structure).
 
 There are two <xref:Microsoft.AspNetCore.Components.Routing.NavLinkMatch> options that you can assign to the `Match` attribute of the `<NavLink>` element:
 
@@ -1352,12 +1643,12 @@ The following HTML markup is rendered:
 > Due to the way that Blazor renders child content, rendering `NavLink` components inside a `for` loop requires a local index variable if the incrementing loop variable is used in the `NavLink` (child) component's content:
 >
 > ```razor
-> @for (int c = 0; c < 10; c++)
+> @for (int c = 1; c < 4; c++)
 > {
->     var current = c;
+>     var ct = c;
 >     <li ...>
->         <NavLink ... href="@c">
->             <span ...></span> @current
+>         <NavLink ...>
+>             <span ...></span> Product #@ct
 >         </NavLink>
 >     </li>
 > }
@@ -1368,23 +1659,106 @@ The following HTML markup is rendered:
 > Alternatively, use a `foreach` loop with <xref:System.Linq.Enumerable.Range%2A?displayProperty=nameWithType>:
 >
 > ```razor
-> @foreach (var c in Enumerable.Range(0,10))
+> @foreach (var c in Enumerable.Range(1, 3))
 > {
 >     <li ...>
->         <NavLink ... href="@c">
->             <span ...></span> @c
+>         <NavLink ...>
+>             <span ...></span> Product #@c
 >         </NavLink>
 >     </li>
 > }
 > ```
 
+<xref:Microsoft.AspNetCore.Components.Routing.NavLink> component entries can be dynamically created from the app's components via reflection. The following example demonstrates the general approach for further customization.
+
+For the following demonstration, a consistent, standard naming convention is used for the app's components:
+
+* Routable component file names use Pascal case&dagger;, for example `Pages/ProductDetail.razor`.
+* Routable component file paths match their URLs in kebab case&Dagger; with hyphens appearing between words in a component's route template. For example, a `ProductDetail` component with a route template of `/product-detail` (`@page "/product-detail"`) is requested in a browser at the relative URL `/product-detail`.
+
+&dagger;Pascal case (upper camel case) is a naming convention without spaces and punctuation and with the first letter of each word capitalized, including the first word.  
+&Dagger;Kebab case is a naming convention without spaces and punctuation that uses lowercase letters and dashes between words.
+
+In the Razor markup of the `NavMenu` component (`NavMenu.razor`) under the default `Home` page, <xref:Microsoft.AspNetCore.Components.Routing.NavLink> components are added from a collection:
+
+```diff
+<div class="nav-scrollable" 
+    onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill-nav-menu" 
+                    aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
++       @foreach (var name in GetRoutableComponents())
++       {
++           <div class="nav-item px-3">
++               <NavLink class="nav-link" 
++                       href="@Regex.Replace(name, @"(\B[A-Z]|\d+)", "-$1").ToLower()">
++                   @Regex.Replace(name, @"(\B[A-Z]|\d+)", " $1")
++               </NavLink>
++           </div>
++       }
+
+    </nav>
+</div>
+```
+
+The `GetRoutableComponents` method in the `@code` block:
+
+```csharp
+public IEnumerable<string> GetRoutableComponents() => 
+    Assembly.GetExecutingAssembly()
+        .ExportedTypes
+        .Where(t => t.IsSubclassOf(typeof(ComponentBase)))
+        .Where(c => c.GetCustomAttributes(inherit: true)
+                     .OfType<RouteAttribute>()
+                     .Any())
+        .Where(c => c.Name != "Home" && c.Name != "Error")
+        .OrderBy(o => o.Name)
+        .Select(c => c.Name);
+```
+
+The preceding example doesn't include the following pages in the rendered list of components:
+
+* `Home` page: The page is listed separately from the automatically generated links because it should appear at the top of the list and set the `Match` parameter.
+* `Error` page: The error page is only navigated to by the framework and shouldn't be listed.
+
+:::moniker range=">= aspnetcore-8.0"
+
+For an example of the preceding code in a sample app that you can run locally, obtain the [**Blazor Web App** or **Blazor WebAssembly** sample app](xref:blazor/fundamentals/index#sample-apps).
+
+:::moniker-end
+
 ## ASP.NET Core endpoint routing integration
 
-*This section only applies to Blazor Server apps.*
+:::moniker range=">= aspnetcore-8.0"
 
-:::moniker range=">= aspnetcore-6.0"
+*This section applies to Blazor Web Apps operating over a circuit.*
 
-Blazor Server is integrated into [ASP.NET Core Endpoint Routing](xref:fundamentals/routing). An ASP.NET Core app is configured to accept incoming connections for interactive components with <xref:Microsoft.AspNetCore.Builder.ComponentEndpointRouteBuilderExtensions.MapBlazorHub%2A> in `Program.cs`:
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+*This section applies to Blazor Server apps.*
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+A Blazor Web App is integrated into [ASP.NET Core Endpoint Routing](xref:fundamentals/routing). An ASP.NET Core app is configured to accept incoming connections for interactive components with <xref:Microsoft.AspNetCore.Builder.RazorComponentsEndpointRouteBuilderExtensions.MapRazorComponents%2A> in the `Program` file.  The default root component (first component loaded) is the `App` component (`App.razor`):
+
+```csharp
+app.MapRazorComponents<App>();
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+Blazor Server is integrated into [ASP.NET Core Endpoint Routing](xref:fundamentals/routing). An ASP.NET Core app is configured to accept incoming connections for interactive components with <xref:Microsoft.AspNetCore.Builder.ComponentEndpointRouteBuilderExtensions.MapBlazorHub%2A> in the `Program` file:
 
 ```csharp
 app.UseRouting();
@@ -1399,24 +1773,14 @@ app.MapFallbackToPage("/_Host");
 
 Blazor Server is integrated into [ASP.NET Core Endpoint Routing](xref:fundamentals/routing). An ASP.NET Core app is configured to accept incoming connections for interactive components with <xref:Microsoft.AspNetCore.Builder.ComponentEndpointRouteBuilderExtensions.MapBlazorHub%2A> in `Startup.Configure`.
 
-`Startup.cs`:
-
 :::moniker-end
 
-:::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
-
-:::code language="csharp" source="~/../blazor-samples/5.0/BlazorSample_Server/routing/Startup.cs" highlight="11":::
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-:::code language="csharp" source="~/../blazor-samples/3.1/BlazorSample_Server/routing/Startup.cs" highlight="11":::
-
-:::moniker-end
+:::moniker range="< aspnetcore-8.0"
 
 The typical configuration is to route all requests to a Razor page, which acts as the host for the server-side part of the Blazor Server app. By convention, the *host* page is usually named `_Host.cshtml` in the `Pages` folder of the app.
 
 The route specified in the host file is called a *fallback route* because it operates with a low priority in route matching. The fallback route is used when other routes don't match. This allows the app to use other controllers and pages without interfering with component routing in the Blazor Server app.
 
 For information on configuring <xref:Microsoft.AspNetCore.Builder.RazorPagesEndpointRouteBuilderExtensions.MapFallbackToPage%2A> for non-root URL server hosting, see <xref:blazor/host-and-deploy/index#app-base-path>.
+
+:::moniker-end
