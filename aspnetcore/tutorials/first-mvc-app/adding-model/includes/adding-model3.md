@@ -237,7 +237,7 @@ Update-Database
 
 [!INCLUDE [more information on the CLI for EF Core](~/includes/ef-cli.md)]
 
-Run the following .NET Core CLI commands:
+Run the following .NET CLI commands:
 
 ```dotnetcli
 dotnet ef migrations add InitialCreate
@@ -388,7 +388,7 @@ Because the `Model` object is strongly typed (as an `IEnumerable<Movie>` object)
 * [Globalization and localization](xref:fundamentals/localization)
 
 > [!div class="step-by-step"]
-> [Previous Adding a View]((~/tutorials/first-mvc-app/adding-view.md)
-> [Next Working with SQL]((~/tutorials/first-mvc-app/working-with-sql.md)
+> [Previous Adding a View](~/tutorials/first-mvc-app/adding-view.md)
+> [Next Working with SQL](~/tutorials/first-mvc-app/working-with-sql.md)
 
 :::moniker-end

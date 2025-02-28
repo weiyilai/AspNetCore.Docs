@@ -6,14 +6,14 @@ monikerRange: ">= aspnetcore-2.1"
 <!-- ms.author: bradyg -->
 ms.author: wpickett
 ms.custom: mvc, engagement-fy23
-ms.date: 03/17/2023
+ms.date: 11/07/2023
 uid: tutorials/signalr-typescript-webpack
 ---
 # Tutorial: Get started with ASP.NET Core SignalR using TypeScript and Webpack
 
-By [Sébastien Sougnez](https://twitter.com/ssougnez)
-
 [!INCLUDE[](~/includes/not-latest-version.md)]
+
+By [Sébastien Sougnez](https://twitter.com/s_sougnez)
 
 :::moniker range=">= aspnetcore-8.0"
 
@@ -55,13 +55,13 @@ Launch Visual Studio. At the start window, select **Continue without code**.
 1. Navigate to **Tools** > **Options** > **Projects and Solutions** > **Web Package Management** > **External Web Tools**.
 1. Select the `$(PATH)` entry from the list. Select the up arrow to move the entry to the second position in the list, and select **OK**:
 
-   ![Visual Studio Configuration](~/tutorials/signalr-typescript-webpack/_static/8.x/signalr-configure-path-visual-studio.png).
+   ![Visual Studio Configuration](~/tutorials/signalr-typescript-webpack/_static/8.x/signalr-configure-path-visual-studio-v17.8.0.png).
 
 To create a new ASP.NET Core web app:
 
 1. Use the **File** > **New** > **Project** menu option and choose the **ASP.NET Core Empty** template. Select **Next**.
 1. Name the project `SignalRWebpack`, and select **Create**.
-1. Select `.NET 8.0` from the **Framework** drop-down. Select **Create**.
+1. Select **.NET 8.0 (Long Term Support)** from the **Framework** drop-down. Select **Create**.
 
 Add the [Microsoft.TypeScript.MSBuild](https://www.nuget.org/packages/Microsoft.TypeScript.MSBuild/) NuGet package to the project:
 
@@ -80,6 +80,8 @@ code -r SignalRWebpack
 
 * The `dotnet new` command creates an empty ASP.NET Core web app in a `SignalRWebpack` directory.
 * The `code` command opens the `SignalRWebpack` directory in the current instance of Visual Studio Code.
+
+[!INCLUDE[](~/includes/vscode-trust-authors-add-assets.md)]
 
 Run the following .NET CLI command in the **Integrated Terminal**:
 
@@ -173,7 +175,9 @@ In this section, you create a [Node.js](https://nodejs.org/) project to convert 
    * The `output` property overrides the default value of `dist`. The bundle is instead emitted in the `wwwroot` directory.
    * The `resolve.extensions` array includes `.js` to import the SignalR client JavaScript.
 
-1. Copy the `src` directory from the [sample project](https://github.com/dotnet/AspNetCore.Docs.Samples/tree/main/tutorials/signalr-typescript-webpack/samples/8.x/SignalRWebpack/src/) into the project root. The `src` directory contains the following files:
+1. Create a new directory named `src` in the project root, `SignalRWebpack/`, for the client code.
+   
+1. Copy the `src` directory and its contents from the [sample project](https://github.com/dotnet/AspNetCore.Docs.Samples/tree/main/tutorials/signalr-typescript-webpack/samples/8.x/SignalRWebpack/) into the project root. The `src` directory contains the following files:
 
    * `index.html`, which defines the homepage's boilerplate markup:
 

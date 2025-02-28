@@ -6,7 +6,6 @@ ms.author: riande
 monikerRange: '>= aspnetcore-6.0'
 ms.date: 11/9/2022
 ms.topic: article
-ms.prod: aspnet-core
 uid: migration/inc/overview
 ---
 
@@ -28,7 +27,7 @@ Before starting the migration, the app targets ASP.NET Framework and runs on Win
 
 ![Before starting the migration](~/migration/inc/overview/static/1.png)
 
-Migration starts by introducing a new app based on ASP.NET Core that becomes the entry point. Incoming requests go to the ASP.NET Core app, which either handles the request or proxies the request to the .NET Framework app via [YARP](https://microsoft.github.io/reverse-proxy/). At first, the majority of code providing responses is in the .NET Framework app, but the ASP.NET Core app is now set up to start migrating routes:
+Migration starts by introducing a new app based on ASP.NET Core that becomes the entry point. Incoming requests go to the ASP.NET Core app, which either handles the request or proxies the request to the .NET Framework app via [YARP](https://dotnet.github.io/yarp/). At first, the majority of code providing responses is in the .NET Framework app, but the ASP.NET Core app is now set up to start migrating routes:
 
 ![start updating routes](~/migration/inc/overview/static/nop.png)
 
@@ -77,3 +76,4 @@ For guidance around usage, see the [usage guidance article](xref:migration/inc/u
 
 * [Example migration of eShop to ASP.NET Core](/dotnet/architecture/porting-existing-aspnet-apps/example-migration-eshop)
 * [Video:Tooling for Incremental ASP.NET Core Migrations](https://www.youtube.com/watch?v=P96l0pDNVpM)
+* <xref:migration/inc/unit-testing>

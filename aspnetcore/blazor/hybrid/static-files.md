@@ -5,7 +5,7 @@ description: Learn how to consume static asset files in Blazor Hybrid apps.
 monikerRange: '>= aspnetcore-6.0'
 ms.author: riande
 ms.custom: mvc
-ms.date: 12/06/2022
+ms.date: 11/12/2024
 uid: blazor/hybrid/static-files
 ---
 # ASP.NET Core Blazor Hybrid static files
@@ -186,9 +186,9 @@ Static web assets from a [Razor class library (RCL)](xref:razor-pages/ui-class) 
 
 The web root of the :::no-loc text="HostPage"::: determines which subset of static assets are available:
 
-* `wwwroot/index.html` (*Recommended*): All assets in the app's `wwwroot` folder are available (for example: `wwwroot/image.png` is available from `/image.png`), including subfolders (for example: `wwwroot/subfolder/image.png` is available from `/subfolder/image.png`). RCL static assets in the RCL's `wwwroot` folder are available (for example: `wwwroot/image.png` is available from the path `_content/{PACKAGE ID}/image.png`), including subfolders (for example: `wwwroot/subfolder/image.png` is available from the path `_content/{PACKAGE ID}/subfolder/image.png`).
-* `wwwroot/{PATH}/index.html`: All assets in the app's `wwwroot/{PATH}` folder are available using app web root relative paths. RCL static assets in `wwwroot/{PATH}` are ***not available*** because they would be in a non-existent theoretical location, such as `../../_content/{PACKAGE ID}/{PATH}`, which is ***not a supported relative path***.
-* `wwwroot/_content/{PACKAGE ID}/index.html`: All assets in the RCL's `wwwroot/{PATH}` folder are available using RCL web root relative paths. The app's static assets in `wwwroot/{PATH}` are ***not available*** because they would be in a non-existent theoretical location, such as `../../{PATH}`, which is ***not a supported relative path***.
+* `wwwroot/index.html` (*recommended*): All assets in the app's `wwwroot` folder are available (for example: `wwwroot/image.png` is available from `/image.png`), including subfolders (for example: `wwwroot/subfolder/image.png` is available from `/subfolder/image.png`). RCL static assets in the RCL's `wwwroot` folder are available (for example: `wwwroot/image.png` is available from the path `_content/{PACKAGE ID}/image.png`), including subfolders (for example: `wwwroot/subfolder/image.png` is available from the path `_content/{PACKAGE ID}/subfolder/image.png`).
+* `wwwroot/{PATH}/index.html`: All assets in the app's `wwwroot/{PATH}` folder are available using app web root relative paths. RCL static assets in `wwwroot/{PATH}` aren't because they would be in a non-existent theoretical location, such as `../../_content/{PACKAGE ID}/{PATH}`, which isn't a supported relative path.
+* `wwwroot/_content/{PACKAGE ID}/index.html`: All assets in the RCL's `wwwroot/{PATH}` folder are available using RCL web root relative paths. The app's static assets in `wwwroot/{PATH}` are aren't because they would be in a non-existent theoretical location, such as `../../{PATH}`, which isn't a supported relative path.
 
 For most apps, we recommend placing the :::no-loc text="HostPage"::: at the root of the `wwwroot` folder of the app, which provides the greatest flexibility for supplying static assets from the app, RCLs, and via subfolders of the app and RCLs.
 
@@ -256,7 +256,7 @@ In a Razor component:
 
 @code {
     private string dataResourceText = "Loading resource ...";
-    private IJSObjectReference module;
+    private IJSObjectReference? module;
     private string result;
 
     protected override async Task OnInitializedAsync()
@@ -294,7 +294,13 @@ In a Razor component:
     {
         if (module is not null)
         {
-            await module.DisposeAsync();
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
         }
     }
 }
@@ -323,7 +329,7 @@ private async Task<string> ReadData()
 }
 ```
 
-[Collocated JavaScript files](xref:blazor/js-interop/index#load-a-script-from-an-external-javascript-file-js-collocated-with-a-component) are also accessible at logical subpaths of `wwwroot`. Instead of using the script described earlier for the `showPrompt` function in `wwwroot/scripts.js`, the following collocated JavaScript file for the `StaticAssetExample2` component also makes the function available.
+[Collocated JavaScript files](xref:blazor/js-interop/javascript-location#load-a-script-from-an-external-javascript-file-js-collocated-with-a-component) are also accessible at logical subpaths of `wwwroot`. Instead of using the script described earlier for the `showPrompt` function in `wwwroot/scripts.js`, the following collocated JavaScript file for the `StaticAssetExample2` component also makes the function available.
 
 `Pages/StaticAssetExample2.razor.js`:
 

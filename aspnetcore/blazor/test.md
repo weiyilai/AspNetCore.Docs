@@ -5,14 +5,14 @@ description: Learn how to test Razor components in Blazor apps.
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 11/12/2024
 uid: blazor/test
 ---
 # Test Razor components in ASP.NET Core Blazor
 
 [!INCLUDE[](~/includes/not-latest-version.md)]
 
-By: [Egil Hansen](https://egilhansen.com/)
+By [Egil Hansen](https://egilhansen.com/)
 
 Testing Razor components is an important aspect of releasing stable and maintainable Blazor apps.
 
@@ -107,35 +107,61 @@ The following demonstrates the structure of a bUnit test on the `Counter` compon
 
 The following bUnit test verifies that the CUT's counter is incremented correctly when the button is selected:
 
+```razor
+@code {
+    [Fact]
+    public void CounterShouldIncrementWhenClicked()
+    {
+        // Arrange
+        using var ctx = new TestContext();
+        var cut = ctx.Render(@<Counter />);
+        var paraElm = cut.Find("p");
+
+        // Act
+        cut.Find("button").Click();
+
+        // Assert
+        var paraElmText = paraElm.TextContent;
+        paraElm.MarkupMatches("Current count: 1");
+    }
+}
+```
+
+Tests can also be written in a C# class file:
+
 ```csharp
-[Fact]
-public void CounterShouldIncrementWhenSelected()
+public class CounterTests
 {
-    // Arrange
-    using var ctx = new TestContext();
-    var cut = ctx.RenderComponent<Counter>();
-    var paraElm = cut.Find("p");
+    [Fact]
+    public void CounterShouldIncrementWhenClicked()
+    {
+        // Arrange
+        using var ctx = new TestContext();
+        var cut = ctx.RenderComponent<Counter>();
+        var paraElm = cut.Find("p");
 
-    // Act
-    cut.Find("button").Click();
-    var paraElmText = paraElm.TextContent;
+        // Act
+        cut.Find("button").Click();
 
-    // Assert
-    paraElmText.MarkupMatches("Current count: 1");
+        // Assert
+        var paraElmText = paraElm.TextContent;
+        paraElmText.MarkupMatches("Current count: 1");
+    }
 }
 ```
 
 The following actions take place at each step of the test:
 
-* *Arrange*: The `Counter` component is rendered using bUnit's `TestContext`. The CUT's paragraph element (`<p>`) is found and assigned to `paraElm`.
+* *Arrange*: The `Counter` component is rendered using bUnit's `TestContext`. The CUT's paragraph element (`<p>`) is found and assigned to `paraElm`. In Razor syntax, a component can be passed as a <xref:Microsoft.AspNetCore.Components.RenderFragment> to bUnit.
 
-* *Act*: The button's element (`<button>`) is located and then selected by calling `Click`, which should increment the counter and update the content of the paragraph tag (`<p>`). The paragraph element text content is obtained by calling `TextContent`.
+* *Act*: The button's element (`<button>`) is located and selected by calling `Click`, which should increment the counter and update the content of the paragraph tag (`<p>`). The paragraph element text content is obtained by calling `TextContent`.
 
 * *Assert*: `MarkupMatches` is called on the text content to verify that it matches the expected string, which is `Current count: 1`.
 
 > [!NOTE]
-> The `MarkupMatches` assert method differs from a regular string comparison assertion (for example, `Assert.Equal("Current count: 1", paraElmText);`) `MarkupMatches` performs a semantic comparison of the input and expected HTML markup. A semantic comparison is aware of HTML semantics, meaning things like insignificant whitespace is ignored. This results in more stable tests. For more information, see [Customizing the Semantic HTML Comparison](https://bunit.egilhansen.com/docs/verification/semantic-html-comparison).
+> The `MarkupMatches` assert method differs from a regular string comparison assertion (for example, `Assert.Equal("Current count: 1", paraElmText);`). `MarkupMatches` performs a semantic comparison of the input and expected HTML markup. A semantic comparison is aware of HTML semantics, meaning things like insignificant whitespace is ignored. This results in more stable tests. For more information, see [Customizing the Semantic HTML Comparison](https://bunit.egilhansen.com/docs/verification/semantic-html-comparison).
 
 ## Additional resources
 
-[Getting Started with bUnit](https://bunit.dev/docs/getting-started/): bUnit instructions include guidance on creating a test project, referencing testing framework packages, and building and running tests.
+* [Getting Started with bUnit](https://bunit.dev/docs/getting-started/): bUnit instructions include guidance on creating a test project, referencing testing framework packages, and building and running tests.
+* [Blazor Testing from A to Z - Egil Hansen - Swetugg Stockholm 2024](https://youtu.be/GU_XbWjrP_g?si=1SrjeaP1T9LdFegN) ([Swetugg](https://www.swetugg.se/sthlm-2025))

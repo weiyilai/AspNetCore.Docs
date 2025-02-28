@@ -5,7 +5,7 @@ description: Learn about Blazor Hybrid authentication and authorization scenario
 monikerRange: '>= aspnetcore-6.0'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 11/12/2024
 uid: blazor/hybrid/security/index
 zone_pivot_groups: blazor-hybrid-frameworks
 ---
@@ -17,7 +17,7 @@ This article describes ASP.NET Core's support for the configuration and manageme
 
 ::: moniker range=">= aspnetcore-7.0"
 
-Authentication in Blazor Hybrid apps is handled by native platform libraries, as they offer enhanced security guarantees that the browser sandbox can't offer. Authentication of native apps uses an OS-specific mechanism or via a federated protocol, such as [OpenID Connect (OIDC)](https://openid.net/connect/). Follow the guidance for the identity provider that you've selected for the app and then further integrate identity with Blazor using the guidance in this article.
+Authentication in Blazor Hybrid apps is handled by native platform libraries, as they offer enhanced security guarantees that the browser sandbox can't offer. Authentication of native apps uses an OS-specific mechanism or via a federated protocol, such as [OpenID Connect (OIDC)](https://openid.net/developers/how-connect-works/). Follow the guidance for the identity provider that you've selected for the app and then further integrate identity with Blazor using the guidance in this article.
 
 Integrating authentication must achieve the following goals for Razor components and services:
 
@@ -36,24 +36,23 @@ After authentication is added to a .NET MAUI, WPF, or Windows Forms app and user
 
 :::zone pivot="maui"
 
-.NET MAUI apps use [Xamarin.Essentials: Web Authenticator](/xamarin/essentials/web-authenticator): The `WebAuthenticator` class allows the app to initiate browser-based authentication flows that listen for a callback to a specific URL registered with the app.
+.NET MAUI apps use the `WebAuthenticator` class to initiate browser-based authentication flows that listen for a callback to a specific URL registered with the app.
 
 For additional guidance, see the following resources:
 
-* [Web authenticator (.NET MAUI documentation](/dotnet/maui/platform-integration/communication/authentication)
+* [Web authenticator (.NET MAUI documentation)](/dotnet/maui/platform-integration/communication/authentication)
 * [`Sample.Server.WebAuthenticator` sample app](https://github.com/dotnet/maui/tree/main/src/Essentials/samples/Sample.Server.WebAuthenticator)
 
 :::zone-end
 
 :::zone pivot="wpf"
 
-WPF apps use the [Microsoft identity platform](/azure/active-directory/develop/) to integrate with Azure Active Directory (AAD) and AAD B2C. For guidance and examples, see the following resources:
+WPF apps use the [Microsoft identity platform](/entra/identity-platform/) to integrate with Microsoft Entra (ME-ID) and AAD B2C. For guidance and examples, see the following resources:
 
-* [Overview of the Microsoft Authentication Library (MSAL)](/azure/active-directory/develop/msal-overview)
-* [Sign-in a user with the Microsoft Identity Platform in a WPF Desktop application and call an ASP.NET Core Web API](/samples/azure-samples/active-directory-dotnet-native-aspnetcore-v2/1-desktop-app-calls-web-api/)
+* [Overview of the Microsoft Authentication Library (MSAL)](/entra/identity-platform/msal-overview)
 * [Add authentication to your Windows (WPF) app](/azure/developer/mobile-apps/azure-mobile-apps/quickstarts/wpf/authentication)
-* [Tutorial: Sign in users and call Microsoft Graph in Windows Presentation Foundation (WPF) desktop app](/azure/active-directory/develop/tutorial-v2-windows-desktop)
-* [Quickstart: Acquire a token and call Microsoft Graph API from a desktop application](/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-windows-desktop)
+* [Tutorial: Sign in users and call Microsoft Graph in Windows Presentation Foundation (WPF) desktop app](/entra/identity-platform/tutorial-v2-windows-desktop)
+* [Quickstart: Acquire a token and call Microsoft Graph API from a desktop application](/entra/identity-platform/index-desktop)
 * [Quickstart: Set up sign in for a desktop app using Azure Active Directory B2C](/azure/active-directory-b2c/quickstart-native-app-desktop)
 * [Configure authentication in a sample WPF desktop app by using Azure AD B2C](/azure/active-directory-b2c/configure-authentication-sample-wpf-desktop-app)
 
@@ -61,7 +60,7 @@ WPF apps use the [Microsoft identity platform](/azure/active-directory/develop/)
 
 :::zone pivot="winforms"
 
-Windows Forms apps use the [Microsoft identity platform](/azure/active-directory/develop/) to integrate with Azure Active Directory (AAD) and AAD B2C. For more information, see [Overview of the Microsoft Authentication Library (MSAL)](/azure/active-directory/develop/msal-overview).
+Windows Forms apps use the [Microsoft identity platform](/entra/identity-platform/) to integrate with Microsoft Entra (ME-ID) and AAD B2C. For more information, see [Overview of the Microsoft Authentication Library (MSAL)](/entra/identity-platform/msal-overview).
 
 :::zone-end
 
@@ -544,12 +543,19 @@ When implementing authentication:
 
 * <xref:blazor/security/index>
 * <xref:blazor/hybrid/security/security-considerations>
+* Entra ID documentation for .NET MAUI
+  * [Tutorial: Register and configure .NET MAUI mobile app in an external tenant](/entra/external-id/customers/tutorial-mobile-app-maui-sign-in-prepare-tenant)
+  * [Sign in users in a sample .NET MAUI Android application](/entra/external-id/customers/how-to-mobile-app-maui-sample-sign-in)
+  * [Sign in users in a sample .NET MAUI desktop application](/entra/external-id/customers/how-to-desktop-app-maui-sample-sign-in)
+* Azure documentation for .NET MAUI
+  * [Add authentication to your .NET MAUI app](/azure/developer/mobile-apps/azure-mobile-apps/quickstarts/maui/authentication)
+  * [MAUI mobile or desktop application using Microsoft Entra ID for authentication](https://github.com/Azure-Samples/ms-identity-dotnetcore-maui)
 
 ::: moniker-end
 
 ::: moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
-Authentication in Blazor Hybrid apps is handled by native platform libraries, as they offer enhanced security guarantees that the browser sandbox can't offer. Authentication of native apps uses an OS-specific mechanism or via a federated protocol, such as [OpenID Connect (OIDC)](https://openid.net/connect/). Follow the guidance for the identity provider that you've selected for the app and then further integrate identity with Blazor using the guidance in this article.
+Authentication in Blazor Hybrid apps is handled by native platform libraries, as they offer enhanced security guarantees that the browser sandbox can't offer. Authentication of native apps uses an OS-specific mechanism or via a federated protocol, such as [OpenID Connect (OIDC)](https://openid.net/developers/how-connect-works/). Follow the guidance for the identity provider that you've selected for the app and then further integrate identity with Blazor using the guidance in this article.
 
 Integrating authentication must achieve the following goals for Razor components and services:
 
@@ -568,24 +574,23 @@ After authentication is added to a .NET MAUI, WPF, or Windows Forms app and user
 
 :::zone pivot="maui"
 
-.NET MAUI apps use [Xamarin.Essentials: Web Authenticator](/xamarin/essentials/web-authenticator): The `WebAuthenticator` class allows the app to initiate browser-based authentication flows that listen for a callback to a specific URL registered with the app.
+.NET MAUI apps use the `WebAuthenticator` class to initiate browser-based authentication flows that listen for a callback to a specific URL registered with the app.
 
 For additional guidance, see the following resources:
 
-* [Web authenticator (.NET MAUI documentation](/dotnet/maui/platform-integration/communication/authentication)
+* [Web authenticator (.NET MAUI documentation)](/dotnet/maui/platform-integration/communication/authentication)
 * [`Sample.Server.WebAuthenticator` sample app](https://github.com/dotnet/maui/tree/main/src/Essentials/samples/Sample.Server.WebAuthenticator)
 
 :::zone-end
 
 :::zone pivot="wpf"
 
-WPF apps use the [Microsoft identity platform](/azure/active-directory/develop/) to integrate with Azure Active Directory (AAD) and AAD B2C. For guidance and examples, see the following resources:
+WPF apps use the [Microsoft identity platform](/entra/identity-platform/) to integrate with Microsoft Entra (ME-ID) and AAD B2C. For guidance and examples, see the following resources:
 
-* [Overview of the Microsoft Authentication Library (MSAL)](/azure/active-directory/develop/msal-overview)
-* [Sign-in a user with the Microsoft Identity Platform in a WPF Desktop application and call an ASP.NET Core Web API](/samples/azure-samples/active-directory-dotnet-native-aspnetcore-v2/1-desktop-app-calls-web-api/)
+* [Overview of the Microsoft Authentication Library (MSAL)](/entra/identity-platform/msal-overview)
 * [Add authentication to your Windows (WPF) app](/azure/developer/mobile-apps/azure-mobile-apps/quickstarts/wpf/authentication)
-* [Tutorial: Sign in users and call Microsoft Graph in Windows Presentation Foundation (WPF) desktop app](/azure/active-directory/develop/tutorial-v2-windows-desktop)
-* [Quickstart: Acquire a token and call Microsoft Graph API from a desktop application](/azure/active-directory/develop/desktop-app-quickstart?pivots=devlang-windows-desktop)
+* [Tutorial: Sign in users and call Microsoft Graph in Windows Presentation Foundation (WPF) desktop app](/entra/identity-platform/tutorial-v2-windows-desktop)
+* [Quickstart: Acquire a token and call Microsoft Graph API from a desktop application](/entra/identity-platform/index-desktop)
 * [Quickstart: Set up sign in for a desktop app using Azure Active Directory B2C](/azure/active-directory-b2c/quickstart-native-app-desktop)
 * [Configure authentication in a sample WPF desktop app by using Azure AD B2C](/azure/active-directory-b2c/configure-authentication-sample-wpf-desktop-app)
 
@@ -593,7 +598,7 @@ WPF apps use the [Microsoft identity platform](/azure/active-directory/develop/)
 
 :::zone pivot="winforms"
 
-Windows Forms apps use the [Microsoft identity platform](/azure/active-directory/develop/) to integrate with Azure Active Directory (AAD) and AAD B2C. For more information, see [Overview of the Microsoft Authentication Library (MSAL)](/azure/active-directory/develop/msal-overview).
+Windows Forms apps use the [Microsoft identity platform](/entra/identity-platform/) to integrate with Microsoft Entra (ME-ID) and AAD B2C. For more information, see [Overview of the Microsoft Authentication Library (MSAL)](/entra/identity-platform/msal-overview).
 
 :::zone-end
 

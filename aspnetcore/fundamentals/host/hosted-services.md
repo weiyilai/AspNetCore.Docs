@@ -3,9 +3,9 @@ title: Background tasks with hosted services in ASP.NET Core
 author: tdykstra
 description: Learn how to implement background tasks with hosted services in ASP.NET Core.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 5/17/2023
+ms.date: 5/10/2024
 uid: fundamentals/host/hosted-services
 ---
 # Background tasks with hosted services in ASP.NET Core
@@ -166,7 +166,7 @@ The Worker Service templates support [.NET native ahead-of-time (AOT)](/dotnet/c
 1. Provide a project name in the **Project name** field or accept the default project name.  Select **Next**.
 1. In the **Additional information** dialog:
   1. Choose a **Framework**.
-  1. Check the **Enable native AOT publish** checkbox.
+  1. Check the **Enable Native AOT publish** checkbox.
   1. Select **Create**.
 
 <!--
@@ -179,7 +179,7 @@ The Worker Service templates support [.NET native ahead-of-time (AOT)](/dotnet/c
 1. Provide a name in the **Project Name** field. Select **Create**.
 -->
 
-# [.NET Core CLI](#tab/netcore-cli)
+# [.NET CLI](#tab/net-cli)
 
 Use the Worker Service (`worker`) template with the [dotnet new](/dotnet/core/tools/dotnet-new) command from a command shell with the AOT option:
 

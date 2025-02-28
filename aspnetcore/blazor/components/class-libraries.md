@@ -5,7 +5,7 @@ description: Discover how components can be included in Blazor apps from an exte
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 11/12/2024
 uid: blazor/components/class-libraries
 ---
 # Consume ASP.NET Core Razor components from a Razor class library (RCL)
@@ -26,8 +26,8 @@ Just as components are regular .NET types, components provided by an RCL are nor
 
 1. Create a new project.
 1. In the **Create a new project** dialog, select **Razor Class Library** from the list of ASP.NET Core project templates. Select **Next**.
-1. In the **Configure your new project** dialog, provide a project name in the **Project name** field or accept the default project name. Examples in this topic use the project name `ComponentLibrary`. Select **Create**.
-1. In the **Create a new Razor class library** dialog, select **Create**.
+1. In the **Configure your new project** dialog, provide a project name in the **Project name** field. Examples in this topic use the project name `ComponentLibrary`. Select **Next**.
+1. In the **Additional information** dialog, don't select **Support pages and views**. Select **Create**.
 1. Add the RCL to a solution:
    1. Open the solution.
    1. Right-click the solution in **Solution Explorer**. Select **Add** > **Existing Project**.
@@ -37,86 +37,7 @@ Just as components are regular .NET types, components provided by an RCL are nor
    1. Right-click the app project. Select **Add** > **Project Reference**.
    1. Select the RCL project. Select **OK**.
 
-:::moniker range=">= aspnetcore-5.0"
-
-If the **Support pages and views** checkbox is selected to support pages and views when generating the RCL from the template:
-
-* Add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-  ```razor
-  @using Microsoft.AspNetCore.Components.Web
-  ```
-
-* Add the following `SupportedPlatform` item to the project file (`.csproj`):
-
-  ```xml
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-  ```
-
-  For more information on the `SupportedPlatform` item, see the [Browser compatibility analyzer for Blazor WebAssembly](#browser-compatibility-analyzer-for-blazor-webassembly) section.
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-If the **Support pages and views** checkbox is selected to support pages and views when generating the RCL from the template, add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-```razor
-@using Microsoft.AspNetCore.Components.Web
-```
-
-:::moniker-end
-
-# [Visual Studio for Mac](#tab/visual-studio-mac)
-
-1. Create a new project.
-1. In the sidebar under **Web and Console**, select **App**. Under **ASP.NET Core**, select **Razor Class Library** from the project templates. Select **Continue**.
-1. Select the target framework for the library with the **Target framework** dropdown list. Select **Continue**.
-1. Provide a project name in the **Project name** field. Examples in this topic use the project name `ComponentLibrary`. Select **Create**.
-1. Add the RCL to a solution:
-   1. Open the solution.
-   1. Right-click the solution in the **Solution** sidebar and select **Add** > **Existing Project**. Alternatively, use the **Add** > **Existing Project** menu command from the **File** menu.
-   1. Navigate to the RCL's project file.
-   1. Select the RCL's project file (`.csproj`) and select **Open**.
-1. Add a reference to the RCL from the app:
-   1. Right-click the app project. Select **Add** > **Reference**. Alternatively, select the **Add Project Reference** menu command from the **Project** menu.
-   1. Select the RCL project's checkbox and reference the project with the **Select** button.
-
-:::moniker range=">= aspnetcore-5.0"
-
-If the **Support pages and views** checkbox is selected to support pages and views when generating the RCL from the template:
-
-* Add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-  ```razor
-  @using Microsoft.AspNetCore.Components.Web
-  ```
-
-* Add the following `SupportedPlatform` item to the project file (`.csproj`):
-
-  ```xml
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-  ```
-
-  For more information on the `SupportedPlatform` item, see the [Browser compatibility analyzer for Blazor WebAssembly](#browser-compatibility-analyzer-for-blazor-webassembly) section.
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-If the **Support pages and views** checkbox is selected to support pages and views when generating the RCL from the template, add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-```razor
-@using Microsoft.AspNetCore.Components.Web
-```
-
-:::moniker-end
-
-# [Visual Studio Code / .NET Core CLI](#tab/visual-studio-code+netcore-cli)
+# [Visual Studio Code / .NET CLI](#tab/visual-studio-code+net-cli)
 
 1. Use the **Razor Class Library** project template (`razorclasslib`) with the [`dotnet new`](/dotnet/core/tools/dotnet-new) command in a command shell. In the following example, an RCL is created and named `ComponentLibrary` using the `-o|--output` option. The folder that holds `ComponentLibrary` is created automatically when the command is executed:
 
@@ -129,38 +50,6 @@ If the **Support pages and views** checkbox is selected to support pages and vie
    ```dotnetcli
    dotnet add reference {PATH TO LIBRARY}
    ```
-
-:::moniker range=">= aspnetcore-5.0"
-
-If the `-s|--support-pages-and-views` option is used to support pages and views when generating the RCL from the template:
-
-* Add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-  ```razor
-  @using Microsoft.AspNetCore.Components.Web
-  ```
-
-* Add the following `SupportedPlatform` item to the project file (`.csproj`):
-
-  ```xml
-  <ItemGroup>
-    <SupportedPlatform Include="browser" />
-  </ItemGroup>
-  ```
-
-  For more information on the `SupportedPlatform` item, see the [Browser compatibility analyzer for Blazor WebAssembly](#browser-compatibility-analyzer-for-blazor-webassembly) section.
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-5.0"
-
-If the `-s|--support-pages-and-views` option is used to support pages and views when generating the RCL from the template, add an `_Imports.razor` file to root of the generated RCL project with the following contents to enable Razor component authoring:
-
-```razor
-@using Microsoft.AspNetCore.Components.Web
-```
-
-:::moniker-end
 
 ---
 
@@ -175,9 +64,6 @@ To consume components from an RCL in another project, use either of the followin
 
 In the following examples, `ComponentLibrary` is an RCL containing the `Component1` component. The `Component1` component is an example component automatically added to an RCL created from the RCL project template that isn't created to support pages and views.
 
-> [!NOTE]
-> If the RCL is created to support pages and views, manually add the `Component1` component and its static assets to the RCL if you plan to follow the examples in this article. The component and static assets are shown in this section.
-
 `Component1.razor` in the `ComponentLibrary` RCL:
 
 ```razor
@@ -188,7 +74,7 @@ In the following examples, `ComponentLibrary` is an RCL containing the `Componen
 
 In the app that consumes the RCL, reference the `Component1` component using its namespace, as the following example shows.
 
-`Pages/ConsumeComponent1.razor`:
+`ConsumeComponent1.razor`:
 
 ```razor
 @page "/consume-component-1"
@@ -200,7 +86,7 @@ In the app that consumes the RCL, reference the `Component1` component using its
 
 Alternatively, add a [`@using`](xref:mvc/views/razor#using) directive and use the component without its namespace. The following `@using` directive can also appear in any `_Imports.razor` file in or above the current folder.
 
-`Pages/ConsumeComponent2.razor`:
+`ConsumeComponent2.razor`:
 
 ```razor
 @page "/consume-component-2"
@@ -276,7 +162,7 @@ Add a component to the RCL that uses the `extra-style` class.
 
 Add a page to the app that uses the `ExtraStyles` component from the RCL.
 
-`Pages/ConsumeComponent3.razor`:
+`ConsumeComponent3.razor`:
 
 ```razor
 @page "/consume-component-3"
@@ -287,10 +173,30 @@ Add a page to the app that uses the `ExtraStyles` component from the RCL.
 <ExtraStyles />
 ```
 
-Link to the library's stylesheet in the app's `<head>` markup ([location of `<head>` content](xref:blazor/project-structure#location-of-head-content)).
+Link to the library's stylesheet in the app's `<head>` markup ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)):
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-9.0"
+
+Blazor Web Apps:
 
 ```html
-<link href="_content/ComponentLibrary/additionalStyles.css" rel="stylesheet" />
+<link href="@Assets["_content/ComponentLibrary/additionalStyles.css"]" rel="stylesheet">
+```
+
+Standalone Blazor WebAssembly apps:
+
+```html
+<link href="_content/ComponentLibrary/additionalStyles.css" rel="stylesheet">
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-9.0"
+
+```html
+<link href="_content/ComponentLibrary/additionalStyles.css" rel="stylesheet">
 ```
 
 :::moniker-end
@@ -343,15 +249,25 @@ The following background image and stylesheet are used by the RCL's `Component1`
 }
 ```
 
-To provide `Component1`'s `my-component` CSS class, link to the library's stylesheet in the app's `<head>` markup.
-
-`wwwroot/index.html` file (Blazor WebAssembly) or `Pages/_Host.cshtml` file (Blazor Server):
+To provide `Component1`'s `my-component` CSS class, link to the library's stylesheet in the app's `<head>` markup ([location of `<head>` content](xref:blazor/project-structure#location-of-head-and-body-content)):
 
 ```html
 <link href="_content/ComponentLibrary/styles.css" rel="stylesheet" />
 ```
 
 :::moniker-end
+
+## Make routable components available from the RCL
+
+To make routable components in the RCL available for direct requests, the RCL's assembly must be disclosed to the app's router.
+
+Open the app's `App` component (`App.razor`). Assign an <xref:System.Reflection.Assembly> collection to the <xref:Microsoft.AspNetCore.Components.Routing.Router.AdditionalAssemblies%2A> parameter of the <xref:Microsoft.AspNetCore.Components.Routing.Router> component to include the RCL's assembly. In the following example, the `ComponentLibrary.Component1` component is used to discover the RCL's assembly.
+
+```razor
+AdditionalAssemblies="new[] { typeof(ComponentLibrary.Component1).Assembly }"
+```
+
+For more information, see <xref:blazor/fundamentals/routing#route-to-components-from-multiple-assemblies>.
 
 ## Create an RCL with static assets in the `wwwroot` folder
 
@@ -384,7 +300,7 @@ Add the following `Jeep` component to the app that consumes the `ComponentLibrar
 * The Jeep YJ&reg; image from the `ComponentLibrary` RCL's `wwwroot` folder.
 * The `JeepYJ` component from the RCL.
 
-`Pages/Jeep.razor`:
+`Jeep.razor`:
 
 ```razor
 @page "/jeep"
@@ -416,21 +332,25 @@ For more information, see <xref:razor-pages/ui-class#create-an-rcl-with-static-a
 
 ## Create an RCL with JavaScript files collocated with components
 
-[!INCLUDE[](~/includes/js-collocation.md)]
+[!INCLUDE[](~/blazor/includes/js-interop/js-collocation.md)]
 
 :::moniker-end
 
+:::moniker range="< aspnetcore-8.0"
+
 ## Supply components and static assets to multiple hosted Blazor apps
 
-For more information, see <xref:blazor/host-and-deploy/webassembly#static-assets-and-class-libraries-for-multiple-blazor-webassembly-apps>.
+For more information, see <xref:blazor/host-and-deploy/multiple-hosted-webassembly>.
+
+:::moniker-end
 
 :::moniker range=">= aspnetcore-5.0"
 
-## Browser compatibility analyzer for Blazor WebAssembly
+## Client-side browser compatibility analyzer
 
-Blazor WebAssembly apps target the full .NET API surface area, but not all .NET APIs are supported on WebAssembly due to browser sandbox constraints. Unsupported APIs throw <xref:System.PlatformNotSupportedException> when running on WebAssembly. A platform compatibility analyzer warns the developer when the app uses APIs that aren't supported by the app's target platforms. For Blazor WebAssembly apps, this means checking that APIs are supported in browsers. Annotating .NET framework APIs for the compatibility analyzer is an on-going process, so not all .NET framework API is currently annotated.
+Client-side apps target the full .NET API surface area, but not all .NET APIs are supported on WebAssembly due to browser sandbox constraints. Unsupported APIs throw <xref:System.PlatformNotSupportedException> when running on WebAssembly. A platform compatibility analyzer warns the developer when the app uses APIs that aren't supported by the app's target platforms. For client-side apps, this means checking that APIs are supported in browsers. Annotating .NET framework APIs for the compatibility analyzer is an on-going process, so not all .NET framework API is currently annotated.
 
-Blazor WebAssembly and RCL projects *automatically* enable browser compatibility checks by adding `browser` as a supported platform with the `SupportedPlatform` MSBuild item. Library developers can manually add the `SupportedPlatform` item to a library's project file to enable the feature:
+Blazor Web Apps that enable Interactive WebAssembly components, Blazor WebAssembly apps, and RCL projects *automatically* enable browser compatibility checks by adding `browser` as a supported platform with the `SupportedPlatform` MSBuild item. Library developers can manually add the `SupportedPlatform` item to a library's project file to enable the feature:
 
 ```xml
 <ItemGroup>
@@ -452,7 +372,7 @@ private static string GetLoggingDirectory()
 }
 ```
 
-For more information, see [Annotating APIs as unsupported on specific platforms (dotnet/designs GitHub repository](https://github.com/dotnet/designs/blob/main/accepted/2020/platform-exclusion/platform-exclusion.md#build-configuration-for-platforms).
+For more information, see [Annotating APIs as unsupported on specific platforms (`dotnet/designs` GitHub repository](https://github.com/dotnet/designs/blob/main/accepted/2020/platform-exclusion/platform-exclusion.md#build-configuration-for-platforms).
 
 :::moniker-end
 
@@ -473,7 +393,7 @@ For more information, see <xref:blazor/js-interop/call-javascript-from-dotnet#ja
 
 ## Avoid trimming JavaScript-invokable .NET methods
 
-[Runtime relinking](xref:blazor/host-and-deploy/webassembly#runtime-relinking) trims class instance JavaScript-invokable .NET methods unless they're explicitly preserved. For more information, see <xref:blazor/js-interop/call-dotnet-from-javascript#avoid-trimming-javascript-invokable-net-methods>.
+[Runtime relinking](xref:blazor/tooling/webassembly#runtime-relinking) trims class instance JavaScript-invokable .NET methods unless they're explicitly preserved. For more information, see <xref:blazor/js-interop/call-dotnet-from-javascript#avoid-trimming-javascript-invokable-net-methods>.
 
 :::moniker-end
 

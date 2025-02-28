@@ -5,28 +5,46 @@ description: Learn how to use the @key directive attribute to retain element, co
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 05/15/2023
+ms.date: 11/12/2024
 uid: blazor/components/key
 ---
 # Retain element, component, and model relationships in ASP.NET Core Blazor
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
+
+This article explains how to use the `@key` directive attribute to retain element, component, and model relationships when rendering and the elements or components subsequently change.
+
+## Use of the `@key` directive attribute
 
 When rendering a list of elements or components and the elements or components subsequently change, Blazor must decide which of the previous elements or components are retained and how model objects should map to them. Normally, this process is automatic and sufficient for general rendering, but there are often cases where controlling the process using the [`@key`](xref:mvc/views/razor#key) directive attribute is required.
 
 Consider the following example that demonstrates a collection mapping problem that's solved by using [`@key`](xref:mvc/views/razor#key).
 
-For the following `Details` and `PeopleExample` components:
+For the following components:
 
-* The `Details` component receives data (`Data`) from the parent `PeopleExample` component, which is displayed in an `<input>` element. Any given displayed `<input>` element can receive the focus of the page from the user when they select one of the `<input>` elements.
-* The `PeopleExample` component creates a list of person objects for display using the `Details` component. Every three seconds, a new person is added to the collection.
+* The `Details` component receives data (`Data`) from the parent component, which is displayed in an `<input>` element. Any given displayed `<input>` element can receive the focus of the page from the user when they select one of the `<input>` elements.
+* The parent component creates a list of person objects for display using the `Details` component. Every three seconds, a new person is added to the collection.
 
 This demonstration allows you to:
 
 * Select an `<input>` from among several rendered `Details` components.
 * Study the behavior of the page's focus as the people collection automatically grows.
 
-`Shared/Details.razor`:
+`Details.razor`:
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Details.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Details.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Shared/element-component-model-relationships/Details.razor":::
 
@@ -50,11 +68,27 @@ This demonstration allows you to:
 
 :::moniker-end
 
-In the following `PeopleExample` component, each iteration of adding a person in `OnTimerCallback` results in Blazor rebuilding the entire collection. The page's focus remains on the *same index* position of `<input>` elements, so the focus shifts each time a person is added. *Shifting the focus away from what the user selected isn't desirable behavior.* After demonstrating the poor behavior with the following component, the [`@key`](xref:mvc/views/razor#key) directive attribute is used to improve the user's experience.
+In the following parent component, each iteration of adding a person in `OnTimerCallback` results in Blazor rebuilding the entire collection. The page's focus remains on the *same index* position of `<input>` elements, so the focus shifts each time a person is added. *Shifting the focus away from what the user selected isn't desirable behavior.* After demonstrating the poor behavior with the following component, the [`@key`](xref:mvc/views/razor#key) directive attribute is used to improve the user's experience.
 
-`Pages/PeopleExample.razor`:
+:::moniker range=">= aspnetcore-9.0"
 
-:::moniker range=">= aspnetcore-7.0"
+`People.razor`:
+
+:::code language="razor" source="~/../blazor-samples/9.0/BlazorSample_BlazorWebApp/Components/Pages/People.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0 < aspnetcore-9.0"
+
+`People.razor`:
+
+:::code language="razor" source="~/../blazor-samples/8.0/BlazorSample_BlazorWebApp/Components/Pages/People.razor":::
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
+`PeopleExample.razor`:
 
 :::code language="razor" source="~/../blazor-samples/7.0/BlazorSample_WebAssembly/Pages/element-component-model-relationships/PeopleExample.razor":::
 
@@ -62,17 +96,23 @@ In the following `PeopleExample` component, each iteration of adding a person in
 
 :::moniker range=">= aspnetcore-6.0 < aspnetcore-7.0"
 
+`PeopleExample.razor`:
+
 :::code language="razor" source="~/../blazor-samples/6.0/BlazorSample_WebAssembly/Pages/element-component-model-relationships/PeopleExample.razor":::
 
 :::moniker-end
 
 :::moniker range=">= aspnetcore-5.0 < aspnetcore-6.0"
 
+`PeopleExample.razor`:
+
 :::code language="razor" source="~/../blazor-samples/5.0/BlazorSample_WebAssembly/Pages/element-component-model-relationships/PeopleExample.razor":::
 
 :::moniker-end
 
 :::moniker range="< aspnetcore-5.0"
+
+`PeopleExample.razor`:
 
 :::code language="razor" source="~/../blazor-samples/3.1/BlazorSample_WebAssembly/Pages/element-component-model-relationships/PeopleExample.razor":::
 
@@ -82,7 +122,7 @@ The contents of the `people` collection changes with inserted, deleted, or re-or
 
 The mapping process of elements or components to a collection can be controlled with the [`@key`](xref:mvc/views/razor#key) directive attribute. Use of [`@key`](xref:mvc/views/razor#key) guarantees the preservation of elements or components based on the key's value. If the `Details` component in the preceding example is keyed on the `person` item, Blazor ignores rerendering `Details` components that haven't changed.
 
-To modify the `PeopleExample` component to use the [`@key`](xref:mvc/views/razor#key) directive attribute with the `people` collection, update the `<Details>` element to the following:
+To modify the parent component to use the [`@key`](xref:mvc/views/razor#key) directive attribute with the `people` collection, update the `<Details>` element to the following:
 
 ```razor
 <Details @key="person" Data="@person.Data" />

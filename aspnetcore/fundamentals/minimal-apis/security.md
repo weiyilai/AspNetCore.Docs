@@ -3,12 +3,16 @@ title: Authentication and authorization in minimal APIs
 author: captainsafia
 description: Learn how to configure authentication and authorization in minimal API apps
 ms.author: safia
+content_well_notification: AI-contribution
 monikerRange: '>= aspnetcore-7.0'
-ms.date: 10/17/2022
+ms.date: 9/17/2023
 uid: fundamentals/minimal-apis/security
+ai-usage: ai-assisted
 ---
 
 # Authentication and authorization in minimal APIs
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 Minimal APIs support all the authentication and authorization options available in ASP.NET Core and provide some additional functionality to improve the experience working with authentication.
 
@@ -31,7 +35,7 @@ To enable authentication, call [`AddAuthentication`](/dotnet/api/microsoft.exten
 
 :::code language="csharp" source="~/fundamentals/minimal-apis/security/7.0-samples/MinApiAuth/MinApiAuth/Program.cs" id="snippet_1" highlight="2":::
 
-Typically, a specific authentication strategy is used. In the following sample, the app is configured with support for JWT bearer-based authentication.
+Typically, a specific authentication strategy is used. In the following sample, the app is configured with support for JWT bearer-based authentication. This example makes use of the APIs available in the [`Microsoft.AspNetCore.Authentication.JwtBearer`](https://www.nuget.org/packages/Microsoft.AspNetCore.Authentication.JwtBearer) NuGet package.
 
 :::code language="csharp" source="~/fundamentals/minimal-apis/security/7.0-samples/MinApiAuth/MinApiAuth/Program.cs" id="snippet_jwt1" highlight="2-3":::
 
@@ -41,14 +45,14 @@ By default, the [`WebApplication`](/dotnet/api/microsoft.aspnetcore.builder.weba
 
 In some cases, such as controlling middleware order, it's necessary to explicitly register authentication and authorization. In the following sample, the authentication middleware runs _after_ the CORS middleware has run. For more information on middlewares and this automatic behavior, see [Middleware in Minimal API apps](/aspnet/core/fundamentals/minimal-apis/middleware).
 
-:::code language="csharp" source="~/fundamentals/minimal-apis/security/7.0-samples/MinApiAuth/MinApiAuth/Program.cs" id="snippet_after" highlight="8-10":::
+:::code language="csharp" source="~/fundamentals/minimal-apis/security/7.0-samples/MinApiAuth/MinApiAuth/Program.cs" id="snippet_after" highlight="9-11":::
 
 ### Configuring authentication strategy
 
-Authentication strategies typically support a variety of configurations that are loaded via options. Minimal app's support loading options from configuration for the following authentication strategies:
+Authentication strategies typically support a variety of configurations that are loaded via options. Minimal apps support loading options from configuration for the following authentication strategies:
 
 - [JWT bearer-based](https://jwt.io/introduction)
-- [OpenID Connection-based](https://openid.net/connect/)
+- [OpenID Connection-based](https://openid.net/developers/how-connect-works/)
 
 The ASP.NET Core framework expects to find these options under the `Authentication:Schemes:{SchemeName}` section in [configuration](/aspnet/core/fundamentals/configuration). In the following sample, two different schemes, `Bearer` and `LocalAuthIssuer`, are defined with their respective options. The `Authentication:DefaultScheme` option can be used to configure the default authentication strategy that's used.
 
@@ -99,7 +103,7 @@ Configuring authorization requirements on a resource is a two-step process that 
 In the following code, <xref:Microsoft.Extensions.DependencyInjection.PolicyServiceCollectionExtensions.AddAuthorizationBuilder%2A> is invoked which:
 
 - Adds authorization-related services to the DI container.
-- Returns an <xref:Microsoft.AspNetCore.Authorization.AuthorizationBuilder> that can be used to directly register authentication policies.
+- Returns an <xref:Microsoft.AspNetCore.Authorization.AuthorizationBuilder> that can be used to directly register authorization policies.
 
 The code creates a new authorization policy, named `admin_greetings`, that encapsulates two authorization requirements:
 

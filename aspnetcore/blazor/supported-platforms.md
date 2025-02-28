@@ -5,7 +5,7 @@ description: Learn about the supported platforms for ASP.NET Core Blazor.
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 11/08/2022
+ms.date: 11/12/2024
 uid: blazor/supported-platforms
 ---
 # ASP.NET Core Blazor supported platforms
@@ -31,16 +31,15 @@ Blazor is supported in the browsers shown in the following table on both mobile 
 
 ## Blazor WebAssembly
 
-| Browser                     | Version               |
-| --------------------------- | --------------------- |
-| Apple Safari                | Current&dagger;       |
-| Google Chrome               | Current&dagger;       |
-| Microsoft Edge              | Current&dagger;       |
-| Microsoft Internet Explorer | Not Supported&Dagger; |
-| Mozilla Firefox             | Current&dagger;       |
+| Browser                     | Version         |
+| --------------------------- | --------------- |
+| Apple Safari                | Current&dagger; |
+| Google Chrome               | Current&dagger; |
+| Microsoft Edge              | Current&dagger; |
+| Microsoft Internet Explorer | Not Supported   |
+| Mozilla Firefox             | Current&dagger; |
 
-&dagger;*Current* refers to the latest version of the browser.  
-&Dagger;Microsoft Internet Explorer doesn't support [WebAssembly](https://webassembly.org).
+&dagger;*Current* refers to the latest version of the browser.
 
 ## Blazor Server
 
@@ -49,11 +48,10 @@ Blazor is supported in the browsers shown in the following table on both mobile 
 | Apple Safari                | Current&dagger; |
 | Google Chrome               | Current&dagger; |
 | Microsoft Edge              | Current&dagger; |
-| Microsoft Internet Explorer | 11&Dagger;      |
+| Microsoft Internet Explorer | Not Supported   |
 | Mozilla Firefox             | Current&dagger; |
 
-&dagger;*Current* refers to the latest version of the browser.  
-&Dagger;Additional polyfills are required. For example, promises can be added via a [`Polyfill.io`](https://polyfill.io/v3/) bundle.
+&dagger;*Current* refers to the latest version of the browser.
 
 :::moniker-end
 

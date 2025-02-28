@@ -12,8 +12,6 @@ uid: tutorials/publish-to-azure-webapp-using-vs
 
 [!INCLUDE [Azure App Service Preview Notice](../includes/azure-apps-preview-notice.md)]
 
-If you're working on macOS, see [Publish a Web app to Azure App Service using Visual Studio for Mac](/visualstudio/mac/publish-app-svc).
-
 To troubleshoot an App Service deployment issue, see <xref:test/troubleshoot-azure-iis>.
 
 ## Set up
@@ -189,7 +187,7 @@ When you have finished testing the app, go to the [Azure portal](https://portal.
 
 * In the **Resource group** page, select **Delete resource group**.
 
-![Azure Portal: Resource Groups page](publish-to-azure-webapp-using-vs/_static/rgd.png)
+![Azure Portal: Resource Groups page](publish-to-azure-webapp-using-vs/_static/rdg.png)
 
 * Enter the name of the resource group and select **Delete**. Your app and all other resources created in this tutorial are now deleted from Azure.
 

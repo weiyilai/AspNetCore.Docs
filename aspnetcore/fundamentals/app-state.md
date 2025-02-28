@@ -2,9 +2,9 @@
 title: Session in ASP.NET Core
 author: tdykstra
 description: Discover approaches to preserve session between requests.
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
-ms.date: 03/22/2022
+ms.date: 05/29/2024
 uid: fundamentals/app-state
 ---
 # Session and state management in ASP.NET Core
@@ -14,6 +14,8 @@ uid: fundamentals/app-state
 By [Rick Anderson](https://twitter.com/RickAndMSFT), [Kirk Larkin](https://twitter.com/serpent5), and [Diana LaRose](https://github.com/DianaLaRose)
 
 HTTP is a stateless protocol. By default, HTTP requests are independent messages that don't retain user values. This article describes several approaches to preserve user data between requests.
+
+For Blazor state management guidance, which adds to or supersedes the guidance in this article, see <xref:blazor/state-management>.
 
 ## State management
 
@@ -78,12 +80,7 @@ The in-memory cache provider stores session data in the memory of the server whe
 
 ### Configure session state
 
-The [Microsoft.AspNetCore.Session](https://www.nuget.org/packages/Microsoft.AspNetCore.Session/) package:
-
-* Is included implicitly by the framework.
-* Provides middleware for managing session state.
-
-To enable the session middleware, `Program.cs` must contain:
+Middleware for managing session state is included in the framework. To enable the session middleware, `Program.cs` must contain:
 
 * Any of the <xref:Microsoft.Extensions.Caching.Distributed.IDistributedCache> memory caches. The `IDistributedCache` implementation is used as a backing store for session. For more information, see <xref:performance/caching/distributed>.
 * A call to <xref:Microsoft.Extensions.DependencyInjection.SessionServiceCollectionExtensions.AddSession%2A>

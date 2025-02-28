@@ -5,7 +5,7 @@ description: Learn how to pass an optional dictionary of parameters to the root 
 monikerRange: '>= aspnetcore-6.0'
 ms.author: riande
 ms.custom: "mvc"
-ms.date: 04/20/2023
+ms.date: 11/12/2024
 uid: blazor/hybrid/root-component-parameters
 ---
 # Pass root component parameters in ASP.NET Core Blazor Hybrid
@@ -90,7 +90,7 @@ public class KeypadViewModel : INotifyPropertyChanged
         // Command to delete a character from the input string when allowed
         DeleteCharCommand =
             new Command(
-                // Command will strip a character from the input string
+                // Command strips a character from the input string
                 () => InputString = InputString.Substring(0, InputString.Length - 1),
 
                 // CanExecute is processed here to return true when there's something to delete
@@ -175,9 +175,9 @@ In the `Main` component (`Main.razor`):
 
   ```xaml
   <Found Context="routeData">
-      <CascadingValue Value="@KeypadViewModel">
-          <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-          <FocusOnNavigate RouteData="@routeData" Selector="h1"/>
+      <CascadingValue Value="KeypadViewModel">
+          <RouteView RouteData="routeData" DefaultLayout="typeof(MainLayout)" />
+          <FocusOnNavigate RouteData="routeData" Selector="h1"/>
       </CascadingValue>
   </Found>
   ```
@@ -260,7 +260,7 @@ Purely for demonstration purposes, style the buttons by placing the following CS
 </style>
 ```
 
-Create a sidebar navigation entry in the [`NavMenu` component](xref:blazor/fundamentals/routing#navlink-and-navmenu-components) (`Shared/NavMenu.razor`) with the following markup:
+Create a sidebar navigation entry in the `NavMenu` component (`Shared/NavMenu.razor`) with the following markup:
 
 ```razor
 <div class="nav-item px-3">

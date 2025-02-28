@@ -5,7 +5,7 @@ description: Learn how to configure Blazor WebAssembly for additional security s
 monikerRange: '>= aspnetcore-3.1'
 ms.author: riande
 ms.custom: mvc
-ms.date: 04/04/2023
+ms.date: 11/12/2024
 uid: blazor/security/webassembly/additional-scenarios
 ---
 # ASP.NET Core Blazor WebAssembly additional security scenarios
@@ -16,12 +16,12 @@ This article describes additional security scenarios for Blazor WebAssembly apps
 
 ## Attach tokens to outgoing requests
 
-<xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler> is a <xref:System.Net.Http.DelegatingHandler> used to process access tokens. Tokens are acquired using the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.IAccessTokenProvider> service, which is registered by the framework. If a token can't be acquired, an <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException> is thrown. <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException> has a <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException.Redirect%2A> method that navigates to `AccessTokenResult.InteractiveRequestUrl` using the given `AccessTokenResult.InteractionOptions` to allow refreshing the access token.
+<xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler> is a <xref:System.Net.Http.DelegatingHandler> used to process access tokens. Tokens are acquired using the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.IAccessTokenProvider> service, which is registered by the framework. If a token can't be acquired, an <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException> is thrown. <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException> has a <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenNotAvailableException.Redirect%2A> method that navigates to <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenResult.InteractiveRequestUrl%2A?displayProperty=nameWithType> using the given <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenResult.InteractionOptions%2A?displayProperty=nameWithType> to allow refreshing the access token.
 
 For convenience, the framework provides the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.BaseAddressAuthorizationMessageHandler> preconfigured with the app's base address as an authorized URL. **Access tokens are only added when the request URI is within the app's base URI.** When outgoing request URIs aren't within the app's base URI, use a [custom `AuthorizationMessageHandler` class (*recommended*)](#custom-authorizationmessagehandler-class) or [configure the `AuthorizationMessageHandler`](#configure-authorizationmessagehandler).
 
 > [!NOTE]
-> In addition to the client app configuration for server API access, the server API must also allow cross-origin requests (CORS) when the client and the server don't reside at the same base address. For more information on server-side CORS configuration, see the [Cross-origin resource sharing (CORS)](#cross-origin-resource-sharing-cors) section later in this article.
+> In addition to the client app configuration for server API access, the server API must also allow cross-origin requests (CORS) when the client and the server don't reside at the same base address. For more information on server-side CORS configuration, see the [Cross-Origin Resource Sharing (CORS)](#cross-origin-resource-sharing-cors) section later in this article.
 
 In the following example:
 
@@ -40,14 +40,18 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 ...
 
 builder.Services.AddHttpClient("WebAPI", 
-        client => client.BaseAddress = new Uri("https://www.example.com/base"))
+        client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>()
     .CreateClient("WebAPI"));
 ```
 
-For a hosted Blazor [solution](xref:blazor/tooling#visual-studio-solution-file-sln) based on the [Blazor WebAssembly project template](xref:blazor/project-structure), request URIs are within the app's base URI by default. Therefore, <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> in an app generated from the project template.
+:::moniker range="< aspnetcore-8.0"
+
+For a hosted Blazor [solution](xref:blazor/tooling#visual-studio-solution-file-sln) based on the [Blazor WebAssembly project template](xref:blazor/project-structure), request URIs are within the app's base URI. Therefore, <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> in an app generated from the project template.
+
+:::moniker-end
 
 The configured <xref:System.Net.Http.HttpClient> is used to make authorized requests using the [`try-catch`](/dotnet/csharp/language-reference/keywords/try-catch) pattern:
 
@@ -189,6 +193,32 @@ In the following example that attempts to obtain an access token for the user, a
 * `prompt` is set to `login`: Forces the user to enter their credentials on that request, negating single sign on.
 * `loginHint` is set to `peter@contoso.com`: Pre-fills the username/email address field of the sign-in page for the user to `peter@contoso.com`. Apps often use this parameter during re-authentication, having already extracted the username from a previous sign in using the `preferred_username` claim.
 
+:::moniker-end
+
+:::moniker range=">= aspnetcore-8.0"
+
+```csharp
+var tokenResult = await TokenProvider.RequestAccessToken(
+    new AccessTokenRequestOptions
+    {
+        Scopes = [ ... ]
+    });
+
+if (!tokenResult.TryGetToken(out var token))
+{
+    tokenResult.InteractionOptions.TryAddAdditionalParameter("prompt", "login");
+    tokenResult.InteractionOptions.TryAddAdditionalParameter("loginHint", 
+        "peter@contoso.com");
+
+    Navigation.NavigateToLogin(accessTokenResult.InteractiveRequestUrl, 
+        accessTokenResult.InteractionOptions);
+}
+```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0 < aspnetcore-8.0"
+
 ```csharp
 var tokenResult = await TokenProvider.RequestAccessToken(
     new AccessTokenRequestOptions
@@ -206,6 +236,10 @@ if (!tokenResult.TryGetToken(out var token))
         accessTokenResult.InteractionOptions);
 }
 ```
+
+:::moniker-end
+
+:::moniker range=">= aspnetcore-7.0"
 
 The preceding example assumes:
 
@@ -260,15 +294,15 @@ public class CustomAuthorizationMessageHandler : AuthorizationMessageHandler
         : base(provider, navigation)
     {
         ConfigureHandler(
-            authorizedUrls: new[] { "https://www.example.com/base" },
-            scopes: new[] { "example.read", "example.write" });
+            authorizedUrls: [ "https://api.contoso.com/v1.0" ],
+            scopes: [ "example.read", "example.write" ]);
     }
 }
 ```
 
 In the preceding code, the scopes `example.read` and `example.write` are generic examples not meant to reflect valid scopes for any particular provider.
 
-In `Program.cs`, `CustomAuthorizationMessageHandler` is registered as a transient service and is configured as the <xref:System.Net.Http.DelegatingHandler> for outgoing <xref:System.Net.Http.HttpResponseMessage> instances made by a named <xref:System.Net.Http.HttpClient>.
+In the `Program` file, `CustomAuthorizationMessageHandler` is registered as a transient service and is configured as the <xref:System.Net.Http.DelegatingHandler> for outgoing <xref:System.Net.Http.HttpResponseMessage> instances made by a named <xref:System.Net.Http.HttpClient>.
 
 In the following example, <xref:Microsoft.Extensions.DependencyInjection.HttpClientFactoryServiceCollectionExtensions.AddHttpClient%2A?displayProperty=nameWithType> is an extension in <xref:Microsoft.Extensions.Http?displayProperty=fullName>. Add the package to an app that doesn't already reference it.
 
@@ -278,7 +312,7 @@ In the following example, <xref:Microsoft.Extensions.DependencyInjection.HttpCli
 builder.Services.AddTransient<CustomAuthorizationMessageHandler>();
 
 builder.Services.AddHttpClient("WebAPI",
-        client => client.BaseAddress = new Uri("https://www.example.com/base"))
+        client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"))
     .AddHttpMessageHandler<CustomAuthorizationMessageHandler>();
 ```
 
@@ -286,9 +320,13 @@ builder.Services.AddHttpClient("WebAPI",
 > In the preceding example, the `CustomAuthorizationMessageHandler` <xref:System.Net.Http.DelegatingHandler> is registered as a transient service for <xref:Microsoft.Extensions.DependencyInjection.HttpClientBuilderExtensions.AddHttpMessageHandler%2A>. Transient registration is recommended for <xref:System.Net.Http.IHttpClientFactory>, which manages its own DI scopes. For more information, see the following resources:
 >
 > * [Utility base component classes to manage a DI scope](xref:blazor/fundamentals/dependency-injection#utility-base-component-classes-to-manage-a-di-scope)
-> * [Detect transient disposables in Blazor WebAssembly apps](xref:blazor/fundamentals/dependency-injection#detect-transient-disposables-in-blazor-webassembly-apps)
+> * [Detect client-side transient disposables](xref:blazor/fundamentals/dependency-injection#detect-client-side-transient-disposables)
 
-For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> by default.
+:::moniker range="< aspnetcore-8.0"
+
+For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType>.
+
+:::moniker-end
 
 The configured <xref:System.Net.Http.HttpClient> is used to make authorized requests using the [`try-catch`](/dotnet/csharp/language-reference/keywords/try-catch) pattern. Where the client is created with <xref:System.Net.Http.IHttpClientFactory.CreateClient%2A> ([`Microsoft.Extensions.Http`](https://www.nuget.org/packages/Microsoft.Extensions.Http) package), the <xref:System.Net.Http.HttpClient> is supplied instances that include access tokens when making requests to the server API. If the request URI is a relative URI, as it is in the following example (`ExampleAPIMethod`), it's combined with the <xref:System.Net.Http.HttpClient.BaseAddress> when the client app makes the request:
 
@@ -321,7 +359,7 @@ The configured <xref:System.Net.Http.HttpClient> is used to make authorized requ
 
 <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler> can be configured with authorized URLs, scopes, and a return URL using the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler.ConfigureHandler%2A> method. <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler.ConfigureHandler%2A> configures the handler to authorize outbound HTTP requests using an access token. The access token is only attached if at least one of the authorized URLs is a base of the request URI (<xref:System.Net.Http.HttpRequestMessage.RequestUri?displayProperty=nameWithType>). If the request URI is a relative URI, it's combined with the <xref:System.Net.Http.HttpClient.BaseAddress>.
 
-In the following example, <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler> configures an <xref:System.Net.Http.HttpClient> in `Program.cs`:
+In the following example, <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AuthorizationMessageHandler> configures an <xref:System.Net.Http.HttpClient> in the `Program` file:
 
 ```csharp
 using System.Net.Http;
@@ -332,19 +370,24 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 builder.Services.AddScoped(sp => new HttpClient(
     sp.GetRequiredService<AuthorizationMessageHandler>()
     .ConfigureHandler(
-        authorizedUrls: new[] { "https://www.example.com/base" },
-        scopes: new[] { "example.read", "example.write" }))
-    {
-        BaseAddress = new Uri("https://www.example.com/base")
-    });
+        authorizedUrls: [ "https://api.contoso.com/v1.0" ],
+        scopes: [ "example.read", "example.write" ])
+    .InnerHandler = new HttpClientHandler())
+{
+    BaseAddress = new Uri("https://api.contoso.com/v1.0")
+});
 ```
 
 In the preceding code, the scopes `example.read` and `example.write` are generic examples not meant to reflect valid scopes for any particular provider.
 
-For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> is assigned to the following by default:
+:::moniker range="< aspnetcore-8.0"
+
+For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> is assigned to the following:
 
 * The <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`).
 * A URL of the `authorizedUrls` array.
+
+:::moniker-end
 
 ## Typed `HttpClient`
 
@@ -352,23 +395,15 @@ A typed client can be defined that handles all of the HTTP and token acquisition
 
 `WeatherForecastClient.cs`:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using static {ASSEMBLY NAME}.Data;
 
-public class WeatherForecastClient
+public class WeatherForecastClient(HttpClient http)
 {
-    private readonly HttpClient http;
     private WeatherForecast[]? forecasts;
 
-    public WeatherForecastClient(HttpClient http)
-    {
-        this.http = http;
-    }
-
     public async Task<WeatherForecast[]> GetForecastAsync()
     {
         try
@@ -386,53 +421,13 @@ public class WeatherForecastClient
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using static {ASSEMBLY NAME}.Data;
-
-public class WeatherForecastClient
-{
-    private readonly HttpClient http;
-    private WeatherForecast[] forecasts;
- 
-    public WeatherForecastClient(HttpClient http)
-    {
-        this.http = http;
-    }
- 
-    public async Task<WeatherForecast[]> GetForecastAsync()
-    {
-        try
-        {
-            forecasts = await http.GetFromJsonAsync<WeatherForecast[]>(
-                "WeatherForecast");
-        }
-        catch (AccessTokenNotAvailableException exception)
-        {
-            exception.Redirect();
-        }
-
-        return forecasts ?? Array.Empty<WeatherForecast>();
-    }
-}
-```
-
-:::moniker-end
-
-In the preceding example, the `WeatherForecast` type is a static class that holds weather forecast data. The placeholder `{ASSEMBLY NAME}` is the app's assembly name (for example, `using static BlazorSample.Data;`).
+In the preceding example, the `WeatherForecast` type is a static class that holds weather forecast data. The `{ASSEMBLY NAME}` placeholder is the app's assembly name (for example, `using static BlazorSample.Data;`).
 
 In the following example, <xref:Microsoft.Extensions.DependencyInjection.HttpClientFactoryServiceCollectionExtensions.AddHttpClient%2A?displayProperty=nameWithType> is an extension in <xref:Microsoft.Extensions.Http?displayProperty=fullName>. Add the package to an app that doesn't already reference it.
 
 [!INCLUDE[](~/includes/package-reference.md)]
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 using System.Net.Http;
@@ -441,13 +436,17 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 ...
 
 builder.Services.AddHttpClient<WeatherForecastClient>(
-        client => client.BaseAddress = new Uri("https://www.example.com/base"))
+        client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"))
     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
 ```
 
-For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> by default.
+:::moniker range="< aspnetcore-8.0"
 
-`FetchData` component (`Pages/FetchData.razor`):
+For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType>.
+
+:::moniker-end
+
+In a component that fetches weather data:
 
 ```razor
 @inject WeatherForecastClient Client
@@ -468,23 +467,44 @@ In the following example, <xref:Microsoft.Extensions.DependencyInjection.HttpCli
 
 [!INCLUDE[](~/includes/package-reference.md)]
 
-In `Program.cs`:
+In the `Program` file:
+
+:::moniker range=">= aspnetcore-8.0"
 
 ```csharp
 builder.Services.AddHttpClient<WeatherForecastClient>(
-        client => client.BaseAddress = new Uri("https://www.example.com/base"))
+        client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"))
     .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationMessageHandler>()
     .ConfigureHandler(
-        authorizedUrls: new [] { "https://www.example.com/base" },
+        authorizedUrls: [ "https://api.contoso.com/v1.0" ],
+        scopes: [ "example.read", "example.write" ]));
+```
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+```csharp
+builder.Services.AddHttpClient<WeatherForecastClient>(
+        client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"))
+    .AddHttpMessageHandler(sp => sp.GetRequiredService<AuthorizationMessageHandler>()
+    .ConfigureHandler(
+        authorizedUrls: new[] { "https://api.contoso.com/v1.0" },
         scopes: new[] { "example.read", "example.write" }));
 ```
 
+:::moniker-end
+
 In the preceding code, the scopes `example.read` and `example.write` are generic examples not meant to reflect valid scopes for any particular provider.
 
-For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> is assigned to the following by default:
+:::moniker range="< aspnetcore-8.0"
+
+For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> is assigned to the following:
 
 * The <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`).
 * A URL of the `authorizedUrls` array.
+
+:::moniker-end
 
 ## Unauthenticated or unauthorized web API requests in an app with a secure default client
 
@@ -494,14 +514,18 @@ In the following example, <xref:Microsoft.Extensions.DependencyInjection.HttpCli
 
 [!INCLUDE[](~/includes/package-reference.md)]
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 builder.Services.AddHttpClient("WebAPI.NoAuthenticationClient", 
-    client => client.BaseAddress = new Uri("https://www.example.com/base"));
+    client => client.BaseAddress = new Uri("https://api.contoso.com/v1.0"));
 ```
 
-For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> by default.
+:::moniker range="< aspnetcore-8.0"
+
+For a hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure), <xref:Microsoft.AspNetCore.Components.WebAssembly.Hosting.IWebAssemblyHostEnvironment.BaseAddress?displayProperty=nameWithType> (`new Uri(builder.HostEnvironment.BaseAddress)`) is assigned to the <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType>.
+
+:::moniker-end
 
 The preceding registration is in addition to the existing secure default <xref:System.Net.Http.HttpClient> registration.
 
@@ -536,7 +560,7 @@ An alternative approach to using the <xref:System.Net.Http.IHttpClientFactory> i
 
 Access tokens can be manually obtained by calling <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.IAccessTokenProvider.RequestAccessToken%2A?displayProperty=nameWithType>. In the following example, an additional scope is required by an app for the default <xref:System.Net.Http.HttpClient>. The Microsoft Authentication Library (MSAL) example configures the scope with `MsalProviderOptions`:
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 builder.Services.AddMsalAuthentication(options =>
@@ -550,9 +574,36 @@ builder.Services.AddMsalAuthentication(options =>
 
 The `{CUSTOM SCOPE 1}` and `{CUSTOM SCOPE 2}` placeholders in the preceding example are custom scopes.
 
+> [!NOTE]
+> <xref:Microsoft.Authentication.WebAssembly.Msal.Models.MsalProviderOptions.AdditionalScopesToConsent%2A> isn't able to provision delegated user permissions for Microsoft Graph via the Microsoft Entra ID consent UI when a user first uses an app registered in Microsoft Azure. For more information, see <xref:blazor/security/webassembly/graph-api?pivots=graph-sdk-5#defaultaccesstokenscopes-versus-additionalscopestoconsent>.
+
 The <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.IAccessTokenProvider.RequestAccessToken%2A?displayProperty=nameWithType> method provides an overload that allows an app to provision an access token with a given set of scopes.
 
 In a Razor component:
+
+:::moniker range=">= aspnetcore-8.0"
+
+```razor
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject IAccessTokenProvider TokenProvider
+
+...
+
+var tokenResult = await TokenProvider.RequestAccessToken(
+    new AccessTokenRequestOptions
+    {
+        Scopes = [ "{CUSTOM SCOPE 1}", "{CUSTOM SCOPE 2}" ]
+    });
+
+if (tokenResult.TryGetToken(out var token))
+{
+    ...
+}
+```
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
 
 ```razor
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
@@ -572,6 +623,8 @@ if (tokenResult.TryGetToken(out var token))
 }
 ```
 
+:::moniker-end
+
 The `{CUSTOM SCOPE 1}` and `{CUSTOM SCOPE 2}` placeholders in the preceding example are custom scopes.
 
 <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccessTokenResult.TryGetToken%2A?displayProperty=nameWithType> returns:
@@ -579,7 +632,7 @@ The `{CUSTOM SCOPE 1}` and `{CUSTOM SCOPE 2}` placeholders in the preceding exam
 * `true` with the `token` for use.
 * `false` if the token isn't retrieved.
 
-## Cross-origin resource sharing (CORS)
+## Cross-Origin Resource Sharing (CORS)
 
 When sending credentials (authorization cookies/headers) on CORS requests, the `Authorization` header must be allowed by the CORS policy.
 
@@ -599,7 +652,11 @@ app.UseCors(policy =>
         .AllowCredentials());
 ```
 
-A hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure) uses the same base address for the client and server apps. The client app's <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> is set to a URI of `builder.HostEnvironment.BaseAddress` by default. CORS configuration is ***not*** required in the default configuration of a hosted Blazor solution. Additional client apps that aren't hosted by the server project and don't share the server app's base address ***do*** require CORS configuration in the server project.
+:::moniker range="< aspnetcore-8.0"
+
+A hosted Blazor solution based on the [Blazor WebAssembly project template](xref:blazor/project-structure) uses the same base address for the client and server apps. The client app's <xref:System.Net.Http.HttpClient.BaseAddress?displayProperty=nameWithType> is set to a URI of `builder.HostEnvironment.BaseAddress`. CORS configuration isn't required in the default configuration of a hosted Blazor solution. Additional client apps that aren't hosted by the server project and don't share the server app's base address ***do*** require CORS configuration in the server project.
+
+:::moniker-end
 
 For more information, see <xref:security/cors> and the sample app's HTTP Request Tester component (`Components/HTTPRequestTester.razor`).
 
@@ -636,149 +693,85 @@ The following example shows how to:
 * Preserve state before redirecting to the login page.
 * Recover the previous state after authentication using a query string parameter.
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```razor
 ...
+@using System.Text.Json
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject IAccessTokenProvider TokenProvider
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-<EditForm Model="User" @onsubmit="OnSaveAsync">
-    <label>User
-        <InputText @bind-Value="User.Name" />
+<EditForm Model="User" OnSubmit="OnSaveAsync">
+    <label>
+        First Name: 
+        <InputText @bind-Value="User!.Name" />
     </label>
-    <label>Last name
-        <InputText @bind-Value="User.LastName" />
+    <label>
+        Last Name: 
+        <InputText @bind-Value="User!.LastName" />
     </label>
+    <button type="submit">Save User</button>
 </EditForm>
 
 @code {
+    public Profile User { get; set; } = new Profile();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var currentQuery = new Uri(Navigation.Uri).Query;
+
+        if (currentQuery.Contains("state=resumeSavingProfile"))
+        {
+            var user = await JS.InvokeAsync<string>("sessionStorage.getItem",
+                "resumeSavingProfile");
+
+            if (!string.IsNullOrEmpty(user))
+            {
+                User = JsonSerializer.Deserialize<Profile>(user);
+            }
+        }
+    }
+
+    public async Task OnSaveAsync()
+    {
+        var http = new HttpClient();
+        http.BaseAddress = new Uri(Navigation.BaseUri);
+
+        var resumeUri = Navigation.Uri + $"?state=resumeSavingProfile";
+
+        var tokenResult = await TokenProvider.RequestAccessToken(
+            new AccessTokenRequestOptions
+            {
+                ReturnUrl = resumeUri
+            });
+
+        if (tokenResult.TryGetToken(out var token))
+        {
+            http.DefaultRequestHeaders.Add("Authorization", 
+                $"Bearer {token.Value}");
+            await http.PostAsJsonAsync("Save", User);
+        }
+        else
+        {
+            await JS.InvokeVoidAsync("sessionStorage.setItem", 
+                "resumeSavingProfile", JsonSerializer.Serialize(User));
+            Navigation.NavigateTo(tokenResult.InteractiveRequestUrl);
+        }
+    }
+
     public class Profile
     {
-        public string? Name { get; set; }
+        public string? FirstName { get; set; }
         public string? LastName { get; set; }
     }
-
-    public Profile User { get; set; } = new Profile();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var currentQuery = new Uri(Navigation.Uri).Query;
-
-        if (currentQuery.Contains("state=resumeSavingProfile"))
-        {
-            User = await JS.InvokeAsync<Profile>("sessionStorage.getItem", 
-                "resumeSavingProfile");
-        }
-    }
-
-    public async Task OnSaveAsync()
-    {
-        var http = new HttpClient();
-        http.BaseAddress = new Uri(Navigation.BaseUri);
-
-        var resumeUri = Navigation.Uri + $"?state=resumeSavingProfile";
-
-        var tokenResult = await TokenProvider.RequestAccessToken(
-            new AccessTokenRequestOptions
-            {
-                ReturnUrl = resumeUri
-            });
-
-        if (tokenResult.TryGetToken(out var token))
-        {
-            http.DefaultRequestHeaders.Add("Authorization", 
-                $"Bearer {token.Value}");
-            await http.PostAsJsonAsync("Save", User);
-        }
-        else
-        {
-            await JS.InvokeVoidAsync("sessionStorage.setItem", 
-                "resumeSavingProfile", User);
-            Navigation.NavigateTo(tokenResult.InteractiveRequestUrl);
-        }
-    }
 }
 ```
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```razor
-...
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-@inject IAccessTokenProvider TokenProvider
-@inject IJSRuntime JS
-@inject NavigationManager Navigation
-
-<EditForm Model="User" @onsubmit="OnSaveAsync">
-    <label>User
-        <InputText @bind-Value="User.Name" />
-    </label>
-    <label>Last name
-        <InputText @bind-Value="User.LastName" />
-    </label>
-</EditForm>
-
-@code {
-    public class Profile
-    {
-        public string Name { get; set; }
-        public string LastName { get; set; }
-    }
-
-    public Profile User { get; set; } = new Profile();
-
-    protected override async Task OnInitializedAsync()
-    {
-        var currentQuery = new Uri(Navigation.Uri).Query;
-
-        if (currentQuery.Contains("state=resumeSavingProfile"))
-        {
-            User = await JS.InvokeAsync<Profile>("sessionStorage.getItem", 
-                "resumeSavingProfile");
-        }
-    }
-
-    public async Task OnSaveAsync()
-    {
-        var http = new HttpClient();
-        http.BaseAddress = new Uri(Navigation.BaseUri);
-
-        var resumeUri = Navigation.Uri + $"?state=resumeSavingProfile";
-
-        var tokenResult = await TokenProvider.RequestAccessToken(
-            new AccessTokenRequestOptions
-            {
-                ReturnUrl = resumeUri
-            });
-
-        if (tokenResult.TryGetToken(out var token))
-        {
-            http.DefaultRequestHeaders.Add("Authorization", 
-                $"Bearer {token.Value}");
-            await http.PostAsJsonAsync("Save", User);
-        }
-        else
-        {
-            await JS.InvokeVoidAsync("sessionStorage.setItem", 
-                "resumeSavingProfile", User);
-            Navigation.NavigateTo(tokenResult.InteractiveRequestUrl);
-        }
-    }
-}
-```
-
-:::moniker-end
 
 ## Save app state before an authentication operation with session storage and a state container
 
 During an authentication operation, there are cases where you want to save the app state before the browser is redirected to the IP. This can be the case when you're using a state container and want to restore the state after the authentication succeeds. You can use a custom authentication state object to preserve app-specific state or a reference to it and restore that state after the authentication operation successfully completes. The following example demonstrates the approach.
 
-A state container class is created in the app with properties to hold the app's state values. In the following example, the container is used to maintain the counter value of the default [Blazor project template's](xref:blazor/project-structure) `Counter` component (`Pages/Counter.razor`). Methods for serializing and deserializing the container are based on <xref:System.Text.Json>.
+A state container class is created in the app with properties to hold the app's state values. In the following example, the container is used to maintain the counter value of the default [Blazor project template's](xref:blazor/project-structure) `Counter` component (`Counter.razor`). Methods for serializing and deserializing the container are based on <xref:System.Text.Json>.
 
 ```csharp
 using System.Text.Json;
@@ -787,10 +780,7 @@ public class StateContainer
 {
     public int CounterValue { get; set; }
 
-    public string GetStateForLocalStorage()
-    {
-        return JsonSerializer.Serialize(this);
-    }
+    public string GetStateForLocalStorage() => JsonSerializer.Serialize(this);
 
     public void SetStateFromLocalStorage(string locallyStoredState)
     {
@@ -837,8 +827,6 @@ Create an `ApplicationAuthenticationState` from <xref:Microsoft.AspNetCore.Compo
 
 `ApplicationAuthenticationState.cs`:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 
@@ -848,32 +836,15 @@ public class ApplicationAuthenticationState : RemoteAuthenticationState
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-
-public class ApplicationAuthenticationState : RemoteAuthenticationState
-{
-    public string Id { get; set; }
-}
-```
-
-:::moniker-end
-
-The `Authentication` component (`Pages/Authentication.razor`) saves and restores the app's state using local session storage with the `StateContainer` serialization and deserialization methods, `GetStateForLocalStorage` and `SetStateFromLocalStorage`:
-
-:::moniker range=">= aspnetcore-6.0"
+The `Authentication` component (`Authentication.razor`) saves and restores the app's state using local session storage with the `StateContainer` serialization and deserialization methods, `GetStateForLocalStorage` and `SetStateFromLocalStorage`:
 
 ```razor
 @page "/authentication/{action}"
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @inject IJSRuntime JS
 @inject StateContainer State
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 
-<RemoteAuthenticatorViewCore Action="@Action"
+<RemoteAuthenticatorViewCore Action="Action"
                              TAuthenticationState="ApplicationAuthenticationState"
                              AuthenticationState="AuthenticationState"
                              OnLogInSucceeded="RestoreState"
@@ -917,63 +888,7 @@ The `Authentication` component (`Pages/Authentication.razor`) saves and restores
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```razor
-@page "/authentication/{action}"
-@inject IJSRuntime JS
-@inject StateContainer State
-@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-
-<RemoteAuthenticatorViewCore Action="@Action"
-                             TAuthenticationState="ApplicationAuthenticationState"
-                             AuthenticationState="AuthenticationState"
-                             OnLogInSucceeded="RestoreState"
-                             OnLogOutSucceeded="RestoreState" />
-
-@code {
-    [Parameter]
-    public string Action { get; set; }
-
-    public ApplicationAuthenticationState AuthenticationState { get; set; } =
-        new ApplicationAuthenticationState();
-
-    protected override async Task OnInitializedAsync()
-    {
-        if (RemoteAuthenticationActions.IsAction(RemoteAuthenticationActions.LogIn,
-            Action) ||
-            RemoteAuthenticationActions.IsAction(RemoteAuthenticationActions.LogOut,
-            Action))
-        {
-            AuthenticationState.Id = Guid.NewGuid().ToString();
-
-            await JS.InvokeVoidAsync("sessionStorage.setItem",
-                AuthenticationState.Id, State.GetStateForLocalStorage());
-        }
-    }
-
-    private async Task RestoreState(ApplicationAuthenticationState state)
-    {
-        if (state.Id != null)
-        {
-            var locallyStoredState = await JS.InvokeAsync<string>(
-                "sessionStorage.getItem", state.Id);
-
-            if (locallyStoredState != null)
-            {
-                State.SetStateFromLocalStorage(locallyStoredState);
-                await JS.InvokeVoidAsync("sessionStorage.removeItem", state.Id);
-            }
-        }
-    }
-}
-```
-
-:::moniker-end
-
-This example uses Azure Active Directory (AAD) for authentication. In `Program.cs`:
+This example uses Microsoft Entra (ME-ID) for authentication. In the `Program` file:
 
 * The `ApplicationAuthenticationState` is configured as the Microsoft Authentication Library (MSAL) `RemoteAuthenticationState` type.
 * The state container is registered in the service container.
@@ -989,7 +904,7 @@ builder.Services.AddSingleton<StateContainer>();
 
 ## Customize app routes
 
-By default, the [`Microsoft.AspNetCore.Components.WebAssembly.Authentication`](https://www.nuget.org/packages/Microsoft.AspNetCore.Components.WebAssembly.Authentication) library uses the routes shown in the following table for representing different authentication states.
+The [`Microsoft.AspNetCore.Components.WebAssembly.Authentication`](https://www.nuget.org/packages/Microsoft.AspNetCore.Components.WebAssembly.Authentication) library uses the routes shown in the following table for representing different authentication states.
 
 | Route                            | Purpose |
 | -------------------------------- | ------- |
@@ -1007,7 +922,7 @@ The routes shown in the preceding table are configurable via <xref:Microsoft.Asp
 
 In the following example, all of the paths are prefixed with `/security`.
 
-`Authentication` component (`Pages/Authentication.razor`):
+`Authentication` component (`Authentication.razor`):
 
 :::moniker range=">= aspnetcore-6.0"
 
@@ -1041,7 +956,7 @@ In the following example, all of the paths are prefixed with `/security`.
 
 :::moniker-end
 
-In `Program.cs`:
+In the `Program` file:
 
 ```csharp
 builder.Services.AddApiAuthorization(options => { 
@@ -1062,7 +977,7 @@ If the requirement calls for completely different paths, set the routes as descr
 ```razor
 @page "/register"
 
-<RemoteAuthenticatorView Action="@RemoteAuthenticationActions.Register" />
+<RemoteAuthenticatorView Action="RemoteAuthenticationActions.Register" />
 ```
 
 You're allowed to break the UI into different pages if you choose to do so.
@@ -1071,7 +986,7 @@ You're allowed to break the UI into different pages if you choose to do so.
 
 <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteAuthenticatorView> includes a default set of UI fragments for each authentication state. Each state can be customized by passing in a custom <xref:Microsoft.AspNetCore.Components.RenderFragment>. To customize the displayed text during the initial login process, can change the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteAuthenticatorView> as follows.
 
-`Authentication` component (`Pages/Authentication.razor`):
+`Authentication` component (`Authentication.razor`):
 
 :::moniker range=">= aspnetcore-6.0"
 
@@ -1133,11 +1048,9 @@ Users bound to the app can be customized.
 
 ### Customize the user with a payload claim
 
-In the following example, the app's authenticated users receive an `amr` claim for each of the user's authentication methods. The `amr` claim identifies how the subject of the token was authenticated in Microsoft Identity Platform v1.0 [payload claims](/azure/active-directory/develop/access-tokens#amr-claim). The example uses a custom user account class based on <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteUserAccount>.
+In the following example, the app's authenticated users receive an `amr` claim for each of the user's authentication methods. The `amr` claim identifies how the subject of the token was authenticated in Microsoft identity platform v1.0 [payload claims](/entra/identity-platform/access-tokens#amr-claim). The example uses a custom user account class based on <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteUserAccount>.
 
 Create a class that extends the <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteUserAccount> class. The following example sets the `AuthenticationMethod` property to the user's array of `amr` JSON property values. `AuthenticationMethod` is populated automatically by the framework when the user is authenticated.
-
-:::moniker range=">= aspnetcore-6.0"
 
 ```csharp
 using System.Text.Json.Serialization;
@@ -1150,26 +1063,7 @@ public class CustomUserAccount : RemoteUserAccount
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-
-public class CustomUserAccount : RemoteUserAccount
-{
-    [JsonPropertyName("amr")]
-    public string[] AuthenticationMethod { get; set; }
-}
-```
-
-:::moniker-end
-
 Create a factory that extends <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.AccountClaimsPrincipalFactory%601> to create claims from the user's authentication methods stored in `CustomUserAccount.AuthenticationMethod`:
-
-:::moniker range=">= aspnetcore-6.0"
 
 ```csharp
 using System.Security.Claims;
@@ -1177,14 +1071,10 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
 
-public class CustomAccountFactory 
-    : AccountClaimsPrincipalFactory<CustomUserAccount>
+public class CustomAccountFactory(NavigationManager navigation,
+    IAccessTokenProviderAccessor accessor)
+    : AccountClaimsPrincipalFactory<CustomUserAccount>(accessor)
 {
-    public CustomAccountFactory(NavigationManager navigation, 
-        IAccessTokenProviderAccessor accessor) : base(accessor)
-    {
-    }
-  
     public override async ValueTask<ClaimsPrincipal> CreateUserAsync(
         CustomUserAccount account, RemoteAuthenticationUserOptions options)
     {
@@ -1207,47 +1097,6 @@ public class CustomAccountFactory
     }
 }
 ```
-
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
-using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
-
-public class CustomAccountFactory 
-    : AccountClaimsPrincipalFactory<CustomUserAccount>
-{
-    public CustomAccountFactory(NavigationManager navigation, 
-        IAccessTokenProviderAccessor accessor) : base(accessor)
-    {
-    }
-  
-    public override async ValueTask<ClaimsPrincipal> CreateUserAsync(
-        CustomUserAccount account, RemoteAuthenticationUserOptions options)
-    {
-        var initialUser = await base.CreateUserAsync(account, options);
-
-        if (initialUser.Identity != null && initialUser.Identity.IsAuthenticated)
-        {
-            var userIdentity = (ClaimsIdentity)initialUser.Identity;
-
-            foreach (var value in account.AuthenticationMethod)
-            {
-                userIdentity.AddClaim(new Claim("amr", value));
-            }
-        }
-
-        return initialUser;
-    }
-}
-```
-
-:::moniker-end
 
 Register the `CustomAccountFactory` for the authentication provider in use. Any of the following registrations are valid:
 
@@ -1299,9 +1148,11 @@ Register the `CustomAccountFactory` for the authentication provider in use. Any 
           CustomUserAccount, CustomAccountFactory>();
   ```
 
-### AAD security groups and roles with a custom user account class
+### ME-ID security groups and roles with a custom user account class
 
-For an additional example that works with AAD security groups and AAD Administrator Roles and a custom user account class, see <xref:blazor/security/webassembly/aad-groups-roles>.
+For an additional example that works with ME-ID security groups and ME-ID Administrator Roles and a custom user account class, see <xref:blazor/security/webassembly/meid-groups-roles>.
+
+:::moniker range="< aspnetcore-8.0"
 
 ## Prerendering with authentication
 
@@ -1310,7 +1161,7 @@ Prerendering content that requires authentication and authorization isn't curren
 * Prerenders paths for which authorization isn't required.
 * Doesn't prerender paths for which authorization is required.
 
-For the **:::no-loc text="Client":::** project's `Program.cs` file, factor common service registrations into a separate method (for example, create a `ConfigureCommonServices` method in the **:::no-loc text="Client":::** project). Common services are those that the developer registers for use by both the client and server projects.
+For the **:::no-loc text="Client":::** project's the `Program` file, factor common service registrations into a separate method (for example, create a `ConfigureCommonServices` method in the **:::no-loc text="Client":::** project). Common services are those that the developer registers for use by both the client and server projects.
 
 ```csharp
 public static void ConfigureCommonServices(IServiceCollection services)
@@ -1319,7 +1170,7 @@ public static void ConfigureCommonServices(IServiceCollection services)
 }
 ```
 
-`Program.cs`:
+In the `Program` file:
 
 ```csharp
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -1332,9 +1183,11 @@ ConfigureCommonServices(builder.Services);
 await builder.Build().RunAsync();
 ```
 
-:::moniker range=">= aspnetcore-6.0"
+:::moniker-end
 
-In the **:::no-loc text="Server":::** project's `Program.cs` file, register the following additional services and call `ConfigureCommonServices`:
+:::moniker range=">= aspnetcore-6.0 < aspnetcore-8.0"
+
+In the **:::no-loc text="Server":::** project's the `Program` file, register the following additional services and call `ConfigureCommonServices`:
 
 ```csharp
 using Microsoft.AspNetCore.Components.Authorization;
@@ -1376,6 +1229,8 @@ public void ConfigureServices(IServiceCollection services)
 
 :::moniker-end
 
+:::moniker range="< aspnetcore-8.0"
+
 For more information on the Blazor framework server authentication provider (`ServerAuthenticationStateProvider`), see <xref:blazor/security/index#authenticationstateprovider>.
 
 In the **:::no-loc text="Server":::** project's `Pages/_Host.cshtml` file, replace the `Component` Tag Helper (`<component ... />`) with the following:
@@ -1397,16 +1252,22 @@ In the **:::no-loc text="Server":::** project's `Pages/_Host.cshtml` file, repla
 
 In the preceding example:
 
-* The placeholder `{CLIENT APP ASSEMBLY NAME}` is the client app's assembly name (for example `BlazorSample.Client`).
+* The `{CLIENT APP ASSEMBLY NAME}` placeholder is the client app's assembly name (for example `BlazorSample.Client`).
 * The conditional check for the `/authentication` path segment:
   * Avoids prerendering (`render-mode="WebAssembly"`) for authentication paths.
   * Prerenders (`render-mode="WebAssemblyPrerendered"`) for non-authentication paths.
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
 
 ## Options for hosted apps and third-party login providers
 
 When authenticating and authorizing a hosted Blazor WebAssembly app with a third-party provider, there are several options available for authenticating the user. Which one you choose depends on your scenario.
 
 For more information, see <xref:security/authentication/social/additional-claims>.
+
+:::moniker-end
 
 ### Authenticate users to only call protected third party APIs
 
@@ -1448,7 +1309,7 @@ Make an API call from the client to the server API. From the server, retrieve th
 
 ## Use OpenID Connect (OIDC) v2.0 endpoints
 
-The authentication library and [Blazor project templates](xref:blazor/project-structure) use OpenID Connect (OIDC) v1.0 endpoints. To use a v2.0 endpoint, configure the JWT Bearer <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions.Authority?displayProperty=nameWithType> option. In the following example, AAD is configured for v2.0 by appending a `v2.0` segment to the <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions.Authority> property:
+The authentication library and [Blazor project templates](xref:blazor/project-structure) use OpenID Connect (OIDC) v1.0 endpoints. To use a v2.0 endpoint, configure the JWT Bearer <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions.Authority?displayProperty=nameWithType> option. In the following example, ME-ID is configured for v2.0 by appending a `v2.0` segment to the <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions.Authority> property:
 
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -1474,23 +1335,36 @@ Alternatively, the setting can be made in the app settings (`appsettings.json`) 
 }
 ```
 
-If tacking on a segment to the authority isn't appropriate for the app's OIDC provider, such as with non-AAD providers, set the <xref:Microsoft.AspNetCore.Builder.OpenIdConnectOptions.Authority> property directly. Either set the property in <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions> or in the app settings file (`appsettings.json`) with the `Authority` key.
+If tacking on a segment to the authority isn't appropriate for the app's OIDC provider, such as with non-ME-ID providers, set the <xref:Microsoft.AspNetCore.Builder.OpenIdConnectOptions.Authority> property directly. Either set the property in <xref:Microsoft.AspNetCore.Builder.JwtBearerOptions> or in the app settings file (`appsettings.json`) with the `Authority` key.
 
-The list of claims in the ID token changes for v2.0 endpoints. For more information, see [Why update to Microsoft identity platform (v2.0)?](/azure/active-directory/azuread-dev/azure-ad-endpoint-comparison).
+The list of claims in the ID token changes for v2.0 endpoints. Microsoft documentation on the changes has been retired, but guidance on the claims in an ID token is available in the [ID token claims reference](/entra/identity-platform/id-token-claims-reference).
 
 ## Configure and use gRPC in components
 
 To configure a Blazor WebAssembly app to use the [ASP.NET Core gRPC framework](xref:grpc/index):
 
 * Enable gRPC-Web on the server. For more information, see <xref:grpc/grpcweb>.
-* Register gRPC services for the app's message handler. The following example configures the app's authorization message handler to use the [`GreeterClient` service from the gRPC tutorial](xref:tutorials/grpc/grpc-start#create-a-grpc-service) (`Program.cs`):
+* Register gRPC services for the app's message handler. The following example configures the app's authorization message handler to use the [`GreeterClient` service from the gRPC tutorial](xref:tutorials/grpc/grpc-start#create-a-grpc-service) (the `Program` file).
+
+:::moniker range=">= aspnetcore-8.0"
+
+> [!NOTE]
+> Prerendering is enabled by default in Blazor Web Apps, so you must account for the component rendering first from the server and then from the client. Any prerendered state should flow to the client so that it can be reused. For more information, see <xref:blazor/components/prerender#persist-prerendered-state>.
+
+:::moniker-end
+
+:::moniker range="< aspnetcore-8.0"
+
+> [!NOTE]
+> Prerendering is enabled by default in hosted Blazor WebAssembly apps, so you must account for the component rendering first from the server and then from the client. Any prerendered state should flow to the client so that it can be reused. For more information, see <xref:blazor/components/integration-hosted-webassembly#persist-prerendered-state>.
+
+:::moniker-end
 
 ```csharp
 using System.Net.Http;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Grpc.Net.Client;
 using Grpc.Net.Client.Web;
-using {ASSEMBLY NAME}.Shared;
 
 ...
 
@@ -1508,16 +1382,11 @@ builder.Services.AddScoped(sp =>
 });
 ```
 
-The placeholder `{ASSEMBLY NAME}` is the app's assembly name (for example, `BlazorSample`). Place the `.proto` file in the `Shared` project of the hosted Blazor solution.
-
-A component in the client app can make gRPC calls using the gRPC client (`Pages/Grpc.razor`):
-
-:::moniker range=">= aspnetcore-6.0"
+A component in the client app can make gRPC calls using the gRPC client (`Grpc.razor`):
 
 ```razor
 @page "/grpc"
 @using Microsoft.AspNetCore.Authorization
-@using {ASSEMBLY NAME}.Shared
 @attribute [Authorize]
 @inject Greeter.GreeterClient GreeterClient
 
@@ -1552,51 +1421,7 @@ Server response: <strong>@serverResponse</strong>
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```razor
-@page "/grpc"
-@using Microsoft.AspNetCore.Authorization
-@using {ASSEMBLY NAME}.Shared
-@attribute [Authorize]
-@inject Greeter.GreeterClient GreeterClient
-
-<h1>Invoke gRPC service</h1>
-
-<p>
-    <input @bind="name" placeholder="Type your name" />
-    <button @onclick="GetGreeting" class="btn btn-primary">Call gRPC service</button>
-</p>
-
-Server response: <strong>@serverResponse</strong>
-
-@code {
-    private string name = "Bert";
-    private string serverResponse;
-
-    private async Task GetGreeting()
-    {
-        try
-        {
-            var request = new HelloRequest { Name = name };
-            var reply = await GreeterClient.SayHelloAsync(request);
-            serverResponse = reply.Message;
-        }
-        catch (Grpc.Core.RpcException ex)
-            when (ex.Status.DebugException is 
-                AccessTokenNotAvailableException tokenEx)
-        {
-            tokenEx.Redirect();
-        }
-    }
-}
-```
-
-:::moniker-end
-
-The placeholder `{ASSEMBLY NAME}` is the app's assembly name (for example, `BlazorSample`). To use the `Status.DebugException` property, use [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client) version 2.30.0 or later.
+To use the `Status.DebugException` property, use [`Grpc.Net.Client`](https://www.nuget.org/packages/Grpc.Net.Client) version 2.30.0 or later.
 
 For more information, see <xref:grpc/grpcweb>.
 
@@ -1612,7 +1437,7 @@ The following subsections explain how to replace:
 Create a JavaScript library to handle your custom authentication details.
 
 > [!WARNING]
-> The guidance in this section is an implementation detail of the default <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteAuthenticationService%603>. The TypeScript code in this section applies specifically to ASP.NET Core 7.0 and is subject to change without notice in upcoming releases of ASP.NET Core.
+> The guidance in this section is an implementation detail of the default <xref:Microsoft.AspNetCore.Components.WebAssembly.Authentication.RemoteAuthenticationService%603>. The TypeScript code in this section applies specifically to ASP.NET Core in .NET 7 and is subject to change without notice in upcoming releases of ASP.NET Core.
 
 ```typescript
 // .NET makes calls to an AuthenticationService object in the Window.
@@ -1723,8 +1548,6 @@ Define a class for passing the data to the underlying JavaScript library.
 
 The following example demonstrates a `ProviderOptions` class with [`JsonPropertyName` attributes](xref:System.Text.Json.Serialization.JsonPropertyNameAttribute) matching a hypothetical custom provider library's expectations:
 
-:::moniker range=">= aspnetcore-6.0"
-
 ```csharp
 public class ProviderOptions
 {
@@ -1734,8 +1557,7 @@ public class ProviderOptions
     [JsonPropertyName("client_id")]
     public string? ClientId { get; set; }
     
-    public IList<string> DefaultScopes { get; } = 
-        new List<string> { "openid", "profile" };
+    public IList<string> DefaultScopes { get; set; } = [ "openid", "profile" ];
         
     [JsonPropertyName("redirect_uri")]
     public string? RedirectUri { get; set; }
@@ -1751,51 +1573,19 @@ public class ProviderOptions
 }
 ```
 
-:::moniker-end
-
-:::moniker range="< aspnetcore-6.0"
-
-```csharp
-public class ProviderOptions
-{
-    public string Authority { get; set; }
-    public string MetadataUrl { get; set; }
-    
-    [JsonPropertyName("client_id")]
-    public string ClientId { get; set; }
-    
-    public IList<string> DefaultScopes { get; } = 
-        new List<string> { "openid", "profile" };
-        
-    [JsonPropertyName("redirect_uri")]
-    public string RedirectUri { get; set; }
-    
-    [JsonPropertyName("post_logout_redirect_uri")]
-    public string PostLogoutRedirectUri { get; set; }
-    
-    [JsonPropertyName("response_type")]
-    public string ResponseType { get; set; }
-    
-    [JsonPropertyName("response_mode")]
-    public string ResponseMode { get; set; }
-}
-```
-
-:::moniker-end
-
 Register the provider options within the DI system and configure the appropriate values:
 
 ```csharp
 builder.Services.AddRemoteAuthentication<RemoteAuthenticationState, RemoteUserAccount,
     ProviderOptions>(options => {
-        options.Authority = "...";
-        options.MetadataUrl = "...";
-        options.ClientId = "...";
-        options.DefaultScopes = new List<string> { "openid", "profile", "myApi" };
-        options.RedirectUri = "https://localhost:5001/authentication/login-callback";
-        options.PostLogoutRedirectUri = "https://localhost:5001/authentication/logout-callback";
-        options.ResponseType = "...";
-        options.ResponseMode = "...";
+        options.ProviderOptions.Authority = "...";
+        options.ProviderOptions.MetadataUrl = "...";
+        options.ProviderOptions.ClientId = "...";
+        options.ProviderOptions.DefaultScopes = [ "openid", "profile", "myApi" ];
+        options.ProviderOptions.RedirectUri = "https://localhost:5001/authentication/login-callback";
+        options.ProviderOptions.PostLogoutRedirectUri = "https://localhost:5001/authentication/logout-callback";
+        options.ProviderOptions.ResponseType = "...";
+        options.ProviderOptions.ResponseMode = "...";
     });
 ```
 
@@ -1827,4 +1617,5 @@ The preceding example sets redirect URIs with regular string literals. The follo
 ## Additional resources
 
 * <xref:blazor/security/webassembly/graph-api>
-* [`HttpClient` and `HttpRequestMessage` with Fetch API request options](xref:blazor/call-web-api#httpclient-and-httprequestmessage-with-fetch-api-request-options)
+* [Cookie-based request credentials (*Call web API* article)](xref:blazor/call-web-api#cookie-based-request-credentials)
+* [`HttpClient` and `HttpRequestMessage` with Fetch API request options (*Call web API* article)](xref:blazor/call-web-api#httpclient-and-httprequestmessage-with-fetch-api-request-options)

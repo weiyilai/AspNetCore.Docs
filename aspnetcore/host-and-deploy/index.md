@@ -3,12 +3,14 @@ title: Host and deploy ASP.NET Core
 author: tdykstra
 description: Learn how to set up hosting environments and deploy ASP.NET Core apps.
 monikerRange: '>= aspnetcore-2.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
 ms.date: 02/07/2020
 uid: host-and-deploy/index
 ---
 # Host and deploy ASP.NET Core
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 :::moniker range=">= aspnetcore-2.2"
 
@@ -17,6 +19,8 @@ In general, to deploy an ASP.NET Core app to a hosting environment:
 * Deploy the published app to a folder on the hosting server.
 * Set up a process manager that starts the app when requests arrive and restarts the app after it crashes or the server reboots.
 * For configuration of a reverse proxy, set up a reverse proxy to forward requests to the app.
+
+For Blazor host and deploy guidance, which adds to or supersedes the guidance in this node, see <xref:blazor/host-and-deploy/index>.
 
 ## Publish to a folder
 
@@ -51,14 +55,13 @@ An ASP.NET Core app is a console app that must be started when a server boots an
 
 * Linux
   * [Nginx](xref:host-and-deploy/linux-nginx)
-  * [Apache](xref:host-and-deploy/linux-apache)
 * Windows
   * [IIS](xref:host-and-deploy/iis/index)
   * [Windows Service](xref:host-and-deploy/windows-service)
 
 ## Set up a reverse proxy
 
-If the app uses the [Kestrel](xref:fundamentals/servers/kestrel) server, [Nginx](xref:host-and-deploy/linux-nginx), [Apache](xref:host-and-deploy/linux-apache), or [IIS](xref:host-and-deploy/iis/index) can be used as a reverse proxy server. A reverse proxy server receives HTTP requests from the Internet and forwards them to Kestrel.
+If the app uses the [Kestrel](xref:fundamentals/servers/kestrel) server, [Nginx](xref:host-and-deploy/linux-nginx), or [IIS](xref:host-and-deploy/iis/index) can be used as a reverse proxy server. A reverse proxy server receives HTTP requests from the Internet and forwards them to Kestrel.
 
 :::moniker-end 
 
@@ -108,6 +111,7 @@ Use Health Check Middleware to perform health checks on an app and its dependenc
 
 ## Additional resources
 
+* [.NET application publishing overview](/dotnet/core/deploying)
 * <xref:test/troubleshoot>
 * [ASP.NET Hosting](https://dotnet.microsoft.com/apps/aspnet/hosting)
 
@@ -139,14 +143,13 @@ An ASP.NET Core app is a console app that must be started when a server boots an
 
 * Linux
   * [Nginx](xref:host-and-deploy/linux-nginx)
-  * [Apache](xref:host-and-deploy/linux-apache)
 * Windows
   * [IIS](xref:host-and-deploy/iis/index)
   * [Windows Service](xref:host-and-deploy/windows-service)
 
 ## Set up a reverse proxy
 
-If the app uses the [Kestrel](xref:fundamentals/servers/kestrel) server, [Nginx](xref:host-and-deploy/linux-nginx), [Apache](xref:host-and-deploy/linux-apache), or [IIS](xref:host-and-deploy/iis/index) can be used as a reverse proxy server. A reverse proxy server receives HTTP requests from the Internet and forwards them to Kestrel.
+If the app uses the [Kestrel](xref:fundamentals/servers/kestrel) server, [Nginx](xref:host-and-deploy/linux-nginx), or [IIS](xref:host-and-deploy/iis/index) can be used as a reverse proxy server. A reverse proxy server receives HTTP requests from the Internet and forwards them to Kestrel.
 
 Either configuration&mdash;with or without a reverse proxy server&mdash;is a supported hosting configuration. For more information, see [When to use Kestrel with a reverse proxy](xref:fundamentals/servers/kestrel#when-to-use-kestrel-with-a-reverse-proxy).
 
@@ -182,6 +185,7 @@ For more information, see <xref:host-and-deploy/docker/index>.
 
 ## Additional resources
 
+* [.NET application publishing overview](/dotnet/core/deploying)
 * <xref:test/troubleshoot>
 * [ASP.NET Hosting](https://dotnet.microsoft.com/apps/aspnet/hosting)
 

@@ -3,12 +3,14 @@ title: Access HttpContext in ASP.NET Core
 author: coderandhiker
 description: Learn about using HttpContext in ASP.NET Core apps. HttpContext isn't thread-safe and can throw an exception when accessed.
 monikerRange: '>= aspnetcore-3.1'
-ms.author: riande
+ms.author: tdykstra
 ms.custom: mvc
 ms.date: 01/31/2022
 uid: fundamentals/httpcontext
 ---
 # Access `HttpContext` in ASP.NET Core
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 :::moniker range=">= aspnetcore-6.0"
 
@@ -187,9 +189,9 @@ public class EmailController : Controller
 }
 ```
 
-## Avoid `IHttpContextAccessor`/`HttpContext` in Razor components
+## `IHttpContextAccessor`/`HttpContext` in Razor components (Blazor)
 
-[!INCLUDE[](~/blazor/security/includes/httpcontext.md)]
+For more information, see <xref:blazor/components/httpcontext>.
 
 :::moniker-end
 
@@ -342,8 +344,8 @@ public class EmailController : Controller
 }
 ```
 
-## Avoid `IHttpContextAccessor`/`HttpContext` in Razor components
+## `IHttpContextAccessor`/`HttpContext` in Razor components (Blazor)
 
-[!INCLUDE[](~/blazor/security/includes/httpcontext.md)]
+For more information, see <xref:blazor/components/httpcontext>.
 
 :::moniker-end

@@ -13,13 +13,15 @@ Run the Identity scaffolder:
     * To create a data context and possibly create a new user class for Identity, select the **+** button. Accept the default value or specify a class (for example, `Contoso.Data.ApplicationDbContext` for a company named "Contoso"). To create a new user class, select the **+** button for **User class** and specify the class (for example, `ContosoUser` for a company named "Contoso").
   * Select the **Add** button to run the scaffolder.
 
-# [.NET Core CLI](#tab/netcore-cli)
+# [.NET CLI](#tab/net-cli)
 
 If you have not previously installed the ASP.NET Core scaffolder, install it now:
 
 ```dotnetcli
 dotnet tool install -g dotnet-aspnet-codegenerator
 ```
+
+[!INCLUDE[](~/includes/dotnet-tool-install-arch-options.md)]
 
 Add required NuGet package references to the project file (`.csproj`). Run the following commands in the project directory:
 

@@ -1,14 +1,16 @@
 ---
-title: Docker images for ASP.NET Core
+title: Run an ASP.NET Core app in Docker containers
 author: rick-anderson
 description: Learn how to use the published ASP.NET Core Docker images from the Docker Registry. Pull and build your own images.
-ms.author: riande
-ms.custom: mvc
-ms.date: 5/15/2023
+ms.author: wpickett
+ms.custom: mvc, linux-related-content
+ms.date: 5/15/2024
 uid: host-and-deploy/docker/building-net-docker-images
 ---
 
-# Docker images for ASP.NET Core
+# Run an ASP.NET Core app in Docker containers
+
+[!INCLUDE[](~/includes/not-latest-version.md)]
 
 This article shows how to run an ASP.NET Core app in Docker containers.
 
@@ -16,7 +18,7 @@ Windows Home Edition doesn't support Hyper-V, and Hyper-V is needed for Docker.
 
 See [Containerize a .NET app with dotnet publish](/dotnet/core/docker/publish-as-container) for information on containerized a .NET app with `dotnet publish`.
 
-:::moniker range=">= aspnetcore-7.0"
+:::moniker range=">= aspnetcore-8.0"
 
 ## ASP.NET Core Docker images
 
@@ -34,11 +36,10 @@ The sample Dockerfile uses the [Docker multi-stage build feature](https://docs.d
 
 ## Prerequisites
 
-* [.NET SDK 7.0](https://dotnet.microsoft.com/download)
+* [.NET SDK 8.0](https://dotnet.microsoft.com/download)
 * Docker client 18.03 or later
 
   * Linux distributions
-    * [CentOS](https://docs.docker.com/install/linux/docker-ce/centos/)
     * [Debian](https://docs.docker.com/install/linux/docker-ce/debian/)
     * [Fedora](https://docs.docker.com/install/linux/docker-ce/fedora/)
     * [Ubuntu](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
@@ -65,7 +66,7 @@ The sample Dockerfile uses the [Docker multi-stage build feature](https://docs.d
   dotnet run
   ```
 
-* Go to `http://localhost:5000` in a browser to test the app.
+* Go to `http://localhost:<port>` in a browser to test the app.
 
 * Press Ctrl+C at the command prompt to stop the app.
 
@@ -80,7 +81,7 @@ The sample Dockerfile uses the [Docker multi-stage build feature](https://docs.d
 
   ```console
   docker build -t aspnetapp .
-  docker run -it --rm -p 5000:80 --name aspnetcore_sample aspnetapp
+  docker run -it --rm -p <port>:8080 --name aspnetcore_sample aspnetapp
   ```
 
   The `build` command arguments:
@@ -90,11 +91,11 @@ The sample Dockerfile uses the [Docker multi-stage build feature](https://docs.d
   The run command arguments:
   * Allocate a pseudo-TTY and keep it open even if not attached. (Same effect as `--interactive --tty`.)
   * Automatically remove the container when it exits.
-  * Map port 5000 on the local machine to port 80 in the container.
+  * Map `<port>` on the local machine to port 8080 in the container.
   * Name the container aspnetcore_sample.
   * Specify the aspnetapp image.
 
-* Go to `http://localhost:5000` in a browser to test the app.
+* Go to `http://localhost:<port>` in a browser to test the app.
 
 ## Build and deploy manually
 
@@ -126,12 +127,12 @@ In some scenarios, you might want to deploy an app to a container by copying its
     dotnet published/aspnetapp.dll
     ```
 
-* Browse to `http://localhost:5000` to see the home page.
+* Browse to `http://localhost:<port>` to see the home page.
 
 To use the manually published app within a Docker container, create a new *Dockerfile* and use the `docker build .` command to build an image.
 
 ```dockerfile
-FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app
 COPY published/ ./
 ENTRYPOINT ["dotnet", "aspnetapp.dll"]
@@ -145,7 +146,7 @@ Here's the *Dockerfile* used by the `docker build` command you ran earlier.  It 
 
 ```dockerfile
 # https://hub.docker.com/_/microsoft-dotnet
-FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
 # copy csproj and restore as distinct layers
@@ -159,7 +160,7 @@ WORKDIR /source/aspnetapp
 RUN dotnet publish -c release -o /app --no-restore
 
 # final stage/image
-FROM mcr.microsoft.com/dotnet/aspnet:6.0
+FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app ./
 ENTRYPOINT ["dotnet", "aspnetapp.dll"]
@@ -178,6 +179,7 @@ In the preceding *Dockerfile*, the `*.csproj` files are copied and restored as d
 * [Debugging with Visual Studio Code](https://code.visualstudio.com/docs/nodejs/debugging-recipes#_debug-nodejs-in-docker-containers)
 * [GC using Docker and small containers](xref:performance/memory#sc)
 * [System.IO.IOException: The configured user limit (128) on the number of inotify instances has been reached](xref:host-and-deploy/docker/index#d128)
+* [Updates to Docker images](https://andrewlock.net/exploring-the-dotnet-8-preview-updates-to-docker-images-in-dotnet-8/)
 
 ## Next steps
 
@@ -188,4 +190,5 @@ The Git repository that contains the sample app also includes documentation. For
 
 :::moniker-end
 
+[!INCLUDE[](~/host-and-deploy/docker/includes/building-net-docker-images7.md)]
 [!INCLUDE[](~/host-and-deploy/docker/includes/building-net-docker-images5.md)]
